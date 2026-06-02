@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jurnal Tani dari Nol — Sistem Keuangan Pertanian</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #F5F2EC;
+  --bg2: #EDE9E1;
+  --bg3: #E4DFD5;
+  --surface: #FDFAF5;
+  --surface2: #F7F3EC;
+  --border: #D8D2C5;
+  --border2: #C9C2B3;
+  --text: #1C1A16;
+  --text2: #5A5449;
+  --text3: #8A8278;
+  --accent: #3D6B47;
+  --accent2: #2E5238;
+  --accent-light: #E8F0EA;
+  --accent-mid: #C5D9C9;
+  --gold: #A07C3A;
+  --gold-light: #F2EAD8;
+  --red: #9B3A2E;
+  --red-light: #F5E8E6;
+  --blue: #2B4E7A;
+  --blue-light: #E5EDF5;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── LAYOUT ── */
+.app-shell { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 240px;
+  background: var(--text);
+  color: #E8E4DC;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brand-icon {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 12px;
+}
+.brand-name {
+  font-family: 'Lora', serif;
+  font-size: 15px; font-weight: 600;
+  color: #FDFAF5;
+  line-height: 1.3;
+}
+.brand-sub { font-size: 11px; color: #8A8278; margin-top: 2px; }
+
+.nav-section { padding: 16px 12px 8px; }
+.nav-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5449; padding: 0 8px; margin-bottom: 6px; font-weight: 500; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  cursor: pointer; color: #A8A099;
+  font-size: 13px; font-weight: 400;
+  transition: all 0.15s;
+  text-decoration: none;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #E8E4DC; }
+.nav-item.active { background: var(--accent); color: #fff; font-weight: 500; }
+.nav-item .ni { font-size: 16px; width: 18px; text-align: center; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.period-badge {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px; color: #8A8278;
+}
+.period-badge strong { color: #E8E4DC; display: block; font-size: 13px; margin-top: 2px; }
+
+/* ── MAIN ── */
+.main { margin-left: 240px; flex: 1; min-height: 100vh; }
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 600; color: var(--text); }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+
+.content { padding: 28px; }
+
+/* ── PAGE ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 16px; }
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.card-title {
+  font-family: 'Lora', serif;
+  font-size: 15px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title .ct-icon { color: var(--accent); }
+
+/* ── METRICS ── */
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.metric-card.green::before { background: var(--accent); }
+.metric-card.red::before { background: var(--red); }
+.metric-card.gold::before { background: var(--gold); }
+.metric-card.blue::before { background: var(--blue); }
+
+.metric-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); font-weight: 500; margin-bottom: 6px; }
+.metric-value { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.metric-value.green { color: var(--accent); }
+.metric-value.red { color: var(--red); }
+.metric-value.gold { color: var(--gold); }
+.metric-value.blue { color: var(--blue); }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg2); border-color: var(--border2); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent2); }
+.btn-primary:hover { background: var(--accent2); }
+.btn-gold { background: var(--gold); color: #fff; border-color: #8A6B30; }
+.btn-gold:hover { background: #8A6B30; }
+.btn-danger { color: var(--red); border-color: #D4A09A; background: var(--red-light); }
+.btn-danger:hover { background: #EDD5D2; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-icon { padding: 7px; border-radius: 7px; }
+
+/* ── FORMS ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group.col3 { grid-column: span 1; }
+label { font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 0.01em; }
+input, select, textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 13px;
+  background: var(--surface2);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  transition: border 0.15s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+input[type="number"] { font-family: 'DM Sans', sans-serif; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+thead th {
+  background: var(--bg2);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg2); }
+tfoot td {
+  padding: 11px 12px;
+  font-weight: 600;
+  border-top: 2px solid var(--border2);
+  background: var(--bg2);
+  font-family: 'Lora', serif;
+}
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  white-space: nowrap;
+}
+.badge-aset { background: var(--blue-light); color: var(--blue); }
+.badge-liab { background: var(--red-light); color: var(--red); }
+.badge-modal { background: var(--accent-light); color: var(--accent2); }
+.badge-pend { background: #E8F4E8; color: #256029; }
+.badge-beban { background: var(--gold-light); color: var(--gold); }
+.badge-debit { background: var(--blue-light); color: var(--blue); }
+.badge-kredit { background: var(--accent-light); color: var(--accent2); }
+.badge-success { background: #E8F4E8; color: #256029; }
+.badge-warning { background: var(--gold-light); color: var(--gold); }
+
+/* ── ALERT ── */
+.alert {
+  display: none; padding: 10px 14px;
+  border-radius: 8px; font-size: 13px;
+  margin-bottom: 14px; align-items: center; gap: 8px;
+}
+.alert.show { display: flex; }
+.alert-success { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
+.alert-error { background: var(--red-light); color: var(--red); border: 1px solid #D4A09A; }
+.alert-info { background: var(--blue-light); color: var(--blue); border: 1px solid #B5C8DF; }
+
+/* ── JOURNAL ENTRY ── */
+.je-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--surface2);
+  transition: all 0.15s;
+}
+.je-card:hover { border-color: var(--border2); background: var(--surface); }
+.je-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.je-meta { }
+.je-desc { font-weight: 500; font-size: 14px; color: var(--text); }
+.je-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.je-ref { font-size: 11px; color: var(--text3); background: var(--bg2); padding: 2px 7px; border-radius: 4px; display: inline-block; margin-left: 6px; }
+.je-lines { border-top: 1px solid var(--border); padding-top: 8px; }
+.je-line { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 12px; }
+.je-acct { color: var(--text2); }
+.je-acct.indent { padding-left: 18px; color: var(--text3); }
+.je-amt { font-weight: 500; }
+.je-amt.d { color: var(--blue); }
+.je-amt.k { color: var(--accent); }
+
+/* ── LINE INPUT ── */
+.line-row {
+  display: flex; gap: 10px; align-items: flex-end;
+  padding: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+/* ── REPORT ── */
+.report-section { margin-bottom: 20px; }
+.report-heading {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3); font-weight: 600;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.report-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 13px; border-bottom: 1px dashed var(--border); }
+.report-row:last-child { border-bottom: none; }
+.report-total {
+  display: flex; justify-content: space-between;
+  padding: 10px 0; font-size: 14px; font-weight: 600;
+  border-top: 2px solid var(--border2); margin-top: 4px;
+  font-family: 'Lora', serif;
+}
+.report-grand {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin-top: 16px;
+  font-family: 'Lora', serif;
+  font-size: 17px; font-weight: 600;
+}
+.report-grand.profit { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
+.report-grand.loss { background: var(--red-light); color: var(--red); border: 1px solid #D4A09A; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 4px; margin-bottom: 18px; background: var(--bg2); border-radius: 10px; padding: 4px; border: 1px solid var(--border); }
+.tab-btn {
+  flex: 1; padding: 8px 14px; border-radius: 7px;
+  border: none; background: transparent;
+  font-size: 13px; font-weight: 400; color: var(--text2);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.tab-btn.active { background: var(--surface); color: var(--text); font-weight: 500; box-shadow: var(--shadow); }
+
+/* ── BALANCE CHECK ── */
+.balance-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 8px;
+  font-size: 12px; margin-top: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  transition: all 0.2s;
+}
+.balance-bar.ok { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent2); }
+.balance-bar.err { background: var(--red-light); border-color: #D4A09A; color: var(--red); }
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--text3); font-size: 13px;
+}
+.empty-state .es-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-state h3 { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
+
+/* ── INFO BOX ── */
+.info-box {
+  background: var(--blue-light);
+  border: 1px solid #B5C8DF;
+  border-left: 3px solid var(--blue);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px; color: var(--blue);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.info-box strong { font-weight: 600; display: block; margin-bottom: 2px; }
+
+/* ── SECTION ROW (for 2-col report layout) ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* ── COA group header ── */
+.coa-group-header { background: var(--bg2); }
+.coa-group-header td { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); padding: 6px 12px; }
+
+/* ── CHART WRAPPER ── */
+.chart-wrap { position: relative; height: 220px; margin-top: 8px; }
+
+/* ── MOBILE SIDEBAR TOGGLE ── */
+.sidebar-toggle { display: none; }
+
+/* ── NUMBER FORMAT ── */
+.num { font-variant-numeric: tabular-nums; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .sidebar-toggle { display: flex; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .metrics-grid { grid-template-columns: 1fr 1fr; }
+  .content { padding: 16px; }
+}
+
+/* ── ANIMATION ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.page.active { animation: fadeIn 0.2s ease; }
+
+/* ── PRINT ── */
+@media print {
+  .sidebar, .topbar, .btn, .tabs { display: none !important; }
+  .main { margin-left: 0; }
+  .content { padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🌿</div>
+      <div class="brand-name">Jurnal Tani<br>dari Nol</div>
+      <div class="brand-sub">Sistem Keuangan Pertanian</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Utama</div>
+      <a class="nav-item active" onclick="showPage('dashboard')" href="#">
+        <span class="ni">🏡</span> Dashboard
+      </a>
+      <a class="nav-item" onclick="showPage('jurnal')" href="#">
+        <span class="ni">📝</span> Input Jurnal
+      </a>
+      <a class="nav-item" onclick="showPage('riwayat')" href="#">
+        <span class="ni">📋</span> Riwayat Transaksi
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Akuntansi</div>
+      <a class="nav-item" onclick="showPage('coa')" href="#">
+        <span class="ni">📑</span> Chart of Accounts
+      </a>
+      <a class="nav-item" onclick="showPage('buku-besar')" href="#">
+        <span class="ni">📒</span> Buku Besar
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Laporan</div>
+      <a class="nav-item" onclick="showPage('trial-balance')" href="#">
+        <span class="ni">⚖️</span> Trial Balance
+      </a>
+      <a class="nav-item" onclick="showPage('neraca')" href="#">
+        <span class="ni">🏦</span> Neraca
+      </a>
+      <a class="nav-item" onclick="showPage('laba-rugi')" href="#">
+        <span class="ni">📈</span> Laba Rugi
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="period-badge">
+        Ardhi's Farm<strong id="sb-period">—</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="btn btn-icon sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-sm" onclick="exportData()">⬇ Export Data</button>
+        <button class="btn btn-sm" onclick="importDataClick()">⬆ Import Data</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
+        <button class="btn btn-sm btn-danger" onclick="resetData()">🗑 Reset</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══════════════════════════════════ DASHBOARD ═══════════════════════════════════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="metrics-grid" id="dash-metrics"></div>
+
+        <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:16px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="ct-icon">📊</span> Beban per Kategori</div>
+            </div>
+            <div class="chart-wrap"><canvas id="chart-beban"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="ct-icon">⏰</span> Transaksi Terakhir</div>
+              <button class="btn btn-sm btn-primary" onclick="showPage('jurnal')">+ Input Baru</button>
+            </div>
+            <div id="dash-recent"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">🗓</span> Pengeluaran Bulanan</div>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ INPUT JURNAL ═══════════════════════════════════ -->
+      <div class="page" id="page-jurnal">
+        <div class="info-box">
+          <strong>Cara Kerja Double-Entry Bookkeeping</strong>
+          Setiap transaksi punya dua sisi: Debit dan Kredit. Total Debit wajib = Total Kredit.
+          Contoh: Beli bibit → Debit "Bibit Kelapa" (Aset bertambah) + Kredit "Kas" (Kas berkurang).
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:18px;"><span class="ct-icon">📝</span> Input Transaksi Baru</div>
+          <div class="alert" id="jurnal-alert"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tanggal Transaksi *</label>
+              <input type="date" id="j-tanggal" />
+            </div>
+            <div class="form-group">
+              <label>No. Referensi (opsional)</label>
+              <input type="text" id="j-ref" placeholder="cth: BKK-001, INV-001" />
+            </div>
+            <div class="form-group full">
+              <label>Keterangan / Deskripsi Transaksi *</label>
+              <input type="text" id="j-desc" placeholder="cth: Pembelian 50 bibit kelapa genjah dari Pak Budi" />
+            </div>
+          </div>
+
+          <hr class="divider" />
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div style="font-size:13px; font-weight:500; color:var(--text2);">Entri Akun Debit & Kredit</div>
+            <button class="btn btn-sm" onclick="addLine()">+ Tambah Baris</button>
+          </div>
+
+          <div id="jurnal-lines"></div>
+
+          <div class="balance-bar" id="balance-bar">
+            <span id="balance-text">Isi nominal untuk melihat status keseimbangan</span>
+          </div>
+
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="simpanJurnal()">💾 Simpan Jurnal</button>
+            <button class="btn" onclick="resetForm()">↺ Reset Form</button>
+          </div>
+        </div>
+
+        <!-- QUICK TEMPLATES -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;"><span class="ct-icon">⚡</span> Template Transaksi Cepat</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;">
+            <button class="btn" onclick="applyTemplate('modal')">💰 Setor Modal Awal</button>
+            <button class="btn" onclick="applyTemplate('bibit')">🌱 Beli Bibit</button>
+            <button class="btn" onclick="applyTemplate('pupuk')">🧪 Beli Pupuk</button>
+            <button class="btn" onclick="applyTemplate('tenaga')">👷 Bayar Tenaga Kerja</button>
+            <button class="btn" onclick="applyTemplate('panen')">🥥 Terima Hasil Panen</button>
+            <button class="btn" onclick="applyTemplate('peralatan')">🔧 Beli Peralatan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ RIWAYAT ═══════════════════════════════════ -->
+      <div class="page" id="page-riwayat">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">📋</span> Riwayat Transaksi</div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="search-jurnal" placeholder="🔍 Cari transaksi..." style="width:200px;" oninput="renderRiwayat()" />
+              <select id="filter-bulan" onchange="renderRiwayat()" style="width:130px;">
+                <option value="">Semua Bulan</option>
+              </select>
+            </div>
+          </div>
+          <div id="riwayat-list"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ COA ═══════════════════════════════════ -->
+      <div class="page" id="page-coa">
+        <div class="info-box">
+          <strong>Chart of Accounts (COA) — Daftar Semua Akun Keuangan</strong>
+          Kode akun mengikuti konvensi: 1-xxx = Aset, 2-xxx = Liabilitas, 3-xxx = Modal, 4-xxx = Pendapatan, 5-xxx = Beban. Normal saldo menentukan sisi mana akun ini bertambah nilainya.
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">➕</span> Tambah Akun Baru</div>
+            <button class="btn btn-gold" onclick="loadDefaultCOA()">🌿 Muat COA Default Pertanian</button>
+          </div>
+          <div class="alert" id="coa-alert"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Kode Akun *</label>
+              <input type="text" id="coa-kode" placeholder="cth: 1-005" />
+            </div>
+            <div class="form-group">
+              <label>Nama Akun *</label>
+              <input type="text" id="coa-nama" placeholder="cth: Bibit Kelapa Hibrida" />
+            </div>
+            <div class="form-group">
+              <label>Kategori *</label>
+              <select id="coa-kategori" onchange="autoNormal()">
+                <option value="Aset">Aset</option>
+                <option value="Liabilitas">Liabilitas</option>
+                <option value="Modal">Modal</option>
+                <option value="Pendapatan">Pendapatan</option>
+                <option value="Beban">Beban</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Normal Saldo</label>
+              <select id="coa-normal">
+                <option value="Debit">Debit</option>
+                <option value="Kredit">Kredit</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Deskripsi (opsional)</label>
+              <input type="text" id="coa-desc" placeholder="Keterangan singkat akun ini" />
+            </div>
+          </div>
+          <div style="margin-top:14px;">
+            <button class="btn btn-primary" onclick="simpanCOA()">💾 Simpan Akun</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px;"><span class="ct-icon">📑</span> Daftar Chart of Accounts</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:80px">Kode</th>
+                  <th>Nama Akun</th>
+                  <th style="width:110px">Kategori</th>
+                  <th style="width:80px">Normal</th>
+                  <th>Deskripsi</th>
+                  <th style="width:60px"></th>
+                </tr>
+              </thead>
+              <tbody id="coa-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ BUKU BESAR ═══════════════════════════════════ -->
+      <div class="page" id="page-buku-besar">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">📒</span> Buku Besar</div>
+            <select id="bb-select" onchange="renderBukuBesar()" style="width:280px;">
+              <option value="">— Pilih Akun —</option>
+            </select>
+          </div>
+          <div id="bb-content">
+            <div class="empty-state">
+              <div class="es-icon">📒</div>
+              <h3>Pilih akun untuk melihat buku besar</h3>
+              <p>Semua transaksi yang melibatkan akun tersebut akan ditampilkan di sini.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ TRIAL BALANCE ═══════════════════════════════════ -->
+      <div class="page" id="page-trial-balance">
+        <div class="info-box">
+          <strong>Trial Balance (Neraca Saldo)</strong>
+          Membuktikan bahwa semua entri jurnal sudah seimbang. Jika total Debit = total Kredit, pembukuan kamu sudah benar. Ini langkah wajib sebelum membuat laporan keuangan.
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">⚖️</span> Trial Balance</div>
+            <button class="btn btn-sm" onclick="window.print()">🖨 Cetak</button>
+          </div>
+          <div id="tb-content"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ NERACA ═══════════════════════════════════ -->
+      <div class="page" id="page-neraca">
+        <div class="info-box">
+          <strong>Neraca (Balance Sheet)</strong>
+          Menunjukkan posisi keuangan bisnis pada satu titik waktu. Rumus utama: <strong>Aset = Liabilitas + Modal</strong>. Jika Aset = sisi kanan, neraca seimbang — usahamu sehat secara finansial.
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">🏦</span> Neraca</div>
+            <button class="btn btn-sm" onclick="window.print()">🖨 Cetak</button>
+          </div>
+          <div id="neraca-content"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ LABA RUGI ═══════════════════════════════════ -->
+      <div class="page" id="page-laba-rugi">
+        <div class="info-box">
+          <strong>Laporan Laba Rugi (Income Statement)</strong>
+          Menunjukkan kinerja bisnis dalam satu periode. Di fase awal ini, wajar jika hasilnya rugi — ini adalah fase investasi. Bismillah, hasil panen akan mengubah ini menjadi keuntungan.
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">📈</span> Laporan Laba Rugi</div>
+            <button class="btn btn-sm" onclick="window.print()">🖨 Cetak</button>
+          </div>
+          <div id="lr-content"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+//  DATA LAYER — localStorage persistence
+// ══════════════════════════════════════════════════
+const LS_COA = 'jtani_coa_v2';
+const LS_JRN = 'jtani_jrn_v2';
+
+function loadData() {
+  try {
+    const c = localStorage.getItem(LS_COA);
+    const j = localStorage.getItem(LS_JRN);
+    COA = c ? JSON.parse(c) : [];
+    JURNAL = j ? JSON.parse(j) : [];
+  } catch(e) { COA = []; JURNAL = []; }
+}
+function saveCOA() { localStorage.setItem(LS_COA, JSON.stringify(COA)); }
+function saveJRN() { localStorage.setItem(LS_JRN, JSON.stringify(JURNAL)); }
+
+let COA = [];
+let JURNAL = [];
+
+// ══════════════════════════════════════════════════
+//  DEFAULT COA
+// ══════════════════════════════════════════════════
+function defaultCOA() {
+  return [
+    {kode:'1-001', nama:'Kas Tunai', kategori:'Aset', normal:'Debit', desc:'Uang tunai di tangan'},
+    {kode:'1-002', nama:'Bank / Rekening', kategori:'Aset', normal:'Debit', desc:'Saldo rekening bank'},
+    {kode:'1-101', nama:'Lahan Pertanian', kategori:'Aset', normal:'Debit', desc:'Nilai aset lahan yang digunakan'},
+    {kode:'1-102', nama:'Bibit Kelapa Genjah', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit kelapa genjah'},
+    {kode:'1-103', nama:'Bibit Kelapa Hibrida', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit kelapa hibrida'},
+    {kode:'1-104', nama:'Bibit Pisang', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit pisang'},
+    {kode:'1-105', nama:'Pupuk & Pestisida (Stok)', kategori:'Aset', normal:'Debit', desc:'Stok pupuk dan obat-obatan yang belum terpakai'},
+    {kode:'1-201', nama:'Peralatan Tani', kategori:'Aset', normal:'Debit', desc:'Cangkul, sprayer, selang, dll'},
+    {kode:'1-202', nama:'Akum. Penyusutan Peralatan', kategori:'Aset', normal:'Kredit', desc:'Akumulasi penyusutan nilai peralatan'},
+    {kode:'2-001', nama:'Utang Usaha', kategori:'Liabilitas', normal:'Kredit', desc:'Hutang kepada pemasok / supplier'},
+    {kode:'2-002', nama:'Utang Bank / Pinjaman', kategori:'Liabilitas', normal:'Kredit', desc:'Pinjaman dari bank atau koperasi'},
+    {kode:'3-001', nama:'Modal Ardhi', kategori:'Modal', normal:'Kredit', desc:'Modal awal yang disetor pemilik'},
+    {kode:'3-002', nama:'Laba Ditahan', kategori:'Modal', normal:'Kredit', desc:'Akumulasi laba dari periode sebelumnya'},
+    {kode:'4-001', nama:'Pendapatan Panen Kelapa', kategori:'Pendapatan', normal:'Kredit', desc:'Hasil penjualan buah kelapa'},
+    {kode:'4-002', nama:'Pendapatan Panen Pisang', kategori:'Pendapatan', normal:'Kredit', desc:'Hasil penjualan tandan pisang'},
+    {kode:'4-003', nama:'Pendapatan Lain-lain', kategori:'Pendapatan', normal:'Kredit', desc:'Pendapatan di luar hasil panen utama'},
+    {kode:'5-001', nama:'Beban Tenaga Kerja', kategori:'Beban', normal:'Debit', desc:'Upah buruh tani / pekerja harian'},
+    {kode:'5-002', nama:'Beban Pupuk & Pestisida', kategori:'Beban', normal:'Debit', desc:'Biaya pembelian pupuk dan obat tanaman'},
+    {kode:'5-003', nama:'Beban Transportasi', kategori:'Beban', normal:'Debit', desc:'Biaya angkut hasil panen atau bahan input'},
+    {kode:'5-004', nama:'Beban Irigasi / Air', kategori:'Beban', normal:'Debit', desc:'Biaya pengairan lahan pertanian'},
+    {kode:'5-005', nama:'Beban Penyusutan Peralatan', kategori:'Beban', normal:'Debit', desc:'Beban penyusutan nilai alat tani per periode'},
+    {kode:'5-006', nama:'Beban Bibit (Ditanam)', kategori:'Beban', normal:'Debit', desc:'Biaya bibit yang sudah ditanam / digunakan'},
+    {kode:'5-007', nama:'Beban Lain-lain', kategori:'Beban', normal:'Debit', desc:'Pengeluaran operasional lainnya yang tidak terkategorikan'},
+  ];
+}
+
+function loadDefaultCOA() {
+  if (COA.length > 0 && !confirm('COA sudah ada. Timpa dengan COA default pertanian?')) return;
+  COA = defaultCOA();
+  saveCOA();
+  renderCOA();
+  refreshSelects();
+  showAlert('coa-alert', '✅ ' + COA.length + ' akun default pertanian berhasil dimuat!', 'success');
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+const PAGE_TITLES = {
+  'dashboard': 'Dashboard',
+  'jurnal': 'Input Jurnal',
+  'riwayat': 'Riwayat Transaksi',
+  'coa': 'Chart of Accounts',
+  'buku-besar': 'Buku Besar',
+  'trial-balance': 'Trial Balance',
+  'neraca': 'Neraca',
+  'laba-rugi': 'Laporan Laba Rugi',
+};
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + name + "'")) n.classList.add('active');
+  });
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
+
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'riwayat') renderRiwayat();
+  if (name === 'coa') renderCOA();
+  if (name === 'buku-besar') { refreshSelects(); renderBukuBesar(); }
+  if (name === 'trial-balance') renderTrialBalance();
+  if (name === 'neraca') renderNeraca();
+  if (name === 'laba-rugi') renderLabaRugi();
+  if (name === 'jurnal') { refreshSelects(); if (!document.getElementById('jurnal-lines').children.length) resetForm(); }
+
+  // Close sidebar on mobile
+  if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
+  return false;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════
+function fmt(n) {
+  const v = Math.round(n || 0);
+  return 'Rp ' + v.toLocaleString('id-ID');
+}
+function fmtShort(n) {
+  n = Math.abs(Math.round(n || 0));
+  if (n >= 1000000000) return 'Rp ' + (n/1000000000).toFixed(1) + 'M';
+  if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1) + 'Jt';
+  if (n >= 1000) return 'Rp ' + (n/1000).toFixed(0) + 'rb';
+  return 'Rp ' + n;
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const parts = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = msg;
+  el.className = 'alert alert-' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function autoNormal() {
+  const kat = document.getElementById('coa-kategori').value;
+  document.getElementById('coa-normal').value = ['Aset','Beban'].includes(kat) ? 'Debit' : 'Kredit';
+}
+
+// ══════════════════════════════════════════════════
+//  SALDO CALCULATION
+// ══════════════════════════════════════════════════
+function calcSaldo() {
+  const raw = {};
+  COA.forEach(a => { raw[a.kode] = { d: 0, k: 0 }; });
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => {
+      if (!raw[l.akun]) raw[l.akun] = { d: 0, k: 0 };
+      if (l.tipe === 'Debit') raw[l.akun].d += l.nominal;
+      else raw[l.akun].k += l.nominal;
+    });
+  });
+  const result = {};
+  COA.forEach(a => {
+    const r = raw[a.kode] || { d: 0, k: 0 };
+    result[a.kode] = {
+      debit: r.d,
+      kredit: r.k,
+      saldo: a.normal === 'Debit' ? r.d - r.k : r.k - r.d,
+      saldoDebit: a.normal === 'Debit' ? Math.max(0, r.d - r.k) : Math.max(0, r.k - r.d) * 0,
+      saldoKredit: a.normal === 'Kredit' ? Math.max(0, r.k - r.d) : Math.max(0, r.d - r.k) * 0,
+    };
+  });
+  return result;
+}
+
+// ══════════════════════════════════════════════════
+//  REFRESH SELECTS
+// ══════════════════════════════════════════════════
+function refreshSelects() {
+  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const buildOpts = (sel, currentVal) => {
+    sel.innerHTML = '<option value="">— Pilih Akun —</option>';
+    groups.forEach(g => {
+      const items = COA.filter(a => a.kategori === g);
+      if (!items.length) return;
+      const og = document.createElement('optgroup');
+      og.label = g;
+      items.forEach(a => {
+        const o = document.createElement('option');
+        o.value = a.kode;
+        o.textContent = a.kode + ' — ' + a.nama;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    if (currentVal) sel.value = currentVal;
+  };
+  document.querySelectorAll('.j-akun').forEach(sel => buildOpts(sel, sel.value));
+  const bbSel = document.getElementById('bb-select');
+  if (bbSel) buildOpts(bbSel, bbSel.value);
+}
+
+// ══════════════════════════════════════════════════
+//  JURNAL FORM
+// ══════════════════════════════════════════════════
+function resetForm() {
+  document.getElementById('j-tanggal').value = today();
+  document.getElementById('j-ref').value = '';
+  document.getElementById('j-desc').value = '';
+  const container = document.getElementById('jurnal-lines');
+  container.innerHTML = '';
+  addLineEl(container, 'Debit');
+  addLineEl(container, 'Kredit');
+  refreshSelects();
+  checkBalance();
+}
+
+function addLine() {
+  addLineEl(document.getElementById('jurnal-lines'), 'Debit');
+  refreshSelects();
+}
+
+function addLineEl(container, defaultTipe) {
+  const idx = Date.now() + Math.random();
+  const div = document.createElement('div');
+  div.className = 'line-row';
+  div.id = 'lr-' + idx;
+  div.innerHTML = `
+    <div class="form-group" style="flex:1; min-width:180px;">
+      <label>Akun</label>
+      <select class="j-akun" onchange="checkBalance()"></select>
+    </div>
+    <div class="form-group" style="width:110px;">
+      <label>Debit / Kredit</label>
+      <select class="j-tipe" onchange="checkBalance()">
+        <option ${defaultTipe==='Debit'?'selected':''}>Debit</option>
+        <option ${defaultTipe==='Kredit'?'selected':''}>Kredit</option>
+      </select>
+    </div>
+    <div class="form-group" style="width:160px;">
+      <label>Nominal (Rp)</label>
+      <input type="number" class="j-nominal" placeholder="0" min="0" oninput="checkBalance()" />
+    </div>
+    <button class="btn btn-danger btn-icon" style="margin-bottom:1px;" onclick="document.getElementById('lr-${idx}').remove(); checkBalance();" title="Hapus baris">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function checkBalance() {
+  let d = 0, k = 0;
+  document.querySelectorAll('.line-row').forEach(row => {
+    const tipe = row.querySelector('.j-tipe').value;
+    const nom = parseFloat(row.querySelector('.j-nominal').value) || 0;
+    if (tipe === 'Debit') d += nom; else k += nom;
+  });
+  const bar = document.getElementById('balance-bar');
+  const txt = document.getElementById('balance-text');
+  if (d === 0 && k === 0) {
+    bar.className = 'balance-bar';
+    txt.textContent = 'Isi nominal untuk melihat status keseimbangan';
+    return;
+  }
+  if (Math.abs(d - k) < 0.01) {
+    bar.className = 'balance-bar ok';
+    txt.innerHTML = '✅ Seimbang — Debit = Kredit = <strong>' + fmt(d) + '</strong>';
+  } else {
+    bar.className = 'balance-bar err';
+    txt.innerHTML = '❌ Belum seimbang — Debit <strong>' + fmt(d) + '</strong> vs Kredit <strong>' + fmt(k) + '</strong> (selisih: ' + fmt(Math.abs(d-k)) + ')';
+  }
+}
+
+function simpanJurnal() {
+  const tgl = document.getElementById('j-tanggal').value;
+  const desc = document.getElementById('j-desc').value.trim();
+  const ref = document.getElementById('j-ref').value.trim();
+  if (!tgl) { showAlert('jurnal-alert','⚠️ Tanggal wajib diisi.','error'); return; }
+  if (!desc) { showAlert('jurnal-alert','⚠️ Keterangan wajib diisi.','error'); return; }
+  const lines = [];
+  let d = 0, k = 0, valid = true;
+  document.querySelectorAll('.line-row').forEach(row => {
+    const akun = row.querySelector('.j-akun').value;
+    const tipe = row.querySelector('.j-tipe').value;
+    const nom = parseFloat(row.querySelector('.j-nominal').value) || 0;
+    if (!akun || nom <= 0) { valid = false; return; }
+    lines.push({ akun, tipe, nominal: nom });
+    if (tipe === 'Debit') d += nom; else k += nom;
+  });
+  if (!valid || lines.length < 2) { showAlert('jurnal-alert','⚠️ Minimal 2 baris entri. Semua akun dan nominal wajib diisi.','error'); return; }
+  if (Math.abs(d - k) > 0.01) { showAlert('jurnal-alert','❌ Jurnal tidak seimbang! Total Debit harus = Total Kredit.','error'); return; }
+  const entry = { id: Date.now(), tanggal: tgl, deskripsi: desc, referensi: ref, lines };
+  JURNAL.unshift(entry);
+  saveJRN();
+  resetForm();
+  showAlert('jurnal-alert','✅ Jurnal berhasil disimpan!','success');
+}
+
+// ══════════════════════════════════════════════════
+//  TEMPLATES
+// ══════════════════════════════════════════════════
+function applyTemplate(type) {
+  resetForm();
+  const akun = (kode) => {
+    const found = COA.find(a => a.kode === kode);
+    return found ? kode : '';
+  };
+  const templates = {
+    modal: { desc: 'Setor modal awal', lines: [{ akun: '1-001', tipe: 'Debit' }, { akun: '3-001', tipe: 'Kredit' }] },
+    bibit: { desc: 'Pembelian bibit', lines: [{ akun: '1-102', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
+    pupuk: { desc: 'Pembelian pupuk & pestisida', lines: [{ akun: '5-002', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
+    tenaga: { desc: 'Pembayaran upah tenaga kerja', lines: [{ akun: '5-001', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
+    panen: { desc: 'Penerimaan hasil panen', lines: [{ akun: '1-001', tipe: 'Debit' }, { akun: '4-001', tipe: 'Kredit' }] },
+    peralatan: { desc: 'Pembelian peralatan tani', lines: [{ akun: '1-201', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
+  };
+  const t = templates[type];
+  if (!t) return;
+  document.getElementById('j-desc').value = t.desc;
+  const container = document.getElementById('jurnal-lines');
+  container.innerHTML = '';
+  t.lines.forEach(l => addLineEl(container, l.tipe));
+  refreshSelects();
+  const rows = container.querySelectorAll('.line-row');
+  t.lines.forEach((l, i) => {
+    if (rows[i]) {
+      const sel = rows[i].querySelector('.j-akun');
+      if (sel && akun(l.akun)) sel.value = l.akun;
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  COA
+// ══════════════════════════════════════════════════
+function simpanCOA() {
+  const kode = document.getElementById('coa-kode').value.trim();
+  const nama = document.getElementById('coa-nama').value.trim();
+  const kategori = document.getElementById('coa-kategori').value;
+  const normal = document.getElementById('coa-normal').value;
+  const desc = document.getElementById('coa-desc').value.trim();
+  if (!kode || !nama) { showAlert('coa-alert','⚠️ Kode dan Nama akun wajib diisi.','error'); return; }
+  if (COA.find(a => a.kode === kode)) { showAlert('coa-alert','⚠️ Kode akun sudah ada.','error'); return; }
+  COA.push({ kode, nama, kategori, normal, desc });
+  COA.sort((a, b) => a.kode.localeCompare(b.kode));
+  saveCOA();
+  renderCOA();
+  refreshSelects();
+  ['coa-kode','coa-nama','coa-desc'].forEach(id => document.getElementById(id).value = '');
+  showAlert('coa-alert','✅ Akun "' + nama + '" berhasil disimpan.','success');
+}
+
+function hapusCOA(kode) {
+  const used = JURNAL.some(j => j.lines.some(l => l.akun === kode));
+  if (used) { alert('Akun ini sudah digunakan dalam jurnal dan tidak bisa dihapus.'); return; }
+  if (!confirm('Hapus akun ' + kode + '?')) return;
+  COA = COA.filter(a => a.kode !== kode);
+  saveCOA();
+  renderCOA();
+}
+
+function renderCOA() {
+  const tb = document.getElementById('coa-tbody');
+  if (!tb) return;
+  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  let html = '';
+  groups.forEach(g => {
+    const items = COA.filter(a => a.kategori === g);
+    if (!items.length) return;
+    html += `<tr class="coa-group-header"><td colspan="6">${g}</td></tr>`;
+    items.forEach(a => {
+      html += `<tr>
+        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px;">${a.kode}</code></td>
+        <td style="font-weight:500;">${a.nama}</td>
+        <td><span class="badge ${badgeMap[a.kategori]}">${a.kategori}</span></td>
+        <td><span class="badge ${a.normal==='Debit'?'badge-debit':'badge-kredit'}">${a.normal}</span></td>
+        <td style="color:var(--text3); font-size:12px;">${a.desc||'—'}</td>
+        <td><button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus">✕</button></td>
+      </tr>`;
+    });
+  });
+  tb.innerHTML = html || '<tr><td colspan="6"><div class="empty-state"><div class="es-icon">📑</div><h3>Belum ada akun</h3><p>Klik "Muat COA Default Pertanian" untuk mulai.</p></div></td></tr>';
+}
+
+// ══════════════════════════════════════════════════
+//  RIWAYAT
+// ══════════════════════════════════════════════════
+function renderRiwayat() {
+  const search = (document.getElementById('search-jurnal').value || '').toLowerCase();
+  const bulan = document.getElementById('filter-bulan').value;
+
+  // Populate bulan filter
+  const bulanSel = document.getElementById('filter-bulan');
+  const currentBulan = bulanSel.value;
+  const bulanSet = new Set(JURNAL.map(j => j.tanggal.substring(0,7)));
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  bulanSel.innerHTML = '<option value="">Semua Bulan</option>';
+  [...bulanSet].sort().reverse().forEach(b => {
+    const [y,m] = b.split('-');
+    bulanSel.innerHTML += `<option value="${b}" ${b===currentBulan?'selected':''}>${months[parseInt(m)-1]} ${y}</option>`;
+  });
+
+  let list = [...JURNAL];
+  if (search) list = list.filter(j => j.deskripsi.toLowerCase().includes(search) || (j.referensi||'').toLowerCase().includes(search));
+  if (bulan) list = list.filter(j => j.tanggal.startsWith(bulan));
+
+  const el = document.getElementById('riwayat-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><h3>Tidak ada transaksi</h3><p>Belum ada jurnal yang cocok dengan filter ini.</p></div>';
+    return;
+  }
+
+  el.innerHTML = list.map(j => {
+    const totalD = j.lines.filter(l => l.tipe === 'Debit').reduce((s,l) => s+l.nominal, 0);
+    const linesHtml = j.lines.map(l => {
+      const akun = COA.find(a => a.kode === l.akun);
+      const nm = akun ? akun.nama : l.akun;
+      const isK = l.tipe === 'Kredit';
+      return `<div class="je-line">
+        <span class="je-acct ${isK?'indent':''}"><span class="badge ${isK?'badge-kredit':'badge-debit'}" style="font-size:10px;padding:1px 6px;margin-right:5px;">${l.tipe[0]}</span>${l.akun} ${nm}</span>
+        <span class="je-amt ${isK?'k':'d'}">${fmt(l.nominal)}</span>
+      </div>`;
+    }).join('');
+    return `<div class="je-card">
+      <div class="je-head">
+        <div class="je-meta">
+          <div class="je-desc">${j.deskripsi}${j.referensi?`<span class="je-ref">${j.referensi}</span>`:''}</div>
+          <div class="je-date">${fmtDate(j.tanggal)} &nbsp;·&nbsp; Total: <strong>${fmt(totalD)}</strong></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="hapusJurnal(${j.id})">🗑 Hapus</button>
+      </div>
+      <div class="je-lines">${linesHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function hapusJurnal(id) {
+  if (!confirm('Hapus transaksi ini? Data tidak dapat dikembalikan.')) return;
+  JURNAL = JURNAL.filter(j => j.id !== id);
+  saveJRN();
+  renderRiwayat();
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════════════
+//  BUKU BESAR
+// ══════════════════════════════════════════════════
+function renderBukuBesar() {
+  const kode = document.getElementById('bb-select').value;
+  const el = document.getElementById('bb-content');
+  if (!kode) { el.innerHTML = '<div class="empty-state"><div class="es-icon">📒</div><h3>Pilih akun di atas</h3></div>'; return; }
+  const akun = COA.find(a => a.kode === kode);
+  if (!akun) return;
+
+  const entries = [];
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => {
+      if (l.akun === kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, tipe: l.tipe, nominal: l.nominal });
+    });
+  });
+  entries.sort((a,b) => a.tanggal.localeCompare(b.tanggal));
+
+  let saldo = 0;
+  const rows = entries.map(e => {
+    const delta = (e.tipe === 'Debit' ? 1 : -1) * (akun.normal === 'Debit' ? 1 : -1) * e.nominal;
+    saldo += delta;
+    return `<tr>
+      <td>${fmtDate(e.tanggal)}</td>
+      <td>${e.desc}</td>
+      <td style="text-align:right; color:var(--blue);">${e.tipe==='Debit' ? fmt(e.nominal) : ''}</td>
+      <td style="text-align:right; color:var(--accent);">${e.tipe==='Kredit' ? fmt(e.nominal) : ''}</td>
+      <td style="text-align:right; font-weight:500;">${fmt(saldo)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5"><div class="empty-state"><h3>Belum ada transaksi untuk akun ini</h3></div></td></tr>';
+
+  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  el.innerHTML = `
+    <div style="margin-bottom:14px; display:flex; align-items:center; gap:10px;">
+      <span style="font-family:'Lora',serif; font-size:16px; font-weight:600;">${akun.kode} — ${akun.nama}</span>
+      <span class="badge ${badgeMap[akun.kategori]}">${akun.kategori}</span>
+      <span class="badge badge-${akun.normal.toLowerCase()}">${akun.normal}</span>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:100px">Tanggal</th>
+        <th>Keterangan</th>
+        <th style="text-align:right;width:130px">Debit</th>
+        <th style="text-align:right;width:130px">Kredit</th>
+        <th style="text-align:right;width:140px">Saldo</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="4" style="font-family:'Lora',serif;">Saldo Akhir (${akun.normal})</td>
+        <td style="text-align:right; color:${saldo>=0?'var(--accent)':'var(--red)'};">${fmt(saldo)}</td>
+      </tr></tfoot>
+    </table>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════
+//  TRIAL BALANCE
+// ══════════════════════════════════════════════════
+function renderTrialBalance() {
+  const saldo = calcSaldo();
+  const el = document.getElementById('tb-content');
+  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  let totalD = 0, totalK = 0;
+  let rows = '';
+
+  groups.forEach(g => {
+    const items = COA.filter(a => a.kategori === g);
+    if (!items.length) return;
+    rows += `<tr class="coa-group-header"><td colspan="4">${g}</td></tr>`;
+    items.forEach(a => {
+      const s = saldo[a.kode] || { debit:0, kredit:0, saldo:0 };
+      const tbD = a.normal === 'Debit' && s.saldo > 0 ? s.saldo : (a.normal === 'Kredit' && s.saldo < 0 ? -s.saldo : 0);
+      const tbK = a.normal === 'Kredit' && s.saldo > 0 ? s.saldo : (a.normal === 'Debit' && s.saldo < 0 ? -s.saldo : 0);
+      totalD += tbD; totalK += tbK;
+      rows += `<tr>
+        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px;">${a.kode}</code></td>
+        <td>${a.nama} <span class="badge ${badgeMap[a.kategori]}" style="font-size:10px;">${a.kategori}</span></td>
+        <td style="text-align:right; color:var(--blue); font-weight:${tbD?500:400};">${tbD ? fmt(tbD) : '—'}</td>
+        <td style="text-align:right; color:var(--accent); font-weight:${tbK?500:400};">${tbK ? fmt(tbK) : '—'}</td>
+      </tr>`;
+    });
+  });
+
+  const balanced = Math.abs(totalD - totalK) < 0.01 && totalD > 0;
+  el.innerHTML = `
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:80px">Kode</th><th>Nama Akun</th><th style="text-align:right;width:140px">Debit</th><th style="text-align:right;width:140px">Kredit</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="4"><div class="empty-state"><h3>Belum ada transaksi</h3></div></td></tr>'}</tbody>
+      <tfoot><tr>
+        <td colspan="2">Total</td>
+        <td style="text-align:right; color:var(--blue);">${fmt(totalD)}</td>
+        <td style="text-align:right; color:var(--accent);">${fmt(totalK)}</td>
+      </tr></tfoot>
+    </table>
+    </div>
+    ${balanced ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Trial Balance seimbang — pembukuan kamu sudah benar! Total Debit = Total Kredit = ${fmt(totalD)}</div>` : (totalD > 0 ? `<div class="alert alert-error show" style="margin-top:14px;">❌ Trial Balance tidak seimbang. Periksa kembali entri jurnal kamu.</div>` : '')}
+  `;
+}
+
+// ══════════════════════════════════════════════════
+//  NERACA
+// ══════════════════════════════════════════════════
+function renderNeraca() {
+  const saldo = calcSaldo();
+  const el = document.getElementById('neraca-content');
+
+  const sumKat = (kat) => COA.filter(a => a.kategori === kat).reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const rowsKat = (kat) => COA.filter(a => a.kategori === kat).map(a => {
+    const s = saldo[a.kode]?.saldo || 0;
+    if (s === 0) return '';
+    return `<div class="report-row"><span>${a.nama}</span><span class="num">${fmt(s)}</span></div>`;
+  }).join('');
+
+  const tAset = sumKat('Aset');
+  const tLiab = sumKat('Liabilitas');
+  const tModal = sumKat('Modal');
+  const tPend = sumKat('Pendapatan');
+  const tBeban = sumKat('Beban');
+  const labaRugi = tPend - tBeban;
+  const totalLiabModal = tLiab + tModal + labaRugi;
+  const balanced = Math.abs(tAset - totalLiabModal) < 0.01;
+
+  el.innerHTML = `
+    <div class="two-col">
+      <div>
+        <div class="report-section">
+          <div class="report-heading">ASET</div>
+          ${rowsKat('Aset') || '<div class="report-row" style="color:var(--text3);">—</div>'}
+          <div class="report-total"><span>Total Aset</span><span class="num">${fmt(tAset)}</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="report-section">
+          <div class="report-heading">LIABILITAS</div>
+          ${rowsKat('Liabilitas') || '<div class="report-row" style="color:var(--text3);">—</div>'}
+          <div class="report-total"><span>Total Liabilitas</span><span class="num">${fmt(tLiab)}</span></div>
+        </div>
+        <div class="report-section" style="margin-top:16px;">
+          <div class="report-heading">MODAL</div>
+          ${rowsKat('Modal') || '<div class="report-row" style="color:var(--text3);">—</div>'}
+          <div class="report-row"><span>Laba / Rugi Periode Ini</span><span class="num" style="color:${labaRugi>=0?'var(--accent)':'var(--red)'};">${fmt(labaRugi)}</span></div>
+          <div class="report-total"><span>Total Modal</span><span class="num">${fmt(tModal + labaRugi)}</span></div>
+        </div>
+        <div class="report-total" style="margin-top:8px;"><span>Total Liabilitas + Modal</span><span class="num">${fmt(totalLiabModal)}</span></div>
+      </div>
+    </div>
+    ${balanced && tAset > 0 ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Neraca seimbang — Aset (${fmt(tAset)}) = Liabilitas + Modal (${fmt(totalLiabModal)})</div>` : ''}
+  `;
+}
+
+// ══════════════════════════════════════════════════
+//  LABA RUGI
+// ══════════════════════════════════════════════════
+function renderLabaRugi() {
+  const saldo = calcSaldo();
+  const el = document.getElementById('lr-content');
+
+  const rowsKat = (kat) => COA.filter(a => a.kategori === kat).map(a => {
+    const s = saldo[a.kode]?.saldo || 0;
+    if (s === 0) return '';
+    return `<div class="report-row"><span>${a.nama}</span><span class="num">${fmt(s)}</span></div>`;
+  }).join('');
+
+  const tPend = COA.filter(a => a.kategori === 'Pendapatan').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tBeban = COA.filter(a => a.kategori === 'Beban').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const labaRugi = tPend - tBeban;
+  const isLaba = labaRugi >= 0;
+
+  el.innerHTML = `
+    <div class="report-section">
+      <div class="report-heading">PENDAPATAN</div>
+      ${rowsKat('Pendapatan') || '<div class="report-row" style="color:var(--text3);">Belum ada pendapatan tercatat. Bismillah, hasil panen akan segera datang. 🌿</div>'}
+      <div class="report-total"><span>Total Pendapatan</span><span class="num" style="color:var(--accent);">${fmt(tPend)}</span></div>
+    </div>
+    <div class="report-section" style="margin-top:18px;">
+      <div class="report-heading">BEBAN OPERASIONAL</div>
+      ${rowsKat('Beban') || '<div class="report-row" style="color:var(--text3);">—</div>'}
+      <div class="report-total"><span>Total Beban</span><span class="num" style="color:var(--red);">${fmt(tBeban)}</span></div>
+    </div>
+    <div class="report-grand ${isLaba?'profit':'loss'}">
+      <span>${isLaba ? '🌿 Laba Bersih' : '⚠️ Rugi Bersih'}</span>
+      <span class="num">${fmt(Math.abs(labaRugi))}</span>
+    </div>
+    ${!isLaba ? `<div class="alert alert-info show" style="margin-top:12px;">💡 Hasil rugi di fase awal ini adalah normal — ini adalah fase investasi pertanian. Biaya tanam adalah amanah yang ditanamkan. Insya Allah hasilnya akan datang saat panen. 🌾</div>` : `<div class="alert alert-success show" style="margin-top:12px;">Alhamdulillah! 🎉 Usaha tani mulai memberikan hasil positif.</div>`}
+  `;
+}
+
+// ══════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════
+let chartBeban = null, chartMonthly = null;
+
+function renderDashboard() {
+  const saldo = calcSaldo();
+  const tAset = COA.filter(a => a.kategori === 'Aset').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tLiab = COA.filter(a => a.kategori === 'Liabilitas').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tModal = COA.filter(a => a.kategori === 'Modal').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tPend = COA.filter(a => a.kategori === 'Pendapatan').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tBeban = COA.filter(a => a.kategori === 'Beban').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const labaRugi = tPend - tBeban;
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric-card green">
+      <div class="metric-label">Total Aset</div>
+      <div class="metric-value green">${fmtShort(tAset)}</div>
+      <div class="metric-sub">${fmt(tAset)}</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">Total Liabilitas</div>
+      <div class="metric-value red">${fmtShort(tLiab)}</div>
+      <div class="metric-sub">${fmt(tLiab)}</div>
+    </div>
+    <div class="metric-card blue">
+      <div class="metric-label">Total Modal</div>
+      <div class="metric-value blue">${fmtShort(tModal)}</div>
+      <div class="metric-sub">${fmt(tModal)}</div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-label">Total Pendapatan</div>
+      <div class="metric-value green">${fmtShort(tPend)}</div>
+      <div class="metric-sub">${fmt(tPend)}</div>
+    </div>
+    <div class="metric-card red">
+      <div class="metric-label">Total Beban</div>
+      <div class="metric-value red">${fmtShort(tBeban)}</div>
+      <div class="metric-sub">${fmt(tBeban)}</div>
+    </div>
+    <div class="metric-card ${labaRugi>=0?'green':'red'}">
+      <div class="metric-label">Laba / Rugi Bersih</div>
+      <div class="metric-value ${labaRugi>=0?'green':'red'}">${fmtShort(labaRugi)}</div>
+      <div class="metric-sub">${fmt(labaRugi)}</div>
+    </div>
+  `;
+
+  // Recent transactions
+  const recentEl = document.getElementById('dash-recent');
+  if (!JURNAL.length) {
+    recentEl.innerHTML = '<div class="empty-state"><div class="es-icon">📝</div><h3>Belum ada transaksi</h3><p>Mulai dengan menekan tombol "+ Input Baru"</p></div>';
+  } else {
+    recentEl.innerHTML = JURNAL.slice(0,7).map(j => {
+      const totalD = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
+      const isPend = j.lines.some(l => { const a = COA.find(c=>c.kode===l.akun); return a?.kategori==='Pendapatan' && l.tipe==='Kredit'; });
+      return `<div class="report-row" style="cursor:pointer;" onclick="showPage('riwayat')">
+        <span style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${j.deskripsi}</span>
+        <span style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:11px; color:var(--text3);">${fmtDate(j.tanggal)}</span>
+          <span style="font-weight:500; color:${isPend?'var(--accent)':'var(--text)'};">${fmt(totalD)}</span>
+        </span>
+      </div>`;
+    }).join('');
+  }
+
+  // Beban chart
+  const bebanAkun = COA.filter(a => a.kategori === 'Beban');
+  const bebanData = bebanAkun.map(a => saldo[a.kode]?.saldo||0).filter(v => v > 0);
+  const bebanLabels = bebanAkun.filter((a,i) => (saldo[a.kode]?.saldo||0) > 0).map(a => a.nama.replace('Beban ',''));
+  const colors = ['#3D6B47','#A07C3A','#2B4E7A','#9B3A2E','#5A8060','#C4963E','#4A6E9A','#B5574B','#7AAB84','#D4B06A'];
+
+  const ctxB = document.getElementById('chart-beban')?.getContext('2d');
+  if (ctxB) {
+    if (chartBeban) chartBeban.destroy();
+    if (bebanData.length) {
+      chartBeban = new Chart(ctxB, {
+        type: 'doughnut',
+        data: { labels: bebanLabels, datasets: [{ data: bebanData, backgroundColor: colors, borderWidth: 2, borderColor: '#FDFAF5' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 }, color: '#5A5449', boxWidth: 12, padding: 8 } } } }
+      });
+    } else {
+      ctxB.clearRect(0,0,ctxB.canvas.width,ctxB.canvas.height);
+      ctxB.fillStyle = '#8A8278';
+      ctxB.font = '13px DM Sans';
+      ctxB.textAlign = 'center';
+      ctxB.fillText('Belum ada data beban', ctxB.canvas.width/2, 100);
+    }
+  }
+
+  // Monthly chart
+  const monthlyMap = {};
+  JURNAL.forEach(j => {
+    const m = j.tanggal.substring(0,7);
+    if (!monthlyMap[m]) monthlyMap[m] = { pend: 0, beban: 0 };
+    j.lines.forEach(l => {
+      const a = COA.find(c => c.kode === l.akun);
+      if (!a) return;
+      if (a.kategori === 'Pendapatan' && l.tipe === 'Kredit') monthlyMap[m].pend += l.nominal;
+      if (a.kategori === 'Beban' && l.tipe === 'Debit') monthlyMap[m].beban += l.nominal;
+    });
+  });
+  const sortedMonths = Object.keys(monthlyMap).sort();
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const mLabels = sortedMonths.map(m => { const [y,mo] = m.split('-'); return months[parseInt(mo)-1] + ' ' + y.slice(2); });
+  const mPend = sortedMonths.map(m => monthlyMap[m].pend);
+  const mBeban = sortedMonths.map(m => monthlyMap[m].beban);
+
+  const ctxM = document.getElementById('chart-monthly')?.getContext('2d');
+  if (ctxM) {
+    if (chartMonthly) chartMonthly.destroy();
+    if (sortedMonths.length) {
+      chartMonthly = new Chart(ctxM, {
+        type: 'bar',
+        data: {
+          labels: mLabels,
+          datasets: [
+            { label: 'Pendapatan', data: mPend, backgroundColor: '#3D6B47', borderRadius: 4 },
+            { label: 'Beban', data: mBeban, backgroundColor: '#9B3A2E', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { family: 'DM Sans', size: 11 }, color: '#5A5449', boxWidth: 12, padding: 10 } } },
+          scales: {
+            x: { ticks: { font: { family: 'DM Sans', size: 11 }, color: '#8A8278' }, grid: { display: false } },
+            y: { ticks: { font: { family: 'DM Sans', size: 11 }, color: '#8A8278', callback: v => fmtShort(v) }, grid: { color: '#E4DFD5' } }
+          }
+        }
+      });
+    } else {
+      ctxM.clearRect(0,0,ctxM.canvas.width,ctxM.canvas.height);
+      ctxM.fillStyle = '#8A8278';
+      ctxM.font = '13px DM Sans';
+      ctxM.textAlign = 'center';
+      ctxM.fillText('Belum ada data transaksi', ctxM.canvas.width/2, 100);
+    }
+  }
+
+  // Sidebar period
+  if (JURNAL.length) {
+    const dates = JURNAL.map(j => j.tanggal).sort();
+    const from = fmtDate(dates[dates.length-1]);
+    document.getElementById('sb-period').textContent = JURNAL.length + ' transaksi';
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  EXPORT / IMPORT / RESET
+// ══════════════════════════════════════════════════
+function exportData() {
+  const data = { coa: COA, jurnal: JURNAL, exported: new Date().toISOString(), app: 'Jurnal Tani dari Nol' };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'jurnal-tani-' + today() + '.json';
+  a.click();
+}
+function importDataClick() { document.getElementById('import-file').click(); }
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.coa || !data.jurnal) { alert('Format file tidak valid.'); return; }
+      if (!confirm('Import akan mengganti semua data yang ada. Lanjutkan?')) return;
+      COA = data.coa;
+      JURNAL = data.jurnal;
+      saveCOA(); saveJRN();
+      renderAll();
+      alert('✅ Data berhasil diimport!');
+    } catch(err) { alert('Gagal membaca file: ' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+function resetData() {
+  if (!confirm('⚠️ HAPUS SEMUA DATA? Semua jurnal dan COA akan dihapus permanen. Pastikan sudah export terlebih dahulu!')) return;
+  if (!confirm('Yakin? Ini tidak bisa dibatalkan.')) return;
+  COA = []; JURNAL = [];
+  saveCOA(); saveJRN();
+  renderAll();
+  alert('Data berhasil direset.');
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+function renderAll() {
+  renderDashboard();
+  renderCOA();
+  refreshSelects();
+}
+
+function init() {
+  loadData();
+  if (COA.length === 0) { COA = defaultCOA(); saveCOA(); }
+  renderAll();
+  resetForm();
+  document.getElementById('j-tanggal').value = today();
+}
+
+init();
+</script>
+</body>
+</html>
