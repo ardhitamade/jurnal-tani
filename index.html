@@ -391,6 +391,31 @@ tfoot td {
 .coa-group-header { background: var(--bg2); }
 .coa-group-header td { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); padding: 6px 12px; }
 
+/* ── COA edit highlight ── */
+.coa-row-editing td { background: #FFF9F0 !important; }
+.coa-row-editing td:first-child { border-left: 3px solid var(--gold); }
+.tipe-badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 11px; font-weight: 500;
+  background: var(--bg2); color: var(--text2);
+  border: 1px solid var(--border);
+}
+.saldo-positive { color: var(--accent); font-weight: 500; }
+.saldo-negative { color: var(--red); font-weight: 500; }
+.saldo-zero { color: var(--text3); }
+.coa-summary-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 8px;
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+.coa-form-editing {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(160,124,58,0.12) !important;
+}
+
 /* ── CHART WRAPPER ── */
 .chart-wrap { position: relative; height: 220px; margin-top: 8px; }
 
@@ -611,15 +636,22 @@ tfoot td {
       <div class="page" id="page-coa">
         <div class="info-box">
           <strong>Chart of Accounts (COA) — Daftar Semua Akun Keuangan</strong>
-          Kode akun mengikuti konvensi: 1-xxx = Aset, 2-xxx = Liabilitas, 3-xxx = Modal, 4-xxx = Pendapatan, 5-xxx = Beban. Normal saldo menentukan sisi mana akun ini bertambah nilainya.
+          Kode akun mengikuti konvensi: 1-xxx = Aset, 2-xxx = Liabilitas, 3-xxx = Modal, 4-xxx = Pendapatan, 5-xxx = Beban.
+          <strong>Tipe Akun</strong> menggambarkan sifat akun lebih spesifik (mis. Kas, Piutang, Persediaan). Normal saldo menentukan sisi mana akun ini bertambah nilainya.
         </div>
-        <div class="card">
+
+        <!-- FORM TAMBAH / EDIT -->
+        <div class="card" id="coa-form-card">
           <div class="card-header">
-            <div class="card-title"><span class="ct-icon">➕</span> Tambah Akun Baru</div>
-            <button class="btn btn-gold" onclick="loadDefaultCOA()">🌿 Muat COA Default Pertanian</button>
+            <div class="card-title"><span class="ct-icon" id="coa-form-icon">➕</span> <span id="coa-form-title">Tambah Akun Baru</span></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-gold" onclick="loadDefaultCOA()">🌿 Muat COA Default Pertanian</button>
+              <button class="btn" id="coa-cancel-edit" onclick="cancelEditCOA()" style="display:none;">✕ Batal Edit</button>
+            </div>
           </div>
           <div class="alert" id="coa-alert"></div>
-          <div class="form-grid">
+          <input type="hidden" id="coa-edit-kode-original" />
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
             <div class="form-group">
               <label>Kode Akun *</label>
               <input type="text" id="coa-kode" placeholder="cth: 1-005" />
@@ -630,12 +662,34 @@ tfoot td {
             </div>
             <div class="form-group">
               <label>Kategori *</label>
-              <select id="coa-kategori" onchange="autoNormal()">
+              <select id="coa-kategori" onchange="autoNormal(); autoTipe()">
                 <option value="Aset">Aset</option>
                 <option value="Liabilitas">Liabilitas</option>
                 <option value="Modal">Modal</option>
                 <option value="Pendapatan">Pendapatan</option>
                 <option value="Beban">Beban</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tipe Akun *</label>
+              <select id="coa-tipe">
+                <option value="Kas & Setara Kas">Kas &amp; Setara Kas</option>
+                <option value="Piutang">Piutang</option>
+                <option value="Persediaan">Persediaan</option>
+                <option value="Aset Tetap">Aset Tetap</option>
+                <option value="Aset Lain-lain">Aset Lain-lain</option>
+                <option value="Akumulasi Penyusutan">Akumulasi Penyusutan</option>
+                <option value="Utang Usaha">Utang Usaha</option>
+                <option value="Utang Jangka Panjang">Utang Jangka Panjang</option>
+                <option value="Kewajiban Lain-lain">Kewajiban Lain-lain</option>
+                <option value="Modal Pemilik">Modal Pemilik</option>
+                <option value="Laba Ditahan">Laba Ditahan</option>
+                <option value="Pendapatan Usaha">Pendapatan Usaha</option>
+                <option value="Pendapatan Lain-lain">Pendapatan Lain-lain</option>
+                <option value="Beban Pokok">Beban Pokok</option>
+                <option value="Beban Operasional">Beban Operasional</option>
+                <option value="Beban Penyusutan">Beban Penyusutan</option>
+                <option value="Beban Lain-lain">Beban Lain-lain</option>
               </select>
             </div>
             <div class="form-group">
@@ -645,33 +699,47 @@ tfoot td {
                 <option value="Kredit">Kredit</option>
               </select>
             </div>
-            <div class="form-group full">
+            <div class="form-group">
               <label>Deskripsi (opsional)</label>
               <input type="text" id="coa-desc" placeholder="Keterangan singkat akun ini" />
             </div>
           </div>
-          <div style="margin-top:14px;">
-            <button class="btn btn-primary" onclick="simpanCOA()">💾 Simpan Akun</button>
+          <div style="margin-top:14px; display:flex; gap:10px;">
+            <button class="btn btn-primary" id="coa-submit-btn" onclick="simpanCOA()">💾 Simpan Akun</button>
+            <button class="btn" onclick="resetCOAForm()">↺ Reset Form</button>
           </div>
         </div>
 
+        <!-- TABEL COA -->
         <div class="card">
-          <div class="card-title" style="margin-bottom:16px;"><span class="ct-icon">📑</span> Daftar Chart of Accounts</div>
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">📑</span> Daftar Chart of Accounts</div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <input type="text" id="coa-search" placeholder="🔍 Cari akun..." style="width:180px;" oninput="renderCOA()" />
+              <select id="coa-filter-kat" onchange="renderCOA()" style="width:130px;">
+                <option value="">Semua Kategori</option>
+                <option>Aset</option><option>Liabilitas</option><option>Modal</option>
+                <option>Pendapatan</option><option>Beban</option>
+              </select>
+            </div>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th style="width:80px">Kode</th>
-                  <th>Nama Akun</th>
-                  <th style="width:110px">Kategori</th>
-                  <th style="width:80px">Normal</th>
-                  <th>Deskripsi</th>
-                  <th style="width:60px"></th>
+                  <th style="width:76px">Kode</th>
+                  <th style="min-width:150px">Nama Akun</th>
+                  <th style="width:100px">Kategori</th>
+                  <th style="width:140px">Tipe Akun</th>
+                  <th style="width:72px">Normal</th>
+                  <th style="width:130px; text-align:right;">Saldo</th>
+                  <th style="width:80px; text-align:center;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="coa-tbody"></tbody>
             </table>
           </div>
+          <div id="coa-summary" style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;"></div>
         </div>
       </div>
 
@@ -770,29 +838,29 @@ let JURNAL = [];
 // ══════════════════════════════════════════════════
 function defaultCOA() {
   return [
-    {kode:'1-001', nama:'Kas Tunai', kategori:'Aset', normal:'Debit', desc:'Uang tunai di tangan'},
-    {kode:'1-002', nama:'Bank / Rekening', kategori:'Aset', normal:'Debit', desc:'Saldo rekening bank'},
-    {kode:'1-101', nama:'Lahan Pertanian', kategori:'Aset', normal:'Debit', desc:'Nilai aset lahan yang digunakan'},
-    {kode:'1-102', nama:'Bibit Kelapa Genjah', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit kelapa genjah'},
-    {kode:'1-103', nama:'Bibit Kelapa Hibrida', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit kelapa hibrida'},
-    {kode:'1-104', nama:'Bibit Pisang', kategori:'Aset', normal:'Debit', desc:'Persediaan bibit pisang'},
-    {kode:'1-105', nama:'Pupuk & Pestisida (Stok)', kategori:'Aset', normal:'Debit', desc:'Stok pupuk dan obat-obatan yang belum terpakai'},
-    {kode:'1-201', nama:'Peralatan Tani', kategori:'Aset', normal:'Debit', desc:'Cangkul, sprayer, selang, dll'},
-    {kode:'1-202', nama:'Akum. Penyusutan Peralatan', kategori:'Aset', normal:'Kredit', desc:'Akumulasi penyusutan nilai peralatan'},
-    {kode:'2-001', nama:'Utang Usaha', kategori:'Liabilitas', normal:'Kredit', desc:'Hutang kepada pemasok / supplier'},
-    {kode:'2-002', nama:'Utang Bank / Pinjaman', kategori:'Liabilitas', normal:'Kredit', desc:'Pinjaman dari bank atau koperasi'},
-    {kode:'3-001', nama:'Modal Ardhi', kategori:'Modal', normal:'Kredit', desc:'Modal awal yang disetor pemilik'},
-    {kode:'3-002', nama:'Laba Ditahan', kategori:'Modal', normal:'Kredit', desc:'Akumulasi laba dari periode sebelumnya'},
-    {kode:'4-001', nama:'Pendapatan Panen Kelapa', kategori:'Pendapatan', normal:'Kredit', desc:'Hasil penjualan buah kelapa'},
-    {kode:'4-002', nama:'Pendapatan Panen Pisang', kategori:'Pendapatan', normal:'Kredit', desc:'Hasil penjualan tandan pisang'},
-    {kode:'4-003', nama:'Pendapatan Lain-lain', kategori:'Pendapatan', normal:'Kredit', desc:'Pendapatan di luar hasil panen utama'},
-    {kode:'5-001', nama:'Beban Tenaga Kerja', kategori:'Beban', normal:'Debit', desc:'Upah buruh tani / pekerja harian'},
-    {kode:'5-002', nama:'Beban Pupuk & Pestisida', kategori:'Beban', normal:'Debit', desc:'Biaya pembelian pupuk dan obat tanaman'},
-    {kode:'5-003', nama:'Beban Transportasi', kategori:'Beban', normal:'Debit', desc:'Biaya angkut hasil panen atau bahan input'},
-    {kode:'5-004', nama:'Beban Irigasi / Air', kategori:'Beban', normal:'Debit', desc:'Biaya pengairan lahan pertanian'},
-    {kode:'5-005', nama:'Beban Penyusutan Peralatan', kategori:'Beban', normal:'Debit', desc:'Beban penyusutan nilai alat tani per periode'},
-    {kode:'5-006', nama:'Beban Bibit (Ditanam)', kategori:'Beban', normal:'Debit', desc:'Biaya bibit yang sudah ditanam / digunakan'},
-    {kode:'5-007', nama:'Beban Lain-lain', kategori:'Beban', normal:'Debit', desc:'Pengeluaran operasional lainnya yang tidak terkategorikan'},
+    {kode:'1-001', nama:'Kas Tunai', kategori:'Aset', tipe:'Kas & Setara Kas', normal:'Debit', desc:'Uang tunai di tangan'},
+    {kode:'1-002', nama:'Bank / Rekening', kategori:'Aset', tipe:'Kas & Setara Kas', normal:'Debit', desc:'Saldo rekening bank'},
+    {kode:'1-101', nama:'Lahan Pertanian', kategori:'Aset', tipe:'Aset Tetap', normal:'Debit', desc:'Nilai aset lahan yang digunakan'},
+    {kode:'1-102', nama:'Bibit Kelapa Genjah', kategori:'Aset', tipe:'Persediaan', normal:'Debit', desc:'Persediaan bibit kelapa genjah'},
+    {kode:'1-103', nama:'Bibit Kelapa Hibrida', kategori:'Aset', tipe:'Persediaan', normal:'Debit', desc:'Persediaan bibit kelapa hibrida'},
+    {kode:'1-104', nama:'Bibit Pisang', kategori:'Aset', tipe:'Persediaan', normal:'Debit', desc:'Persediaan bibit pisang'},
+    {kode:'1-105', nama:'Pupuk & Pestisida (Stok)', kategori:'Aset', tipe:'Persediaan', normal:'Debit', desc:'Stok pupuk dan obat-obatan yang belum terpakai'},
+    {kode:'1-201', nama:'Peralatan Tani', kategori:'Aset', tipe:'Aset Tetap', normal:'Debit', desc:'Cangkul, sprayer, selang, dll'},
+    {kode:'1-202', nama:'Akum. Penyusutan Peralatan', kategori:'Aset', tipe:'Akumulasi Penyusutan', normal:'Kredit', desc:'Akumulasi penyusutan nilai peralatan'},
+    {kode:'2-001', nama:'Utang Usaha', kategori:'Liabilitas', tipe:'Utang Usaha', normal:'Kredit', desc:'Hutang kepada pemasok / supplier'},
+    {kode:'2-002', nama:'Utang Bank / Pinjaman', kategori:'Liabilitas', tipe:'Utang Jangka Panjang', normal:'Kredit', desc:'Pinjaman dari bank atau koperasi'},
+    {kode:'3-001', nama:'Modal Ardhi', kategori:'Modal', tipe:'Modal Pemilik', normal:'Kredit', desc:'Modal awal yang disetor pemilik'},
+    {kode:'3-002', nama:'Laba Ditahan', kategori:'Modal', tipe:'Laba Ditahan', normal:'Kredit', desc:'Akumulasi laba dari periode sebelumnya'},
+    {kode:'4-001', nama:'Pendapatan Panen Kelapa', kategori:'Pendapatan', tipe:'Pendapatan Usaha', normal:'Kredit', desc:'Hasil penjualan buah kelapa'},
+    {kode:'4-002', nama:'Pendapatan Panen Pisang', kategori:'Pendapatan', tipe:'Pendapatan Usaha', normal:'Kredit', desc:'Hasil penjualan tandan pisang'},
+    {kode:'4-003', nama:'Pendapatan Lain-lain', kategori:'Pendapatan', tipe:'Pendapatan Lain-lain', normal:'Kredit', desc:'Pendapatan di luar hasil panen utama'},
+    {kode:'5-001', nama:'Beban Tenaga Kerja', kategori:'Beban', tipe:'Beban Operasional', normal:'Debit', desc:'Upah buruh tani / pekerja harian'},
+    {kode:'5-002', nama:'Beban Pupuk & Pestisida', kategori:'Beban', tipe:'Beban Pokok', normal:'Debit', desc:'Biaya pembelian pupuk dan obat tanaman'},
+    {kode:'5-003', nama:'Beban Transportasi', kategori:'Beban', tipe:'Beban Operasional', normal:'Debit', desc:'Biaya angkut hasil panen atau bahan input'},
+    {kode:'5-004', nama:'Beban Irigasi / Air', kategori:'Beban', tipe:'Beban Operasional', normal:'Debit', desc:'Biaya pengairan lahan pertanian'},
+    {kode:'5-005', nama:'Beban Penyusutan Peralatan', kategori:'Beban', tipe:'Beban Penyusutan', normal:'Debit', desc:'Beban penyusutan nilai alat tani per periode'},
+    {kode:'5-006', nama:'Beban Bibit (Ditanam)', kategori:'Beban', tipe:'Beban Pokok', normal:'Debit', desc:'Biaya bibit yang sudah ditanam / digunakan'},
+    {kode:'5-007', nama:'Beban Lain-lain', kategori:'Beban', tipe:'Beban Lain-lain', normal:'Debit', desc:'Pengeluaran operasional lainnya yang tidak terkategorikan'},
   ];
 }
 
@@ -830,7 +898,7 @@ function showPage(name) {
 
   if (name === 'dashboard') renderDashboard();
   if (name === 'riwayat') renderRiwayat();
-  if (name === 'coa') renderCOA();
+  if (name === 'coa') { renderCOA(); autoTipe(); }
   if (name === 'buku-besar') { refreshSelects(); renderBukuBesar(); }
   if (name === 'trial-balance') renderTrialBalance();
   if (name === 'neraca') renderNeraca();
@@ -873,11 +941,6 @@ function showAlert(id, msg, type) {
   el.innerHTML = msg;
   el.className = 'alert alert-' + type + ' show';
   setTimeout(() => el.classList.remove('show'), 4000);
-}
-
-function autoNormal() {
-  const kat = document.getElementById('coa-kategori').value;
-  document.getElementById('coa-normal').value = ['Aset','Beban'].includes(kat) ? 'Debit' : 'Kredit';
 }
 
 // ══════════════════════════════════════════════════
@@ -1062,56 +1125,196 @@ function applyTemplate(type) {
 }
 
 // ══════════════════════════════════════════════════
-//  COA
+//  COA — TIPE AUTO-SUGGEST
 // ══════════════════════════════════════════════════
+const TIPE_BY_KAT = {
+  Aset: ['Kas & Setara Kas','Piutang','Persediaan','Aset Tetap','Akumulasi Penyusutan','Aset Lain-lain'],
+  Liabilitas: ['Utang Usaha','Utang Jangka Panjang','Kewajiban Lain-lain'],
+  Modal: ['Modal Pemilik','Laba Ditahan'],
+  Pendapatan: ['Pendapatan Usaha','Pendapatan Lain-lain'],
+  Beban: ['Beban Pokok','Beban Operasional','Beban Penyusutan','Beban Lain-lain'],
+};
+
+function autoTipe() {
+  const kat = document.getElementById('coa-kategori').value;
+  const sel = document.getElementById('coa-tipe');
+  const tipes = TIPE_BY_KAT[kat] || [];
+  sel.innerHTML = tipes.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function autoNormal() {
+  const kat = document.getElementById('coa-kategori').value;
+  document.getElementById('coa-normal').value = ['Aset','Beban'].includes(kat) ? 'Debit' : 'Kredit';
+}
+
+// ══════════════════════════════════════════════════
+//  COA — CRUD
+// ══════════════════════════════════════════════════
+let _editingCOAKode = null;
+
+function resetCOAForm() {
+  _editingCOAKode = null;
+  document.getElementById('coa-kode').value = '';
+  document.getElementById('coa-nama').value = '';
+  document.getElementById('coa-desc').value = '';
+  document.getElementById('coa-kategori').value = 'Aset';
+  autoNormal(); autoTipe();
+  document.getElementById('coa-edit-kode-original').value = '';
+  document.getElementById('coa-form-title').textContent = 'Tambah Akun Baru';
+  document.getElementById('coa-form-icon').textContent = '➕';
+  document.getElementById('coa-submit-btn').textContent = '💾 Simpan Akun';
+  document.getElementById('coa-cancel-edit').style.display = 'none';
+  document.getElementById('coa-kode').removeAttribute('readonly');
+  document.getElementById('coa-form-card').classList.remove('coa-form-editing');
+  renderCOA();
+}
+
+function editCOA(kode) {
+  const a = COA.find(x => x.kode === kode);
+  if (!a) return;
+  _editingCOAKode = kode;
+  document.getElementById('coa-edit-kode-original').value = kode;
+  document.getElementById('coa-kode').value = a.kode;
+  document.getElementById('coa-kode').setAttribute('readonly', true);
+  document.getElementById('coa-nama').value = a.nama;
+  document.getElementById('coa-kategori').value = a.kategori;
+  autoTipe();
+  document.getElementById('coa-tipe').value = a.tipe || (TIPE_BY_KAT[a.kategori]||[])[0] || '';
+  document.getElementById('coa-normal').value = a.normal;
+  document.getElementById('coa-desc').value = a.desc || '';
+  document.getElementById('coa-form-title').textContent = 'Edit Akun: ' + a.kode + ' — ' + a.nama;
+  document.getElementById('coa-form-icon').textContent = '✏️';
+  document.getElementById('coa-submit-btn').textContent = '💾 Update Akun';
+  document.getElementById('coa-cancel-edit').style.display = 'inline-flex';
+  document.getElementById('coa-form-card').classList.add('coa-form-editing');
+  document.getElementById('coa-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderCOA();
+}
+
+function cancelEditCOA() { resetCOAForm(); }
+
 function simpanCOA() {
+  const kodeOriginal = document.getElementById('coa-edit-kode-original').value;
+  const isEdit = !!_editingCOAKode;
   const kode = document.getElementById('coa-kode').value.trim();
   const nama = document.getElementById('coa-nama').value.trim();
   const kategori = document.getElementById('coa-kategori').value;
+  const tipe = document.getElementById('coa-tipe').value;
   const normal = document.getElementById('coa-normal').value;
   const desc = document.getElementById('coa-desc').value.trim();
+
   if (!kode || !nama) { showAlert('coa-alert','⚠️ Kode dan Nama akun wajib diisi.','error'); return; }
-  if (COA.find(a => a.kode === kode)) { showAlert('coa-alert','⚠️ Kode akun sudah ada.','error'); return; }
-  COA.push({ kode, nama, kategori, normal, desc });
-  COA.sort((a, b) => a.kode.localeCompare(b.kode));
-  saveCOA();
-  renderCOA();
-  refreshSelects();
-  ['coa-kode','coa-nama','coa-desc'].forEach(id => document.getElementById(id).value = '');
-  showAlert('coa-alert','✅ Akun "' + nama + '" berhasil disimpan.','success');
+
+  if (isEdit) {
+    const idx = COA.findIndex(a => a.kode === kodeOriginal);
+    if (idx === -1) return;
+    // Update jurnal references if kode changed (kode is readonly in edit, but just in case)
+    COA[idx] = { kode, nama, kategori, tipe, normal, desc };
+    COA.sort((a,b) => a.kode.localeCompare(b.kode));
+    saveCOA();
+    refreshSelects();
+    showAlert('coa-alert','✅ Akun "' + nama + '" berhasil diupdate.','success');
+    resetCOAForm();
+  } else {
+    if (COA.find(a => a.kode === kode)) { showAlert('coa-alert','⚠️ Kode akun sudah ada.','error'); return; }
+    COA.push({ kode, nama, kategori, tipe, normal, desc });
+    COA.sort((a,b) => a.kode.localeCompare(b.kode));
+    saveCOA();
+    refreshSelects();
+    ['coa-kode','coa-nama','coa-desc'].forEach(id => document.getElementById(id).value = '');
+    autoTipe();
+    showAlert('coa-alert','✅ Akun "' + nama + '" berhasil disimpan.','success');
+    renderCOA();
+  }
 }
 
 function hapusCOA(kode) {
   const used = JURNAL.some(j => j.lines.some(l => l.akun === kode));
-  if (used) { alert('Akun ini sudah digunakan dalam jurnal dan tidak bisa dihapus.'); return; }
+  if (used) { alert('Akun ini sudah digunakan dalam jurnal dan tidak bisa dihapus.\nUntuk menjaga integritas data, akun yang sudah bertransaksi tidak dapat dihapus.'); return; }
   if (!confirm('Hapus akun ' + kode + '?')) return;
   COA = COA.filter(a => a.kode !== kode);
   saveCOA();
+  if (_editingCOAKode === kode) resetCOAForm();
   renderCOA();
 }
 
 function renderCOA() {
   const tb = document.getElementById('coa-tbody');
   if (!tb) return;
+
+  const saldo = calcSaldo();
+  const search = (document.getElementById('coa-search')?.value || '').toLowerCase();
+  const filterKat = document.getElementById('coa-filter-kat')?.value || '';
   const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
   const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+
   let html = '';
+  let totalAset = 0, totalBeban = 0, totalPend = 0, totalLiab = 0, totalModal = 0;
+  let visibleCount = 0;
+
   groups.forEach(g => {
-    const items = COA.filter(a => a.kategori === g);
+    if (filterKat && filterKat !== g) return;
+    let items = COA.filter(a => a.kategori === g);
+    if (search) items = items.filter(a =>
+      a.kode.toLowerCase().includes(search) ||
+      a.nama.toLowerCase().includes(search) ||
+      (a.tipe||'').toLowerCase().includes(search) ||
+      (a.desc||'').toLowerCase().includes(search)
+    );
     if (!items.length) return;
-    html += `<tr class="coa-group-header"><td colspan="6">${g}</td></tr>`;
+    html += `<tr class="coa-group-header"><td colspan="7">${g} <span style="font-weight:400; color:var(--text3); font-size:10px; margin-left:6px;">(${items.length} akun)</span></td></tr>`;
     items.forEach(a => {
-      html += `<tr>
-        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px;">${a.kode}</code></td>
-        <td style="font-weight:500;">${a.nama}</td>
+      const s = saldo[a.kode]?.saldo || 0;
+      const saldoClass = s > 0 ? 'saldo-positive' : s < 0 ? 'saldo-negative' : 'saldo-zero';
+      const isEditing = _editingCOAKode === a.kode;
+      const tipeLabel = a.tipe || '—';
+      visibleCount++;
+      if (a.kategori === 'Aset') totalAset += s;
+      else if (a.kategori === 'Liabilitas') totalLiab += s;
+      else if (a.kategori === 'Modal') totalModal += s;
+      else if (a.kategori === 'Pendapatan') totalPend += s;
+      else if (a.kategori === 'Beban') totalBeban += s;
+
+      html += `<tr class="${isEditing ? 'coa-row-editing' : ''}" id="coa-row-${a.kode.replace('-','_')}">
+        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px; white-space:nowrap;">${a.kode}</code></td>
+        <td>
+          <div style="font-weight:500; line-height:1.3;">${a.nama}</div>
+          ${a.desc ? `<div style="font-size:11px; color:var(--text3); margin-top:1px;">${a.desc}</div>` : ''}
+        </td>
         <td><span class="badge ${badgeMap[a.kategori]}">${a.kategori}</span></td>
+        <td><span class="tipe-badge">${tipeLabel}</span></td>
         <td><span class="badge ${a.normal==='Debit'?'badge-debit':'badge-kredit'}">${a.normal}</span></td>
-        <td style="color:var(--text3); font-size:12px;">${a.desc||'—'}</td>
-        <td><button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus">✕</button></td>
+        <td style="text-align:right;">
+          <span class="${saldoClass}">${s !== 0 ? fmt(s) : '<span style="color:var(--text3);">—</span>'}</span>
+        </td>
+        <td style="text-align:center;">
+          <div style="display:flex; gap:4px; justify-content:center;">
+            <button class="btn btn-sm btn-icon" onclick="editCOA('${a.kode}')" title="Edit akun" style="padding:4px 7px;">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus" style="padding:4px 7px;">✕</button>
+          </div>
+        </td>
       </tr>`;
     });
   });
-  tb.innerHTML = html || '<tr><td colspan="6"><div class="empty-state"><div class="es-icon">📑</div><h3>Belum ada akun</h3><p>Klik "Muat COA Default Pertanian" untuk mulai.</p></div></td></tr>';
+
+  if (!html) {
+    tb.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📑</div><h3>${search || filterKat ? 'Tidak ada akun yang cocok' : 'Belum ada akun'}</h3><p>${search || filterKat ? 'Coba ubah filter pencarian.' : 'Klik "Muat COA Default Pertanian" untuk mulai.'}</p></div></td></tr>`;
+  } else {
+    tb.innerHTML = html;
+  }
+
+  // Summary pills
+  const summaryEl = document.getElementById('coa-summary');
+  if (summaryEl) {
+    summaryEl.innerHTML = [
+      { label: '🌾 Total Aset', val: totalAset, cls: 'saldo-positive' },
+      { label: '📉 Total Liabilitas', val: totalLiab, cls: 'saldo-negative' },
+      { label: '💰 Total Modal', val: totalModal, cls: '' },
+      { label: '📈 Total Pendapatan', val: totalPend, cls: 'saldo-positive' },
+      { label: '📤 Total Beban', val: totalBeban, cls: 'saldo-negative' },
+      { label: '📊 Laba / Rugi', val: totalPend - totalBeban, cls: (totalPend - totalBeban) >= 0 ? 'saldo-positive' : 'saldo-negative' },
+    ].map(p => `<div class="coa-summary-pill"><span style="color:var(--text3);">${p.label}</span><span class="${p.cls}">${fmt(p.val)}</span></div>`).join('');
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -1564,6 +1767,7 @@ function init() {
   if (COA.length === 0) { COA = defaultCOA(); saveCOA(); }
   renderAll();
   resetForm();
+  autoTipe();
   document.getElementById('j-tanggal').value = today();
 }
 
