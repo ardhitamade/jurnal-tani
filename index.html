@@ -387,9 +387,56 @@ tfoot td {
 /* ── SECTION ROW (for 2-col report layout) ── */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-/* ── COA group header ── */
-.coa-group-header { background: var(--bg2); }
-.coa-group-header td { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); padding: 6px 12px; }
+/* ── COA HIERARCHY ── */
+.coa-indent-1 { padding-left: 28px !important; }
+.coa-indent-2 { padding-left: 52px !important; }
+.coa-tree-line {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.coa-tree-line::before {
+  content: '↳';
+  color: var(--border2);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.coa-parent-row-item td { background: var(--surface2) !important; }
+.coa-parent-row-item td:first-child { border-left: 3px solid var(--accent); }
+.coa-child-row-item td { background: var(--surface) !important; }
+.coa-child-row-item:hover td { background: var(--bg2) !important; }
+
+.level-badge-parent {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600;
+  background: var(--accent-light); color: var(--accent2);
+  border: 1px solid var(--accent-mid);
+  white-space: nowrap;
+}
+.level-badge-child {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  background: var(--blue-light); color: var(--blue);
+  border: 1px solid #B5C8DF;
+  white-space: nowrap;
+}
+.level-badge-standalone {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500;
+  background: var(--bg2); color: var(--text3);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.coa-no-txn-badge {
+  display: inline-block; font-size: 10px;
+  color: var(--gold); background: var(--gold-light);
+  border: 1px solid #D4B06A; border-radius: 4px;
+  padding: 1px 6px; margin-left: 5px; vertical-align: middle;
+}
+.coa-parent-saldo {
+  font-size: 12px;
+}
+.coa-parent-saldo-detail {
+  font-size: 10px; color: var(--text3); margin-top: 1px;
+}
 
 /* ── COA edit highlight ── */
 .coa-row-editing td { background: #FFF9F0 !important; }
@@ -451,10 +498,94 @@ tfoot td {
 
 /* ── PRINT ── */
 @media print {
-  .sidebar, .topbar, .btn, .tabs { display: none !important; }
+  .sidebar, .topbar, .btn, .tabs, .no-print { display: none !important; }
   .main { margin-left: 0; }
   .content { padding: 0; }
   .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+}
+
+/* ── PERIOD FILTER BAR ── */
+.period-filter-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.period-filter-bar label { font-size: 12px; font-weight: 500; color: var(--text2); white-space: nowrap; }
+.period-filter-bar select, .period-filter-bar input[type="date"] {
+  font-size: 12px; padding: 6px 10px; border-radius: 7px;
+}
+.period-quick-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+.period-quick-btn {
+  padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border2); background: var(--surface); cursor: pointer;
+  color: var(--text2); transition: all 0.12s; white-space: nowrap;
+}
+.period-quick-btn:hover { background: var(--bg2); }
+.period-quick-btn.active { background: var(--accent); color: #fff; border-color: var(--accent2); }
+
+/* ── CLOSING ENTRY ── */
+.closing-step {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface2);
+  margin-bottom: 10px;
+}
+.closing-step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; flex-shrink: 0;
+}
+.closing-step-num.done { background: var(--text3); }
+.closing-preview-table { width: 100%; font-size: 12px; margin-top: 8px; }
+.closing-preview-table td { padding: 3px 8px; }
+.closing-preview-table td:last-child { text-align: right; font-weight: 500; }
+.period-history-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-radius: 8px; background: var(--surface2);
+  border: 1px solid var(--border); margin-bottom: 8px;
+}
+
+/* ── ARUS KAS ── */
+.cashflow-section { margin-bottom: 20px; }
+.cashflow-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px; border-radius: 8px 8px 0 0;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.cashflow-section-header.ops  { background: var(--accent-light); color: var(--accent2); }
+.cashflow-section-header.inv  { background: var(--blue-light); color: var(--blue); }
+.cashflow-section-header.fin  { background: var(--gold-light); color: var(--gold); }
+.cashflow-section-body {
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 8px 8px; overflow: hidden;
+}
+.cashflow-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; font-size: 13px;
+  border-bottom: 1px dashed var(--border);
+}
+.cashflow-row:last-child { border-bottom: none; }
+.cashflow-row:hover { background: var(--bg2); }
+.cashflow-total {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px; font-weight: 600; font-size: 14px;
+  background: var(--bg2); border-top: 2px solid var(--border2);
+  font-family: 'Lora', serif;
+}
+.cashflow-net {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 18px; border-radius: var(--radius);
+  font-family: 'Lora', serif; font-size: 17px; font-weight: 600;
+  margin-top: 16px;
+}
+.cashflow-net.positive { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
+.cashflow-net.negative { background: var(--red-light); color: var(--red); border: 1px solid #D4A09A; }
+.arus-kas-mapping-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: var(--bg2); color: var(--text3);
+  border: 1px solid var(--border); margin-left: 5px;
 }
 </style>
 </head>
@@ -503,6 +634,16 @@ tfoot td {
       </a>
       <a class="nav-item" onclick="showPage('laba-rugi')" href="#">
         <span class="ni">📈</span> Laba Rugi
+      </a>
+      <a class="nav-item" onclick="showPage('arus-kas')" href="#">
+        <span class="ni">💸</span> Arus Kas
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Periode</div>
+      <a class="nav-item" onclick="showPage('tutup-buku')" href="#">
+        <span class="ni">🔒</span> Tutup Buku
       </a>
     </div>
 
@@ -621,13 +762,29 @@ tfoot td {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">📋</span> Riwayat Transaksi</div>
-            <div style="display:flex; gap:8px;">
-              <input type="text" id="search-jurnal" placeholder="🔍 Cari transaksi..." style="width:200px;" oninput="renderRiwayat()" />
-              <select id="filter-bulan" onchange="renderRiwayat()" style="width:130px;">
-                <option value="">Semua Bulan</option>
-              </select>
-            </div>
+            <button class="btn btn-sm no-print" onclick="window.print()">🖨 Cetak</button>
           </div>
+          <div class="period-filter-bar no-print">
+            <label>Periode:</label>
+            <div class="period-quick-btns">
+              <button class="period-quick-btn active" id="rw-q-all" onclick="setRiwayatPeriod('all')">Semua</button>
+              <button class="period-quick-btn" id="rw-q-today" onclick="setRiwayatPeriod('today')">Hari Ini</button>
+              <button class="period-quick-btn" id="rw-q-week" onclick="setRiwayatPeriod('week')">7 Hari</button>
+              <button class="period-quick-btn" id="rw-q-month" onclick="setRiwayatPeriod('month')">Bulan Ini</button>
+              <button class="period-quick-btn" id="rw-q-year" onclick="setRiwayatPeriod('year')">Tahun Ini</button>
+              <button class="period-quick-btn" id="rw-q-custom" onclick="setRiwayatPeriod('custom')">Kustom</button>
+            </div>
+            <div id="rw-custom-range" style="display:none; display:flex; gap:6px; align-items:center;">
+              <input type="date" id="rw-date-from" onchange="renderRiwayat()" style="width:140px;" />
+              <span style="color:var(--text3); font-size:12px;">s/d</span>
+              <input type="date" id="rw-date-to" onchange="renderRiwayat()" style="width:140px;" />
+            </div>
+            <input type="text" id="search-jurnal" placeholder="🔍 Cari keterangan..." style="width:180px; margin-left:auto;" oninput="renderRiwayat()" />
+            <select id="filter-bulan" onchange="renderRiwayat()" style="width:130px;">
+              <option value="">Semua Bulan</option>
+            </select>
+          </div>
+          <div id="riwayat-stats" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;"></div>
           <div id="riwayat-list"></div>
         </div>
       </div>
@@ -635,34 +792,50 @@ tfoot td {
       <!-- ═══════════════════════════════════ COA ═══════════════════════════════════ -->
       <div class="page" id="page-coa">
         <div class="info-box">
-          <strong>Chart of Accounts (COA) — Daftar Semua Akun Keuangan</strong>
-          Kode akun mengikuti konvensi: 1-xxx = Aset, 2-xxx = Liabilitas, 3-xxx = Modal, 4-xxx = Pendapatan, 5-xxx = Beban.
-          <strong>Tipe Akun</strong> menggambarkan sifat akun lebih spesifik (mis. Kas, Piutang, Persediaan). Normal saldo menentukan sisi mana akun ini bertambah nilainya.
+          <strong>Chart of Accounts (COA) — Hierarki Akun Keuangan</strong>
+          Akun bisa memiliki <strong>Sub-akun (anak)</strong>. Contoh: <em>1-002 Bank/Rekening</em> (induk) → <em>1-002-01 BRI Tabungan</em>, <em>1-002-02 BCA Giro</em> (anak).
+          Aturan penting: <strong>Akun Induk tidak bisa dipakai di Jurnal</strong> — hanya akun anak (detail) yang boleh bertransaksi. Saldo induk = agregat semua anaknya secara otomatis.
         </div>
 
         <!-- FORM TAMBAH / EDIT -->
         <div class="card" id="coa-form-card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon" id="coa-form-icon">➕</span> <span id="coa-form-title">Tambah Akun Baru</span></div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <button class="btn btn-gold" onclick="loadDefaultCOA()">🌿 Muat COA Default Pertanian</button>
-              <button class="btn" id="coa-cancel-edit" onclick="cancelEditCOA()" style="display:none;">✕ Batal Edit</button>
+              <button class="btn" id="coa-cancel-edit" onclick="cancelEditCOA()" style="display:none;">✕ Batal</button>
             </div>
           </div>
           <div class="alert" id="coa-alert"></div>
           <input type="hidden" id="coa-edit-kode-original" />
+
+          <!-- Akun Induk toggle -->
+          <div id="coa-parent-row" style="margin-bottom:14px; padding:12px 14px; background:var(--gold-light); border:1px solid #D4B06A; border-radius:8px; display:none;">
+            <div style="font-size:12px; font-weight:600; color:var(--gold); margin-bottom:6px;">📂 Membuat Sub-akun dari:</div>
+            <div id="coa-parent-info" style="font-size:13px; color:var(--text);"></div>
+            <input type="hidden" id="coa-parent-kode" />
+          </div>
+
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
             <div class="form-group">
-              <label>Kode Akun *</label>
-              <input type="text" id="coa-kode" placeholder="cth: 1-005" />
+              <label>Kode Akun *
+                <span id="coa-kode-hint" style="font-weight:400; color:var(--text3); font-size:11px; margin-left:4px;"></span>
+              </label>
+              <input type="text" id="coa-kode" placeholder="cth: 1-002" />
             </div>
             <div class="form-group">
               <label>Nama Akun *</label>
-              <input type="text" id="coa-nama" placeholder="cth: Bibit Kelapa Hibrida" />
+              <input type="text" id="coa-nama" placeholder="cth: Bank BRI — Tabungan" />
+            </div>
+            <div class="form-group">
+              <label>Akun Induk (opsional)</label>
+              <select id="coa-induk" onchange="onIndukChange()">
+                <option value="">— Tidak ada (akun mandiri) —</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Kategori *</label>
-              <select id="coa-kategori" onchange="autoNormal(); autoTipe()">
+              <select id="coa-kategori" onchange="autoNormal(); autoTipe(); syncKategoriFromInduk()">
                 <option value="Aset">Aset</option>
                 <option value="Liabilitas">Liabilitas</option>
                 <option value="Modal">Modal</option>
@@ -672,25 +845,7 @@ tfoot td {
             </div>
             <div class="form-group">
               <label>Tipe Akun *</label>
-              <select id="coa-tipe">
-                <option value="Kas & Setara Kas">Kas &amp; Setara Kas</option>
-                <option value="Piutang">Piutang</option>
-                <option value="Persediaan">Persediaan</option>
-                <option value="Aset Tetap">Aset Tetap</option>
-                <option value="Aset Lain-lain">Aset Lain-lain</option>
-                <option value="Akumulasi Penyusutan">Akumulasi Penyusutan</option>
-                <option value="Utang Usaha">Utang Usaha</option>
-                <option value="Utang Jangka Panjang">Utang Jangka Panjang</option>
-                <option value="Kewajiban Lain-lain">Kewajiban Lain-lain</option>
-                <option value="Modal Pemilik">Modal Pemilik</option>
-                <option value="Laba Ditahan">Laba Ditahan</option>
-                <option value="Pendapatan Usaha">Pendapatan Usaha</option>
-                <option value="Pendapatan Lain-lain">Pendapatan Lain-lain</option>
-                <option value="Beban Pokok">Beban Pokok</option>
-                <option value="Beban Operasional">Beban Operasional</option>
-                <option value="Beban Penyusutan">Beban Penyusutan</option>
-                <option value="Beban Lain-lain">Beban Lain-lain</option>
-              </select>
+              <select id="coa-tipe"></select>
             </div>
             <div class="form-group">
               <label>Normal Saldo</label>
@@ -699,14 +854,15 @@ tfoot td {
                 <option value="Kredit">Kredit</option>
               </select>
             </div>
-            <div class="form-group">
+            <div class="form-group full">
               <label>Deskripsi (opsional)</label>
               <input type="text" id="coa-desc" placeholder="Keterangan singkat akun ini" />
             </div>
           </div>
-          <div style="margin-top:14px; display:flex; gap:10px;">
+          <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <button class="btn btn-primary" id="coa-submit-btn" onclick="simpanCOA()">💾 Simpan Akun</button>
             <button class="btn" onclick="resetCOAForm()">↺ Reset Form</button>
+            <span id="coa-type-indicator" style="font-size:12px; color:var(--text3);"></span>
           </div>
         </div>
 
@@ -714,26 +870,30 @@ tfoot td {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">📑</span> Daftar Chart of Accounts</div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <input type="text" id="coa-search" placeholder="🔍 Cari akun..." style="width:180px;" oninput="renderCOA()" />
               <select id="coa-filter-kat" onchange="renderCOA()" style="width:130px;">
                 <option value="">Semua Kategori</option>
                 <option>Aset</option><option>Liabilitas</option><option>Modal</option>
                 <option>Pendapatan</option><option>Beban</option>
               </select>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;">
+                <input type="checkbox" id="coa-show-zero" onchange="renderCOA()" style="width:auto;" /> Sembunyikan saldo nol
+              </label>
             </div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th style="width:76px">Kode</th>
-                  <th style="min-width:150px">Nama Akun</th>
-                  <th style="width:100px">Kategori</th>
-                  <th style="width:140px">Tipe Akun</th>
-                  <th style="width:72px">Normal</th>
-                  <th style="width:130px; text-align:right;">Saldo</th>
-                  <th style="width:80px; text-align:center;">Aksi</th>
+                  <th style="width:100px">Kode</th>
+                  <th style="min-width:160px">Nama Akun</th>
+                  <th style="width:95px">Kategori</th>
+                  <th style="width:135px">Tipe Akun</th>
+                  <th style="width:68px">Normal</th>
+                  <th style="width:60px; text-align:center;">Level</th>
+                  <th style="width:140px; text-align:right;">Saldo</th>
+                  <th style="width:100px; text-align:center;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="coa-tbody"></tbody>
@@ -781,13 +941,27 @@ tfoot td {
       <div class="page" id="page-neraca">
         <div class="info-box">
           <strong>Neraca (Balance Sheet)</strong>
-          Menunjukkan posisi keuangan bisnis pada satu titik waktu. Rumus utama: <strong>Aset = Liabilitas + Modal</strong>. Jika Aset = sisi kanan, neraca seimbang — usahamu sehat secara finansial.
+          Menunjukkan posisi keuangan bisnis pada satu titik waktu. Rumus utama: <strong>Aset = Liabilitas + Modal</strong>. Filter tanggal akan menampilkan neraca per tanggal tertentu berdasarkan transaksi yang ada.
         </div>
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">🏦</span> Neraca</div>
-            <button class="btn btn-sm" onclick="window.print()">🖨 Cetak</button>
+            <button class="btn btn-sm no-print" onclick="window.print()">🖨 Cetak</button>
           </div>
+          <div class="period-filter-bar no-print">
+            <label>Per Tanggal:</label>
+            <div class="period-quick-btns">
+              <button class="period-quick-btn active" id="nr-q-all" onclick="setNeracaPeriod('all')">Semua</button>
+              <button class="period-quick-btn" id="nr-q-month" onclick="setNeracaPeriod('month')">Akhir Bulan Ini</button>
+              <button class="period-quick-btn" id="nr-q-year" onclick="setNeracaPeriod('year')">Akhir Tahun Ini</button>
+              <button class="period-quick-btn" id="nr-q-custom" onclick="setNeracaPeriod('custom')">Tanggal Tertentu</button>
+            </div>
+            <div id="nr-custom-range" style="display:none; align-items:center; gap:6px;">
+              <label style="font-size:11px;">s/d:</label>
+              <input type="date" id="nr-date-to" onchange="renderNeraca()" style="width:150px;" />
+            </div>
+          </div>
+          <div id="neraca-period-label" style="font-size:12px; color:var(--text3); margin-bottom:14px;"></div>
           <div id="neraca-content"></div>
         </div>
       </div>
@@ -801,10 +975,81 @@ tfoot td {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">📈</span> Laporan Laba Rugi</div>
-            <button class="btn btn-sm" onclick="window.print()">🖨 Cetak</button>
+            <button class="btn btn-sm no-print" onclick="window.print()">🖨 Cetak</button>
           </div>
+          <div class="period-filter-bar no-print">
+            <label>Periode:</label>
+            <div class="period-quick-btns">
+              <button class="period-quick-btn active" id="lr-q-all" onclick="setLRPeriod('all')">Semua</button>
+              <button class="period-quick-btn" id="lr-q-month" onclick="setLRPeriod('month')">Bulan Ini</button>
+              <button class="period-quick-btn" id="lr-q-q1" onclick="setLRPeriod('q1')">Kwartal 1</button>
+              <button class="period-quick-btn" id="lr-q-q2" onclick="setLRPeriod('q2')">Kwartal 2</button>
+              <button class="period-quick-btn" id="lr-q-q3" onclick="setLRPeriod('q3')">Kwartal 3</button>
+              <button class="period-quick-btn" id="lr-q-q4" onclick="setLRPeriod('q4')">Kwartal 4</button>
+              <button class="period-quick-btn" id="lr-q-year" onclick="setLRPeriod('year')">Tahun Ini</button>
+              <button class="period-quick-btn" id="lr-q-custom" onclick="setLRPeriod('custom')">Kustom</button>
+            </div>
+            <div id="lr-custom-range" style="display:none; align-items:center; gap:6px;">
+              <input type="date" id="lr-date-from" onchange="renderLabaRugi()" style="width:140px;" />
+              <span style="color:var(--text3); font-size:12px;">s/d</span>
+              <input type="date" id="lr-date-to" onchange="renderLabaRugi()" style="width:140px;" />
+            </div>
+          </div>
+          <div id="lr-period-label" style="font-size:12px; color:var(--text3); margin-bottom:14px;"></div>
           <div id="lr-content"></div>
         </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ ARUS KAS ═══════════════════════════════════ -->
+      <div class="page" id="page-arus-kas">
+        <div class="info-box">
+          <strong>Laporan Arus Kas (Statement of Cash Flows)</strong>
+          Menunjukkan dari mana kas masuk dan ke mana kas keluar dalam satu periode. Dibagi 3 aktivitas: <strong>Operasi</strong> (kegiatan usaha utama), <strong>Investasi</strong> (beli/jual aset), dan <strong>Pendanaan</strong> (modal & hutang). Metode yang digunakan: <em>Metode Langsung</em>.
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">💸</span> Laporan Arus Kas</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm no-print" onclick="showPage('coa-mapping')">⚙️ Mapping Akun</button>
+              <button class="btn btn-sm no-print" onclick="window.print()">🖨 Cetak</button>
+            </div>
+          </div>
+          <div class="period-filter-bar no-print">
+            <label>Periode:</label>
+            <div class="period-quick-btns">
+              <button class="period-quick-btn active" id="ak-q-all" onclick="setAKPeriod('all')">Semua</button>
+              <button class="period-quick-btn" id="ak-q-month" onclick="setAKPeriod('month')">Bulan Ini</button>
+              <button class="period-quick-btn" id="ak-q-year" onclick="setAKPeriod('year')">Tahun Ini</button>
+              <button class="period-quick-btn" id="ak-q-custom" onclick="setAKPeriod('custom')">Kustom</button>
+            </div>
+            <div id="ak-custom-range" style="display:none; align-items:center; gap:6px;">
+              <input type="date" id="ak-date-from" onchange="renderArusKas()" style="width:140px;" />
+              <span style="color:var(--text3); font-size:12px;">s/d</span>
+              <input type="date" id="ak-date-to" onchange="renderArusKas()" style="width:140px;" />
+            </div>
+          </div>
+          <div id="ak-period-label" style="font-size:12px; color:var(--text3); margin-bottom:14px;"></div>
+          <div id="ak-content"></div>
+        </div>
+
+        <div class="card" style="margin-top:16px;" id="ak-mapping-info">
+          <div class="card-title" style="margin-bottom:12px;"><span class="ct-icon">⚙️</span> Mapping Akun ke Aktivitas Arus Kas</div>
+          <div style="font-size:12px; color:var(--text2); margin-bottom:12px;">
+            Setiap akun Aset & Liabilitas perlu dipetakan ke kategori arus kas agar laporan akurat.
+            Akun Kas/Setara Kas otomatis terdeteksi. Akun lain perlu dikonfigurasi.
+          </div>
+          <div id="ak-mapping-table"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ TUTUP BUKU ═══════════════════════════════════ -->
+      <div class="page" id="page-tutup-buku">
+        <div class="info-box">
+          <strong>Tutup Buku Akhir Tahun (Year-End Closing)</strong>
+          Proses closing memindahkan saldo Pendapatan dan Beban ke akun Laba Ditahan melalui 3 jurnal otomatis,
+          lalu mereset semua akun nominal (Pendapatan & Beban) ke nol untuk periode baru. Transaksi periode yang ditutup akan <strong>terkunci</strong> (tidak bisa diedit/hapus).
+        </div>
+        <div id="tutup-buku-content"></div>
       </div>
 
     </div><!-- /content -->
@@ -818,20 +1063,25 @@ tfoot td {
 // ══════════════════════════════════════════════════
 const LS_COA = 'jtani_coa_v2';
 const LS_JRN = 'jtani_jrn_v2';
+const LS_PER = 'jtani_periods_v1';
 
 function loadData() {
   try {
     const c = localStorage.getItem(LS_COA);
     const j = localStorage.getItem(LS_JRN);
-    COA = c ? JSON.parse(c) : [];
-    JURNAL = j ? JSON.parse(j) : [];
-  } catch(e) { COA = []; JURNAL = []; }
+    const p = localStorage.getItem(LS_PER);
+    COA     = c ? JSON.parse(c) : [];
+    JURNAL  = j ? JSON.parse(j) : [];
+    PERIODS = p ? JSON.parse(p) : [];
+  } catch(e) { COA = []; JURNAL = []; PERIODS = []; }
 }
 function saveCOA() { localStorage.setItem(LS_COA, JSON.stringify(COA)); }
 function saveJRN() { localStorage.setItem(LS_JRN, JSON.stringify(JURNAL)); }
+function savePER() { localStorage.setItem(LS_PER, JSON.stringify(PERIODS)); }
 
-let COA = [];
-let JURNAL = [];
+let COA     = [];
+let JURNAL  = [];
+let PERIODS = [];
 
 // ══════════════════════════════════════════════════
 //  DEFAULT COA
@@ -877,35 +1127,40 @@ function loadDefaultCOA() {
 //  NAVIGATION
 // ══════════════════════════════════════════════════
 const PAGE_TITLES = {
-  'dashboard': 'Dashboard',
-  'jurnal': 'Input Jurnal',
-  'riwayat': 'Riwayat Transaksi',
-  'coa': 'Chart of Accounts',
-  'buku-besar': 'Buku Besar',
-  'trial-balance': 'Trial Balance',
-  'neraca': 'Neraca',
-  'laba-rugi': 'Laporan Laba Rugi',
+  'dashboard':    'Dashboard',
+  'jurnal':       'Input Jurnal',
+  'riwayat':      'Riwayat Transaksi',
+  'coa':          'Chart of Accounts',
+  'buku-besar':   'Buku Besar',
+  'trial-balance':'Trial Balance',
+  'neraca':       'Neraca',
+  'laba-rugi':    'Laporan Laba Rugi',
+  'arus-kas':     'Laporan Arus Kas',
+  'tutup-buku':   'Tutup Buku Akhir Tahun',
 };
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
+  const pageEl = document.getElementById('page-' + name);
+  if (!pageEl) return;
+  pageEl.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => {
     if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + name + "'")) n.classList.add('active');
   });
   document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
 
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'riwayat') renderRiwayat();
-  if (name === 'coa') { renderCOA(); autoTipe(); }
-  if (name === 'buku-besar') { refreshSelects(); renderBukuBesar(); }
+  if (name === 'dashboard')     renderDashboard();
+  if (name === 'riwayat')       renderRiwayat();
+  if (name === 'coa')           { renderCOA(); autoTipe(); refreshIndukSelect(); }
+  if (name === 'buku-besar')    { refreshSelects(); renderBukuBesar(); }
   if (name === 'trial-balance') renderTrialBalance();
-  if (name === 'neraca') renderNeraca();
-  if (name === 'laba-rugi') renderLabaRugi();
-  if (name === 'jurnal') { refreshSelects(); if (!document.getElementById('jurnal-lines').children.length) resetForm(); }
+  if (name === 'neraca')        renderNeraca();
+  if (name === 'laba-rugi')     renderLabaRugi();
+  if (name === 'arus-kas')      renderArusKas();
+  if (name === 'tutup-buku')    renderTutupBuku();
+  if (name === 'jurnal')        { refreshSelects(); if (!document.getElementById('jurnal-lines').children.length) resetForm(); }
 
-  // Close sidebar on mobile
   if (window.innerWidth < 900) document.getElementById('sidebar').classList.remove('open');
   return false;
 }
@@ -975,7 +1230,31 @@ function calcSaldo() {
 // ══════════════════════════════════════════════════
 function refreshSelects() {
   const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
-  const buildOpts = (sel, currentVal) => {
+
+  // For JURNAL dropdowns: only leaf accounts (no children) can be transacted
+  const buildJurnalOpts = (sel, currentVal) => {
+    sel.innerHTML = '<option value="">— Pilih Akun —</option>';
+    groups.forEach(g => {
+      // Only accounts that have NO children (leaf nodes)
+      const items = COA.filter(a => a.kategori === g && !hasChildren(a.kode));
+      if (!items.length) return;
+      const og = document.createElement('optgroup');
+      og.label = g;
+      items.forEach(a => {
+        const o = document.createElement('option');
+        o.value = a.kode;
+        // Show parent path for sub-accounts for clarity
+        const parentName = a.induk ? (COA.find(p => p.kode === a.induk)?.nama || '') : '';
+        o.textContent = a.kode + ' — ' + (parentName ? parentName + ' › ' : '') + a.nama;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    if (currentVal) sel.value = currentVal;
+  };
+
+  // For BUKU BESAR: show all accounts (parents show aggregated)
+  const buildAllOpts = (sel, currentVal) => {
     sel.innerHTML = '<option value="">— Pilih Akun —</option>';
     groups.forEach(g => {
       const items = COA.filter(a => a.kategori === g);
@@ -985,16 +1264,19 @@ function refreshSelects() {
       items.forEach(a => {
         const o = document.createElement('option');
         o.value = a.kode;
-        o.textContent = a.kode + ' — ' + a.nama;
+        const indent = a.induk ? '  ↳ ' : '';
+        const parentLabel = hasChildren(a.kode) ? ' 📂' : '';
+        o.textContent = indent + a.kode + ' — ' + a.nama + parentLabel;
         og.appendChild(o);
       });
       sel.appendChild(og);
     });
     if (currentVal) sel.value = currentVal;
   };
-  document.querySelectorAll('.j-akun').forEach(sel => buildOpts(sel, sel.value));
+
+  document.querySelectorAll('.j-akun').forEach(sel => buildJurnalOpts(sel, sel.value));
   const bbSel = document.getElementById('bb-select');
-  if (bbSel) buildOpts(bbSel, bbSel.value);
+  if (bbSel) buildAllOpts(bbSel, bbSel.value);
 }
 
 // ══════════════════════════════════════════════════
@@ -1071,6 +1353,9 @@ function simpanJurnal() {
   const desc = document.getElementById('j-desc').value.trim();
   const ref = document.getElementById('j-ref').value.trim();
   if (!tgl) { showAlert('jurnal-alert','⚠️ Tanggal wajib diisi.','error'); return; }
+  // Guard: blocked locked periods
+  const lockedPeriod = PERIODS.find(p => p.closed && tgl >= p.startDate && tgl <= p.endDate);
+  if (lockedPeriod) { showAlert('jurnal-alert', `⛔ Periode ${lockedPeriod.name} sudah ditutup. Tidak bisa menambah transaksi di tanggal ini.`, 'error'); return; }
   if (!desc) { showAlert('jurnal-alert','⚠️ Keterangan wajib diisi.','error'); return; }
   const lines = [];
   let d = 0, k = 0, valid = true;
@@ -1079,6 +1364,11 @@ function simpanJurnal() {
     const tipe = row.querySelector('.j-tipe').value;
     const nom = parseFloat(row.querySelector('.j-nominal').value) || 0;
     if (!akun || nom <= 0) { valid = false; return; }
+    // Guard: akun induk tidak boleh dipakai di jurnal
+    if (hasChildren(akun)) {
+      showAlert('jurnal-alert', '❌ Akun "' + akun + '" adalah akun induk dan tidak bisa digunakan di jurnal. Gunakan sub-akunnya.', 'error');
+      valid = false; return;
+    }
     lines.push({ akun, tipe, nominal: nom });
     if (tipe === 'Debit') d += nom; else k += nom;
   });
@@ -1128,23 +1418,110 @@ function applyTemplate(type) {
 //  COA — TIPE AUTO-SUGGEST
 // ══════════════════════════════════════════════════
 const TIPE_BY_KAT = {
-  Aset: ['Kas & Setara Kas','Piutang','Persediaan','Aset Tetap','Akumulasi Penyusutan','Aset Lain-lain'],
+  Aset:       ['Kas & Setara Kas','Piutang','Persediaan','Aset Tetap','Akumulasi Penyusutan','Aset Lain-lain'],
   Liabilitas: ['Utang Usaha','Utang Jangka Panjang','Kewajiban Lain-lain'],
-  Modal: ['Modal Pemilik','Laba Ditahan'],
+  Modal:      ['Modal Pemilik','Laba Ditahan'],
   Pendapatan: ['Pendapatan Usaha','Pendapatan Lain-lain'],
-  Beban: ['Beban Pokok','Beban Operasional','Beban Penyusutan','Beban Lain-lain'],
+  Beban:      ['Beban Pokok','Beban Operasional','Beban Penyusutan','Beban Lain-lain'],
 };
 
 function autoTipe() {
   const kat = document.getElementById('coa-kategori').value;
   const sel = document.getElementById('coa-tipe');
+  const cur = sel.value;
   const tipes = TIPE_BY_KAT[kat] || [];
   sel.innerHTML = tipes.map(t => `<option value="${t}">${t}</option>`).join('');
+  if (tipes.includes(cur)) sel.value = cur;
 }
-
 function autoNormal() {
   const kat = document.getElementById('coa-kategori').value;
   document.getElementById('coa-normal').value = ['Aset','Beban'].includes(kat) ? 'Debit' : 'Kredit';
+}
+function syncKategoriFromInduk() {}
+
+// ══════════════════════════════════════════════════
+//  COA — HIERARCHY HELPERS
+// ══════════════════════════════════════════════════
+function hasChildren(kode) {
+  return COA.some(a => a.induk === kode);
+}
+function getChildren(kode) {
+  return COA.filter(a => a.induk === kode);
+}
+function getAncestors(kode) {
+  const result = [];
+  let current = COA.find(a => a.kode === kode);
+  while (current && current.induk) {
+    result.push(current.induk);
+    current = COA.find(a => a.kode === current.induk);
+  }
+  return result;
+}
+function suggestSubKode(parentKode) {
+  const siblings = COA.filter(a => a.induk === parentKode);
+  if (siblings.length === 0) return parentKode + '.01';
+  const suffixes = siblings.map(a => {
+    const parts = a.kode.split('.');
+    return parseInt(parts[parts.length - 1]) || 0;
+  });
+  const next = Math.max(...suffixes) + 1;
+  return parentKode + '.' + String(next).padStart(2, '0');
+}
+function refreshIndukSelect(skipKode) {
+  const sel = document.getElementById('coa-induk');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Tidak ada (akun mandiri) —</option>';
+  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  groups.forEach(g => {
+    const items = COA.filter(a => {
+      if (a.kode === skipKode) return false;
+      if (skipKode && getAncestors(a.kode).includes(skipKode)) return false;
+      return a.kategori === g;
+    });
+    if (!items.length) return;
+    const og = document.createElement('optgroup');
+    og.label = g;
+    items.forEach(a => {
+      const o = document.createElement('option');
+      o.value = a.kode;
+      o.textContent = a.kode + ' — ' + a.nama + (hasChildren(a.kode) ? ' 📂' : '');
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  if (cur) sel.value = cur;
+}
+function onIndukChange() {
+  const indukKode = document.getElementById('coa-induk').value;
+  const parentRow = document.getElementById('coa-parent-row');
+  const indicator = document.getElementById('coa-type-indicator');
+  if (!indukKode) {
+    parentRow.style.display = 'none';
+    document.getElementById('coa-kode').removeAttribute('readonly');
+    document.getElementById('coa-kode-hint').textContent = '';
+    indicator.textContent = '';
+    return;
+  }
+  const parent = COA.find(a => a.kode === indukKode);
+  if (!parent) return;
+  document.getElementById('coa-kategori').value = parent.kategori;
+  autoTipe();
+  document.getElementById('coa-tipe').value = parent.tipe || (TIPE_BY_KAT[parent.kategori]||[])[0] || '';
+  document.getElementById('coa-normal').value = parent.normal;
+  const suggested = suggestSubKode(indukKode);
+  if (!document.getElementById('coa-edit-kode-original').value) {
+    document.getElementById('coa-kode').value = suggested;
+  }
+  document.getElementById('coa-kode-hint').textContent = '(saran: ' + suggested + ')';
+  parentRow.style.display = 'block';
+  document.getElementById('coa-parent-kode').value = indukKode;
+  const bm = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  document.getElementById('coa-parent-info').innerHTML =
+    `<code style="background:var(--bg2);padding:2px 8px;border-radius:4px;">${parent.kode}</code>
+     <strong style="margin-left:8px;">${parent.nama}</strong>
+     <span class="badge ${bm[parent.kategori]}" style="margin-left:8px;">${parent.kategori}</span>`;
+  indicator.innerHTML = '<span style="color:var(--gold);">📂 Sub-akun — saldo induk dihitung otomatis dari semua sub-akunnya</span>';
 }
 
 // ══════════════════════════════════════════════════
@@ -1155,18 +1532,33 @@ let _editingCOAKode = null;
 function resetCOAForm() {
   _editingCOAKode = null;
   document.getElementById('coa-kode').value = '';
+  document.getElementById('coa-kode').removeAttribute('readonly');
+  document.getElementById('coa-kode-hint').textContent = '';
   document.getElementById('coa-nama').value = '';
   document.getElementById('coa-desc').value = '';
   document.getElementById('coa-kategori').value = 'Aset';
+  document.getElementById('coa-induk').value = '';
+  document.getElementById('coa-parent-row').style.display = 'none';
+  document.getElementById('coa-parent-kode').value = '';
   autoNormal(); autoTipe();
   document.getElementById('coa-edit-kode-original').value = '';
   document.getElementById('coa-form-title').textContent = 'Tambah Akun Baru';
   document.getElementById('coa-form-icon').textContent = '➕';
   document.getElementById('coa-submit-btn').textContent = '💾 Simpan Akun';
   document.getElementById('coa-cancel-edit').style.display = 'none';
-  document.getElementById('coa-kode').removeAttribute('readonly');
   document.getElementById('coa-form-card').classList.remove('coa-form-editing');
+  document.getElementById('coa-type-indicator').textContent = '';
+  refreshIndukSelect();
   renderCOA();
+}
+
+function addSubAkun(parentKode) {
+  resetCOAForm();
+  setTimeout(() => {
+    document.getElementById('coa-induk').value = parentKode;
+    onIndukChange();
+    document.getElementById('coa-form-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 50);
 }
 
 function editCOA(kode) {
@@ -1176,18 +1568,27 @@ function editCOA(kode) {
   document.getElementById('coa-edit-kode-original').value = kode;
   document.getElementById('coa-kode').value = a.kode;
   document.getElementById('coa-kode').setAttribute('readonly', true);
+  document.getElementById('coa-kode-hint').textContent = '';
   document.getElementById('coa-nama').value = a.nama;
   document.getElementById('coa-kategori').value = a.kategori;
   autoTipe();
   document.getElementById('coa-tipe').value = a.tipe || (TIPE_BY_KAT[a.kategori]||[])[0] || '';
   document.getElementById('coa-normal').value = a.normal;
   document.getElementById('coa-desc').value = a.desc || '';
+  refreshIndukSelect(kode);
+  document.getElementById('coa-induk').value = a.induk || '';
+  if (a.induk) { onIndukChange(); } else { document.getElementById('coa-parent-row').style.display = 'none'; }
   document.getElementById('coa-form-title').textContent = 'Edit Akun: ' + a.kode + ' — ' + a.nama;
   document.getElementById('coa-form-icon').textContent = '✏️';
   document.getElementById('coa-submit-btn').textContent = '💾 Update Akun';
   document.getElementById('coa-cancel-edit').style.display = 'inline-flex';
   document.getElementById('coa-form-card').classList.add('coa-form-editing');
-  document.getElementById('coa-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const childCount = getChildren(kode).length;
+  if (childCount > 0) {
+    document.getElementById('coa-type-indicator').innerHTML =
+      '<span style="color:var(--gold);">📂 Akun induk dengan ' + childCount + ' sub-akun. Akun ini tidak bisa digunakan di jurnal.</span>';
+  }
+  document.getElementById('coa-form-card').scrollIntoView({ behavior:'smooth', block:'start' });
   renderCOA();
 }
 
@@ -1195,33 +1596,40 @@ function cancelEditCOA() { resetCOAForm(); }
 
 function simpanCOA() {
   const kodeOriginal = document.getElementById('coa-edit-kode-original').value;
-  const isEdit = !!_editingCOAKode;
-  const kode = document.getElementById('coa-kode').value.trim();
-  const nama = document.getElementById('coa-nama').value.trim();
-  const kategori = document.getElementById('coa-kategori').value;
-  const tipe = document.getElementById('coa-tipe').value;
-  const normal = document.getElementById('coa-normal').value;
-  const desc = document.getElementById('coa-desc').value.trim();
+  const isEdit  = !!_editingCOAKode;
+  const kode    = document.getElementById('coa-kode').value.trim();
+  const nama    = document.getElementById('coa-nama').value.trim();
+  const kategori= document.getElementById('coa-kategori').value;
+  const tipe    = document.getElementById('coa-tipe').value;
+  const normal  = document.getElementById('coa-normal').value;
+  const desc    = document.getElementById('coa-desc').value.trim();
+  const induk   = document.getElementById('coa-induk').value.trim();
 
   if (!kode || !nama) { showAlert('coa-alert','⚠️ Kode dan Nama akun wajib diisi.','error'); return; }
+  if (induk && !COA.find(a => a.kode === induk)) { showAlert('coa-alert','⚠️ Akun induk tidak ditemukan.','error'); return; }
 
   if (isEdit) {
     const idx = COA.findIndex(a => a.kode === kodeOriginal);
     if (idx === -1) return;
-    // Update jurnal references if kode changed (kode is readonly in edit, but just in case)
-    COA[idx] = { kode, nama, kategori, tipe, normal, desc };
+    const updated = { kode, nama, kategori, tipe, normal, desc };
+    if (induk) updated.induk = induk;
+    COA[idx] = updated;
     COA.sort((a,b) => a.kode.localeCompare(b.kode));
-    saveCOA();
-    refreshSelects();
+    saveCOA(); refreshSelects();
     showAlert('coa-alert','✅ Akun "' + nama + '" berhasil diupdate.','success');
     resetCOAForm();
   } else {
     if (COA.find(a => a.kode === kode)) { showAlert('coa-alert','⚠️ Kode akun sudah ada.','error'); return; }
-    COA.push({ kode, nama, kategori, tipe, normal, desc });
+    const newAkun = { kode, nama, kategori, tipe, normal, desc };
+    if (induk) newAkun.induk = induk;
+    COA.push(newAkun);
     COA.sort((a,b) => a.kode.localeCompare(b.kode));
-    saveCOA();
-    refreshSelects();
+    saveCOA(); refreshSelects();
     ['coa-kode','coa-nama','coa-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('coa-induk').value = '';
+    document.getElementById('coa-parent-row').style.display = 'none';
+    document.getElementById('coa-kode-hint').textContent = '';
+    document.getElementById('coa-type-indicator').textContent = '';
     autoTipe();
     showAlert('coa-alert','✅ Akun "' + nama + '" berhasil disimpan.','success');
     renderCOA();
@@ -1229,90 +1637,172 @@ function simpanCOA() {
 }
 
 function hapusCOA(kode) {
-  const used = JURNAL.some(j => j.lines.some(l => l.akun === kode));
-  if (used) { alert('Akun ini sudah digunakan dalam jurnal dan tidak bisa dihapus.\nUntuk menjaga integritas data, akun yang sudah bertransaksi tidak dapat dihapus.'); return; }
+  if (JURNAL.some(j => j.lines.some(l => l.akun === kode))) {
+    alert('Akun ini sudah digunakan dalam jurnal dan tidak bisa dihapus.'); return;
+  }
+  if (hasChildren(kode)) {
+    alert('Akun ini memiliki sub-akun. Hapus semua sub-akun terlebih dahulu.'); return;
+  }
   if (!confirm('Hapus akun ' + kode + '?')) return;
   COA = COA.filter(a => a.kode !== kode);
   saveCOA();
   if (_editingCOAKode === kode) resetCOAForm();
+  refreshIndukSelect();
   renderCOA();
 }
 
+// ══════════════════════════════════════════════════
+//  COA — SALDO WITH ROLL-UP
+// ══════════════════════════════════════════════════
+function calcSaldo() {
+  const raw = {};
+  COA.forEach(a => { raw[a.kode] = { d: 0, k: 0 }; });
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => {
+      if (!raw[l.akun]) raw[l.akun] = { d: 0, k: 0 };
+      if (l.tipe === 'Debit') raw[l.akun].d += l.nominal;
+      else raw[l.akun].k += l.nominal;
+    });
+  });
+  const leafSaldo = {};
+  COA.forEach(a => {
+    const r = raw[a.kode] || { d: 0, k: 0 };
+    leafSaldo[a.kode] = a.normal === 'Debit' ? r.d - r.k : r.k - r.d;
+  });
+  function rollUp(kode) {
+    const children = getChildren(kode);
+    if (children.length === 0) return leafSaldo[kode] || 0;
+    return children.reduce((sum, child) => sum + rollUp(child.kode), 0);
+  }
+  const result = {};
+  COA.forEach(a => {
+    const r = raw[a.kode] || { d: 0, k: 0 };
+    result[a.kode] = {
+      debit: r.d, kredit: r.k,
+      saldo: rollUp(a.kode),
+      isRollup: hasChildren(a.kode),
+    };
+  });
+  return result;
+}
+
+// ══════════════════════════════════════════════════
+//  COA — RENDER TABLE
+// ══════════════════════════════════════════════════
 function renderCOA() {
   const tb = document.getElementById('coa-tbody');
   if (!tb) return;
-
-  const saldo = calcSaldo();
-  const search = (document.getElementById('coa-search')?.value || '').toLowerCase();
-  const filterKat = document.getElementById('coa-filter-kat')?.value || '';
-  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const saldo    = calcSaldo();
+  const search   = (document.getElementById('coa-search')?.value || '').toLowerCase();
+  const filterKat= document.getElementById('coa-filter-kat')?.value || '';
+  const hideZero = document.getElementById('coa-show-zero')?.checked || false;
+  const groups   = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
   const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
-
   let html = '';
-  let totalAset = 0, totalBeban = 0, totalPend = 0, totalLiab = 0, totalModal = 0;
-  let visibleCount = 0;
+  let totalAset=0, totalBeban=0, totalPend=0, totalLiab=0, totalModal=0;
+
+  function rowMatchesSearch(a) {
+    if (!search) return true;
+    return a.kode.toLowerCase().includes(search) || a.nama.toLowerCase().includes(search) ||
+      (a.tipe||'').toLowerCase().includes(search) || (a.desc||'').toLowerCase().includes(search);
+  }
+  function subtreeMatchesSearch(kode) {
+    const a = COA.find(x => x.kode === kode);
+    if (!a) return false;
+    if (rowMatchesSearch(a)) return true;
+    return getChildren(kode).some(c => subtreeMatchesSearch(c.kode));
+  }
+
+  function renderRow(a, depth) {
+    if (filterKat && filterKat !== a.kategori) return '';
+    if (search && !subtreeMatchesSearch(a.kode)) return '';
+    const s        = saldo[a.kode]?.saldo || 0;
+    const isParent = hasChildren(a.kode);
+    const isChild  = !!a.induk;
+    if (hideZero && s === 0 && !isParent) return '';
+
+    if (!isChild) {
+      if (a.kategori==='Aset') totalAset += s;
+      else if (a.kategori==='Liabilitas') totalLiab += s;
+      else if (a.kategori==='Modal') totalModal += s;
+      else if (a.kategori==='Pendapatan') totalPend += s;
+      else if (a.kategori==='Beban') totalBeban += s;
+    }
+
+    const saldoClass = s > 0 ? 'saldo-positive' : s < 0 ? 'saldo-negative' : 'saldo-zero';
+    const isEditing  = _editingCOAKode === a.kode;
+
+    let saldoHtml;
+    if (isParent) {
+      const cc = getChildren(a.kode).length;
+      saldoHtml = `<div class="coa-parent-saldo ${saldoClass}">${s!==0?fmt(s):'—'}</div>
+                   <div class="coa-parent-saldo-detail">roll-up ${cc} sub-akun</div>`;
+    } else {
+      saldoHtml = `<span class="${saldoClass}">${s!==0?fmt(s):'<span style="color:var(--text3);">—</span>'}</span>`;
+    }
+
+    let levelHtml;
+    if (isParent)      levelHtml = `<span class="level-badge-parent">📂 Induk</span>`;
+    else if (isChild)  levelHtml = `<span class="level-badge-child">↳ Sub</span>`;
+    else               levelHtml = `<span class="level-badge-standalone">Akun</span>`;
+
+    let actionHtml = `<div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-sm btn-icon" onclick="editCOA('${a.kode}')" title="Edit" style="padding:4px 7px;">✏️</button>
+      <button class="btn btn-sm btn-icon" onclick="addSubAkun('${a.kode}')" title="Tambah sub-akun" style="padding:4px 7px;background:var(--gold-light);border-color:#D4B06A;font-size:13px;">＋</button>
+      <button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus" style="padding:4px 7px;">✕</button>
+    </div>`;
+
+    const indentPx  = depth * 22;
+    const noEntryBadge = isParent ? `<span class="coa-no-txn-badge">No Entry</span>` : '';
+    const nameCellContent = `<div style="padding-left:${indentPx}px">
+      ${depth > 0 ? '<span style="color:var(--border2);margin-right:5px;">↳</span>' : ''}
+      <span style="font-weight:${isParent?'600':'500'};">${a.nama}</span>${noEntryBadge}
+      ${a.desc ? `<div style="font-size:11px;color:var(--text3);margin-top:1px;${depth>0?'padding-left:14px':''}">${a.desc}</div>` : ''}
+    </div>`;
+
+    const rowClass = [
+      isEditing ? 'coa-row-editing' : '',
+      isParent  ? 'coa-parent-row-item' : '',
+      isChild   ? 'coa-child-row-item' : '',
+    ].filter(Boolean).join(' ');
+
+    let result = `<tr class="${rowClass}">
+      <td><code style="font-size:11px;background:var(--bg2);padding:2px 6px;border-radius:4px;white-space:nowrap;${isParent?'font-weight:700;':''}">${a.kode}</code></td>
+      <td>${nameCellContent}</td>
+      <td><span class="badge ${badgeMap[a.kategori]}">${a.kategori}</span></td>
+      <td><span class="tipe-badge">${a.tipe||'—'}</span></td>
+      <td><span class="badge ${a.normal==='Debit'?'badge-debit':'badge-kredit'}">${a.normal}</span></td>
+      <td style="text-align:center;">${levelHtml}</td>
+      <td style="text-align:right;">${saldoHtml}</td>
+      <td>${actionHtml}</td>
+    </tr>`;
+    getChildren(a.kode).forEach(child => { result += renderRow(child, depth + 1); });
+    return result;
+  }
 
   groups.forEach(g => {
     if (filterKat && filterKat !== g) return;
-    let items = COA.filter(a => a.kategori === g);
-    if (search) items = items.filter(a =>
-      a.kode.toLowerCase().includes(search) ||
-      a.nama.toLowerCase().includes(search) ||
-      (a.tipe||'').toLowerCase().includes(search) ||
-      (a.desc||'').toLowerCase().includes(search)
-    );
-    if (!items.length) return;
-    html += `<tr class="coa-group-header"><td colspan="7">${g} <span style="font-weight:400; color:var(--text3); font-size:10px; margin-left:6px;">(${items.length} akun)</span></td></tr>`;
-    items.forEach(a => {
-      const s = saldo[a.kode]?.saldo || 0;
-      const saldoClass = s > 0 ? 'saldo-positive' : s < 0 ? 'saldo-negative' : 'saldo-zero';
-      const isEditing = _editingCOAKode === a.kode;
-      const tipeLabel = a.tipe || '—';
-      visibleCount++;
-      if (a.kategori === 'Aset') totalAset += s;
-      else if (a.kategori === 'Liabilitas') totalLiab += s;
-      else if (a.kategori === 'Modal') totalModal += s;
-      else if (a.kategori === 'Pendapatan') totalPend += s;
-      else if (a.kategori === 'Beban') totalBeban += s;
-
-      html += `<tr class="${isEditing ? 'coa-row-editing' : ''}" id="coa-row-${a.kode.replace('-','_')}">
-        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px; white-space:nowrap;">${a.kode}</code></td>
-        <td>
-          <div style="font-weight:500; line-height:1.3;">${a.nama}</div>
-          ${a.desc ? `<div style="font-size:11px; color:var(--text3); margin-top:1px;">${a.desc}</div>` : ''}
-        </td>
-        <td><span class="badge ${badgeMap[a.kategori]}">${a.kategori}</span></td>
-        <td><span class="tipe-badge">${tipeLabel}</span></td>
-        <td><span class="badge ${a.normal==='Debit'?'badge-debit':'badge-kredit'}">${a.normal}</span></td>
-        <td style="text-align:right;">
-          <span class="${saldoClass}">${s !== 0 ? fmt(s) : '<span style="color:var(--text3);">—</span>'}</span>
-        </td>
-        <td style="text-align:center;">
-          <div style="display:flex; gap:4px; justify-content:center;">
-            <button class="btn btn-sm btn-icon" onclick="editCOA('${a.kode}')" title="Edit akun" style="padding:4px 7px;">✏️</button>
-            <button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus" style="padding:4px 7px;">✕</button>
-          </div>
-        </td>
-      </tr>`;
-    });
+    const roots = COA.filter(a => a.kategori === g && !a.induk);
+    if (!roots.length) return;
+    const tot = roots.reduce((s, a) => s + (saldo[a.kode]?.saldo||0), 0);
+    const tc  = tot > 0 ? 'saldo-positive' : tot < 0 ? 'saldo-negative' : 'saldo-zero';
+    html += `<tr class="coa-group-header">
+      <td colspan="6">${g} <span style="font-weight:400;color:var(--text3);font-size:10px;margin-left:6px;">(${COA.filter(a=>a.kategori===g).length} akun)</span></td>
+      <td style="text-align:right;"><span class="${tc}">${fmt(tot)}</span></td><td></td></tr>`;
+    roots.forEach(a => { html += renderRow(a, 0); });
   });
 
-  if (!html) {
-    tb.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📑</div><h3>${search || filterKat ? 'Tidak ada akun yang cocok' : 'Belum ada akun'}</h3><p>${search || filterKat ? 'Coba ubah filter pencarian.' : 'Klik "Muat COA Default Pertanian" untuk mulai.'}</p></div></td></tr>`;
-  } else {
-    tb.innerHTML = html;
-  }
+  tb.innerHTML = html || `<tr><td colspan="8"><div class="empty-state"><div class="es-icon">📑</div><h3>Belum ada akun</h3><p>Klik "Muat COA Default Pertanian" untuk memulai.</p></div></td></tr>`;
 
-  // Summary pills
   const summaryEl = document.getElementById('coa-summary');
   if (summaryEl) {
     summaryEl.innerHTML = [
-      { label: '🌾 Total Aset', val: totalAset, cls: 'saldo-positive' },
-      { label: '📉 Total Liabilitas', val: totalLiab, cls: 'saldo-negative' },
-      { label: '💰 Total Modal', val: totalModal, cls: '' },
-      { label: '📈 Total Pendapatan', val: totalPend, cls: 'saldo-positive' },
-      { label: '📤 Total Beban', val: totalBeban, cls: 'saldo-negative' },
-      { label: '📊 Laba / Rugi', val: totalPend - totalBeban, cls: (totalPend - totalBeban) >= 0 ? 'saldo-positive' : 'saldo-negative' },
+      { label:'🌾 Total Aset',       val:totalAset,              cls:'saldo-positive' },
+      { label:'📉 Total Liabilitas', val:totalLiab,              cls:totalLiab>0?'saldo-negative':'' },
+      { label:'💰 Total Modal',      val:totalModal,             cls:'' },
+      { label:'📈 Total Pendapatan', val:totalPend,              cls:'saldo-positive' },
+      { label:'📤 Total Beban',      val:totalBeban,             cls:'saldo-negative' },
+      { label:'📊 Laba / Rugi',      val:totalPend-totalBeban,   cls:(totalPend-totalBeban)>=0?'saldo-positive':'saldo-negative' },
     ].map(p => `<div class="coa-summary-pill"><span style="color:var(--text3);">${p.label}</span><span class="${p.cls}">${fmt(p.val)}</span></div>`).join('');
   }
 }
@@ -1356,13 +1846,20 @@ function renderRiwayat() {
         <span class="je-amt ${isK?'k':'d'}">${fmt(l.nominal)}</span>
       </div>`;
     }).join('');
-    return `<div class="je-card">
+    const isLocked   = !!j.locked;
+    const isClosing  = !!j.isClosing;
+    const lockBadge  = isClosing
+      ? `<span style="font-size:10px;background:var(--gold-light);color:var(--gold);border:1px solid #D4B06A;border-radius:4px;padding:1px 7px;margin-left:6px;">CLOSING</span>`
+      : isLocked
+      ? `<span style="font-size:10px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:4px;padding:1px 7px;margin-left:6px;">🔒 Terkunci</span>`
+      : '';
+    return `<div class="je-card" style="${isClosing?'border-color:var(--gold);background:var(--gold-light);':''}${isLocked&&!isClosing?'opacity:0.85;':''}">
       <div class="je-head">
         <div class="je-meta">
-          <div class="je-desc">${j.deskripsi}${j.referensi?`<span class="je-ref">${j.referensi}</span>`:''}</div>
+          <div class="je-desc">${j.deskripsi}${j.referensi?`<span class="je-ref">${j.referensi}</span>`:''}${lockBadge}</div>
           <div class="je-date">${fmtDate(j.tanggal)} &nbsp;·&nbsp; Total: <strong>${fmt(totalD)}</strong></div>
         </div>
-        <button class="btn btn-danger btn-sm" onclick="hapusJurnal(${j.id})">🗑 Hapus</button>
+        ${isLocked ? '<span style="font-size:20px;" title="Terkunci">🔒</span>' : `<button class="btn btn-danger btn-sm" onclick="hapusJurnal(${j.id})">🗑 Hapus</button>`}
       </div>
       <div class="je-lines">${linesHtml}</div>
     </div>`;
@@ -1370,6 +1867,8 @@ function renderRiwayat() {
 }
 
 function hapusJurnal(id) {
+  const j = JURNAL.find(x => x.id === id);
+  if (j && j.locked) { alert('⛔ Transaksi ini terkunci karena periode sudah ditutup. Tidak bisa dihapus.'); return; }
   if (!confirm('Hapus transaksi ini? Data tidak dapat dikembalikan.')) return;
   JURNAL = JURNAL.filter(j => j.id !== id);
   saveJRN();
@@ -1387,6 +1886,97 @@ function renderBukuBesar() {
   const akun = COA.find(a => a.kode === kode);
   if (!akun) return;
 
+  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  const saldoAll = calcSaldo();
+  const isParent = hasChildren(kode);
+
+  // Header
+  const parentBadge = isParent
+    ? `<span class="level-badge-parent" style="margin-left:8px;">📂 Akun Induk</span>`
+    : (akun.induk ? `<span class="level-badge-child" style="margin-left:8px;">↳ Sub-akun dari ${akun.induk}</span>` : '');
+
+  let headerHtml = `<div style="margin-bottom:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span style="font-family:'Lora',serif; font-size:16px; font-weight:600;">${akun.kode} — ${akun.nama}</span>
+    <span class="badge ${badgeMap[akun.kategori]}">${akun.kategori}</span>
+    <span class="badge badge-${akun.normal.toLowerCase()}">${akun.normal}</span>
+    ${parentBadge}
+  </div>`;
+
+  // If parent: show sub-account summary cards + each child's transactions
+  if (isParent) {
+    const children = getChildren(kode);
+    const totalSaldo = saldoAll[kode]?.saldo || 0;
+    const saldoClass = totalSaldo > 0 ? 'saldo-positive' : totalSaldo < 0 ? 'saldo-negative' : 'saldo-zero';
+
+    // Summary cards for each child
+    let childCards = children.map(child => {
+      const cs = saldoAll[child.kode]?.saldo || 0;
+      const cc = cs > 0 ? 'saldo-positive' : cs < 0 ? 'saldo-negative' : 'saldo-zero';
+      const txCount = JURNAL.filter(j => j.lines.some(l => l.akun === child.kode)).length;
+      return `<div class="metric-card" style="flex:1; min-width:180px; cursor:pointer;" onclick="document.getElementById('bb-select').value='${child.kode}'; renderBukuBesar();">
+        <div class="metric-label">${child.kode}</div>
+        <div style="font-weight:500; font-size:14px; margin-bottom:4px;">${child.nama}</div>
+        <div class="metric-value ${cc}" style="font-size:18px;">${fmt(cs)}</div>
+        <div class="metric-sub">${txCount} transaksi · klik untuk detail</div>
+      </div>`;
+    }).join('');
+
+    let html = headerHtml;
+    html += `<div class="info-box" style="margin-bottom:14px;">
+      📂 <strong>Akun Induk</strong> — tidak bisa digunakan langsung di Jurnal. Saldo di bawah adalah <strong>agregat otomatis</strong> dari semua sub-akunnya.
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+      ${childCards}
+      <div class="metric-card green" style="flex:1; min-width:180px;">
+        <div class="metric-label">Total ${akun.nama}</div>
+        <div class="metric-value ${saldoClass}" style="font-size:20px;">${fmt(totalSaldo)}</div>
+        <div class="metric-sub">roll-up ${children.length} sub-akun</div>
+      </div>
+    </div>`;
+
+    // Show each child's ledger inline
+    children.forEach(child => {
+      const entries = [];
+      JURNAL.forEach(j => {
+        j.lines.forEach(l => {
+          if (l.akun === child.kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, tipe: l.tipe, nominal: l.nominal });
+        });
+      });
+      entries.sort((a,b) => a.tanggal.localeCompare(b.tanggal));
+      let childSaldo = 0;
+      const childRows = entries.map(e => {
+        const delta = (e.tipe === 'Debit' ? 1 : -1) * (child.normal === 'Debit' ? 1 : -1) * e.nominal;
+        childSaldo += delta;
+        return `<tr>
+          <td>${fmtDate(e.tanggal)}</td><td>${e.desc}</td>
+          <td style="text-align:right;color:var(--blue);">${e.tipe==='Debit'?fmt(e.nominal):''}</td>
+          <td style="text-align:right;color:var(--accent);">${e.tipe==='Kredit'?fmt(e.nominal):''}</td>
+          <td style="text-align:right;font-weight:500;">${fmt(childSaldo)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:12px;">Belum ada transaksi</td></tr>';
+
+      html += `<div style="margin-bottom:14px; border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+        <div style="padding:10px 14px; background:var(--bg2); font-weight:500; font-size:13px; display:flex; justify-content:space-between;">
+          <span>↳ ${child.kode} — ${child.nama}</span>
+          <span class="${(saldoAll[child.kode]?.saldo||0)>=0?'saldo-positive':'saldo-negative'}">${fmt(saldoAll[child.kode]?.saldo||0)}</span>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th style="width:100px">Tanggal</th><th>Keterangan</th>
+            <th style="text-align:right;width:120px">Debit</th>
+            <th style="text-align:right;width:120px">Kredit</th>
+            <th style="text-align:right;width:130px">Saldo</th>
+          </tr></thead>
+          <tbody>${childRows}</tbody>
+        </table></div>
+      </div>`;
+    });
+
+    el.innerHTML = html;
+    return;
+  }
+
+  // Leaf account — normal buku besar
   const entries = [];
   JURNAL.forEach(j => {
     j.lines.forEach(l => {
@@ -1408,13 +1998,7 @@ function renderBukuBesar() {
     </tr>`;
   }).join('') || '<tr><td colspan="5"><div class="empty-state"><h3>Belum ada transaksi untuk akun ini</h3></div></td></tr>';
 
-  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
-  el.innerHTML = `
-    <div style="margin-bottom:14px; display:flex; align-items:center; gap:10px;">
-      <span style="font-family:'Lora',serif; font-size:16px; font-weight:600;">${akun.kode} — ${akun.nama}</span>
-      <span class="badge ${badgeMap[akun.kategori]}">${akun.kategori}</span>
-      <span class="badge badge-${akun.normal.toLowerCase()}">${akun.normal}</span>
-    </div>
+  el.innerHTML = headerHtml + `
     <div class="table-wrap">
     <table>
       <thead><tr>
@@ -1714,10 +2298,492 @@ function renderDashboard() {
 }
 
 // ══════════════════════════════════════════════════
+//  ARUS KAS (Statement of Cash Flows — Direct Method)
+// ══════════════════════════════════════════════════
+// Mapping: akun tipe → kategori arus kas
+const CF_MAP = {
+  'Kas & Setara Kas':    'kas',        // excluded from flows (it IS cash)
+  'Pendapatan Usaha':    'operasi',
+  'Pendapatan Lain-lain':'operasi',
+  'Beban Pokok':         'operasi',
+  'Beban Operasional':   'operasi',
+  'Beban Penyusutan':    'operasi',
+  'Beban Lain-lain':     'operasi',
+  'Piutang':             'operasi',
+  'Persediaan':          'operasi',
+  'Utang Usaha':         'operasi',
+  'Kewajiban Lain-lain': 'operasi',
+  'Aset Tetap':          'investasi',
+  'Akumulasi Penyusutan':'investasi',
+  'Aset Lain-lain':      'investasi',
+  'Modal Pemilik':       'pendanaan',
+  'Laba Ditahan':        'pendanaan',
+  'Utang Jangka Panjang':'pendanaan',
+};
+
+function getCashAccounts() {
+  return COA.filter(a => a.tipe === 'Kas & Setara Kas' && !hasChildren(a.kode));
+}
+
+function filterJurnalByPeriod(dateFrom, dateTo) {
+  return JURNAL.filter(j => {
+    if (dateFrom && j.tanggal < dateFrom) return false;
+    if (dateTo   && j.tanggal > dateTo)   return false;
+    return true;
+  });
+}
+
+// Build cash flow from journal lines in period
+function buildCashFlows(dateFrom, dateTo) {
+  const cashKodes = getCashAccounts().map(a => a.kode);
+  const filtered  = filterJurnalByPeriod(dateFrom, dateTo);
+
+  const result = { operasi:[], investasi:[], pendanaan:[], unclassified:[] };
+
+  filtered.forEach(j => {
+    // Find all cash lines in this entry
+    const cashLines    = j.lines.filter(l => cashKodes.includes(l.akun));
+    const nonCashLines = j.lines.filter(l => !cashKodes.includes(l.akun));
+    if (!cashLines.length) return; // no cash movement
+
+    // Net cash effect of this journal entry
+    cashLines.forEach(cl => {
+      const kasAkun  = COA.find(a => a.kode === cl.akun);
+      // Cash increases when Debit (normal Debit account like Kas)
+      const cashDelta = cl.tipe === 'Debit' ? cl.nominal : -cl.nominal;
+
+      // Classify by the non-cash counterpart
+      let category = 'unclassified';
+      let label     = j.deskripsi;
+      nonCashLines.forEach(nl => {
+        const counterAkun = COA.find(a => a.kode === nl.akun);
+        if (counterAkun) {
+          const mapped = CF_MAP[counterAkun.tipe];
+          if (mapped && mapped !== 'kas') category = mapped;
+          // Use akun name for detail
+        }
+      });
+
+      result[category].push({
+        tanggal:   j.tanggal,
+        deskripsi: j.deskripsi,
+        kas:       kasAkun?.nama || cl.akun,
+        delta:     cashDelta,
+        jurnalId:  j.id,
+      });
+    });
+  });
+  return result;
+}
+
+let _akPeriod = { type: 'all', from: null, to: null };
+
+function setAKPeriod(type) {
+  _akPeriod.type = type;
+  document.querySelectorAll('[id^="ak-q-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('ak-q-' + type);
+  if (btn) btn.classList.add('active');
+  const cr = document.getElementById('ak-custom-range');
+  if (cr) cr.style.display = type === 'custom' ? 'flex' : 'none';
+
+  const now = new Date();
+  const y   = now.getFullYear();
+  const m   = String(now.getMonth()+1).padStart(2,'0');
+
+  if (type === 'all')    { _akPeriod.from = null;         _akPeriod.to = null; }
+  if (type === 'month')  { _akPeriod.from = `${y}-${m}-01`; _akPeriod.to = `${y}-${m}-31`; }
+  if (type === 'year')   { _akPeriod.from = `${y}-01-01`; _akPeriod.to = `${y}-12-31`; }
+  if (type !== 'custom') renderArusKas();
+}
+
+function renderArusKas() {
+  const el = document.getElementById('ak-content');
+  if (!el) return;
+
+  let dateFrom = _akPeriod.from;
+  let dateTo   = _akPeriod.to;
+  if (_akPeriod.type === 'custom') {
+    dateFrom = document.getElementById('ak-date-from')?.value || null;
+    dateTo   = document.getElementById('ak-date-to')?.value   || null;
+  }
+
+  const label = document.getElementById('ak-period-label');
+  if (label) label.textContent = dateFrom || dateTo
+    ? `Periode: ${dateFrom ? fmtDate(dateFrom) : 'awal'} s/d ${dateTo ? fmtDate(dateTo) : 'sekarang'}`
+    : 'Semua periode';
+
+  const flows  = buildCashFlows(dateFrom, dateTo);
+  const cashAccounts = getCashAccounts();
+
+  if (!cashAccounts.length) {
+    el.innerHTML = `<div class="alert alert-info show">⚠️ Belum ada akun dengan Tipe <strong>Kas &amp; Setara Kas</strong> di COA. Pastikan akun kas sudah dikonfigurasi.</div>`;
+    return;
+  }
+
+  // Compute saldo kas awal & akhir from all journals up to period
+  const saldoAll   = calcSaldo();
+  const allFlows   = buildCashFlows(null, null);
+  const kasKodes   = cashAccounts.map(a => a.kode);
+
+  // Cash balance = sum of kas accounts saldo
+  const totalKasSaldo = kasKodes.reduce((s, k) => s + (saldoAll[k]?.saldo || 0), 0);
+
+  // Totals
+  const sumFlows = (arr) => arr.reduce((s, f) => s + f.delta, 0);
+  const tOps  = sumFlows(flows.operasi);
+  const tInv  = sumFlows(flows.investasi);
+  const tFin  = sumFlows(flows.pendanaan);
+  const tUnc  = sumFlows(flows.unclassified);
+  const tNet  = tOps + tInv + tFin + tUnc;
+
+  function buildSection(title, key, headerClass, items, total) {
+    if (!items.length) {
+      return `<div class="cashflow-section">
+        <div class="cashflow-section-header ${headerClass}">${title}<span>Rp 0</span></div>
+        <div class="cashflow-section-body">
+          <div class="cashflow-row" style="color:var(--text3);justify-content:center;font-size:12px;">Tidak ada arus kas pada periode ini</div>
+        </div>
+      </div>`;
+    }
+    const rows = items.map(f =>
+      `<div class="cashflow-row">
+        <span>
+          <span style="font-size:11px;color:var(--text3);margin-right:6px;">${fmtDate(f.tanggal)}</span>
+          ${f.deskripsi}
+        </span>
+        <span style="font-weight:500;color:${f.delta>=0?'var(--accent)':'var(--red)'};">${f.delta>=0?'+':''}${fmt(f.delta)}</span>
+      </div>`
+    ).join('');
+    return `<div class="cashflow-section">
+      <div class="cashflow-section-header ${headerClass}">
+        <span>${title}</span>
+        <span style="color:${total>=0?'inherit':'var(--red)'};">${total>=0?'+':''}${fmt(total)}</span>
+      </div>
+      <div class="cashflow-section-body">
+        ${rows}
+        <div class="cashflow-total"><span>Subtotal ${title}</span><span style="color:${total>=0?'var(--accent)':'var(--red)'};">${fmt(total)}</span></div>
+      </div>
+    </div>`;
+  }
+
+  const uncSection = flows.unclassified.length ? buildSection('⚠️ Belum Terklasifikasi', 'unclassified', 'ops', flows.unclassified, tUnc) : '';
+
+  el.innerHTML = `
+    ${buildSection('🌿 Aktivitas Operasi', 'operasi', 'ops', flows.operasi, tOps)}
+    ${buildSection('🏗 Aktivitas Investasi', 'investasi', 'inv', flows.investasi, tInv)}
+    ${buildSection('🏦 Aktivitas Pendanaan', 'pendanaan', 'fin', flows.pendanaan, tFin)}
+    ${uncSection}
+    <div class="cashflow-net ${tNet>=0?'positive':'negative'}">
+      <span>${tNet>=0?'✅':'⚠️'} Kenaikan / Penurunan Kas Bersih</span>
+      <span>${tNet>=0?'+':''}${fmt(tNet)}</span>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+      <div class="metric-card blue" style="flex:1;min-width:150px;">
+        <div class="metric-label">Saldo Kas Saat Ini</div>
+        <div class="metric-value blue" style="font-size:18px;">${fmt(totalKasSaldo)}</div>
+        <div class="metric-sub">Total semua akun kas</div>
+      </div>
+      ${cashAccounts.map(a => {
+        const s = saldoAll[a.kode]?.saldo || 0;
+        return `<div class="metric-card" style="flex:1;min-width:130px;">
+          <div class="metric-label">${a.kode}</div>
+          <div style="font-size:13px;font-weight:500;">${a.nama}</div>
+          <div class="metric-value ${s>=0?'green':'red'}" style="font-size:16px;">${fmt(s)}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    ${flows.unclassified.length ? `<div class="alert alert-info show" style="margin-top:12px;">
+      ⚙️ Ada ${flows.unclassified.length} transaksi yang belum terklasifikasi. Pastikan <strong>Tipe Akun</strong> di COA sudah diisi dengan benar untuk akurasi laporan arus kas.
+    </div>` : ''}
+  `;
+}
+
+// ══════════════════════════════════════════════════
+//  TUTUP BUKU — 1-CLICK YEAR-END CLOSING
+// ══════════════════════════════════════════════════
+
+function getYearsWithTransactions() {
+  const years = new Set(JURNAL.map(j => j.tanggal.substring(0,4)));
+  return [...years].sort();
+}
+
+function isYearClosed(year) {
+  return PERIODS.some(p => p.name === year && p.closed);
+}
+
+function getPendingYears() {
+  return getYearsWithTransactions().filter(y => !isYearClosed(y));
+}
+
+function previewClosingEntries(year) {
+  const from = year + '-01-01';
+  const to   = year + '-12-31';
+  const jurnalInPeriod = JURNAL.filter(j => j.tanggal >= from && j.tanggal <= to && !j.isClosing);
+
+  // Calculate raw saldo from period
+  const raw = {};
+  jurnalInPeriod.forEach(j => {
+    j.lines.forEach(l => {
+      if (!raw[l.akun]) raw[l.akun] = { d:0, k:0 };
+      if (l.tipe === 'Debit') raw[l.akun].d += l.nominal;
+      else raw[l.akun].k += l.nominal;
+    });
+  });
+
+  const saldoPendapatan = COA.filter(a => a.kategori === 'Pendapatan' && !hasChildren(a.kode)).map(a => {
+    const r = raw[a.kode] || { d:0, k:0 };
+    return { akun: a, saldo: r.k - r.d };
+  }).filter(x => x.saldo !== 0);
+
+  const saldoBeban = COA.filter(a => a.kategori === 'Beban' && !hasChildren(a.kode)).map(a => {
+    const r = raw[a.kode] || { d:0, k:0 };
+    return { akun: a, saldo: r.d - r.k };
+  }).filter(x => x.saldo !== 0);
+
+  const totalPend  = saldoPendapatan.reduce((s, x) => s + x.saldo, 0);
+  const totalBeban = saldoBeban.reduce((s, x) => s + x.saldo, 0);
+  const netIncome  = totalPend - totalBeban;
+
+  // Find Ikhtisar LR akun (create if not exists in preview)
+  const ilrAkun = COA.find(a => a.kode === '4-099') || { kode:'4-099', nama:'Ikhtisar Laba Rugi' };
+  // Find Laba Ditahan
+  const ldAkun  = COA.find(a => a.tipe === 'Laba Ditahan' && !hasChildren(a.kode));
+
+  return { saldoPendapatan, saldoBeban, totalPend, totalBeban, netIncome, ilrAkun, ldAkun, from, to };
+}
+
+function renderTutupBuku() {
+  const el = document.getElementById('tutup-buku-content');
+  if (!el) return;
+
+  const pendingYears = getPendingYears();
+  const closedPeriods = PERIODS.filter(p => p.closed).sort((a,b) => b.name.localeCompare(a.name));
+
+  // Closed periods history
+  const historyHtml = closedPeriods.length ? closedPeriods.map(p => `
+    <div class="period-history-row">
+      <div>
+        <div style="font-weight:500;">Tahun ${p.name}</div>
+        <div style="font-size:12px;color:var(--text3);">Ditutup: ${fmtDate(p.closedAt)} · ${p.journalCount} transaksi terkunci</div>
+      </div>
+      <div style="text-align:right;">
+        <span class="badge badge-${p.netIncome>=0?'success':'warning'}">${p.netIncome>=0?'Laba':'Rugi'}: ${fmt(Math.abs(p.netIncome))}</span>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">→ Laba Ditahan</div>
+      </div>
+    </div>`) .join('') :
+    '<div style="color:var(--text3);font-size:13px;padding:12px 0;">Belum ada periode yang ditutup.</div>';
+
+  // Pending year selector
+  const yearOptions = pendingYears.map(y =>
+    `<option value="${y}">${y}</option>`).join('');
+
+  el.innerHTML = `
+    <!-- HISTORY -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title" style="margin-bottom:14px;"><span class="ct-icon">📅</span> Riwayat Periode Tertutup</div>
+      ${historyHtml}
+    </div>
+
+    <!-- CLOSING FORM -->
+    <div class="card" id="closing-form-card">
+      <div class="card-title" style="margin-bottom:16px;"><span class="ct-icon">🔒</span> Tutup Buku Tahun Baru</div>
+
+      ${!pendingYears.length ? `
+        <div class="alert alert-info show">✅ Semua tahun yang memiliki transaksi sudah ditutup. Input transaksi untuk tahun baru untuk membuka periode baru.</div>
+      ` : `
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px;">
+          <div class="form-group" style="flex:0 0 200px;">
+            <label>Pilih Tahun Yang Ditutup</label>
+            <select id="closing-year" onchange="renderClosingPreview()">
+              ${yearOptions}
+            </select>
+          </div>
+          <div style="margin-top:18px;font-size:12px;color:var(--text2);">
+            ⚠️ Proses ini akan membuat 3 jurnal closing otomatis dan mengunci semua transaksi periode tersebut.
+          </div>
+        </div>
+        <div id="closing-preview"></div>
+      `}
+    </div>
+  `;
+
+  if (pendingYears.length) renderClosingPreview();
+}
+
+function renderClosingPreview() {
+  const sel  = document.getElementById('closing-year');
+  if (!sel) return;
+  const year = sel.value;
+  if (!year) return;
+
+  const p = previewClosingEntries(year);
+  const el = document.getElementById('closing-preview');
+  if (!el) return;
+
+  const noLD = !p.ldAkun;
+  const noTxn = p.saldoPendapatan.length === 0 && p.saldoBeban.length === 0;
+
+  if (noTxn) {
+    el.innerHTML = `<div class="alert alert-info show">ℹ️ Tidak ada transaksi Pendapatan / Beban di tahun ${year} yang perlu di-closing.</div>`;
+    return;
+  }
+
+  // Build closing journal previews
+  // Jurnal 1: Close Pendapatan → ILR
+  const j1Lines = p.saldoPendapatan.map(x =>
+    `<tr><td>Debit</td><td>${x.akun.kode} ${x.akun.nama}</td><td style="text-align:right;">${fmt(x.saldo)}</td></tr>`
+  ).join('') + `<tr style="color:var(--accent);"><td>Kredit</td><td>${p.ilrAkun.kode} Ikhtisar Laba Rugi</td><td style="text-align:right;">${fmt(p.totalPend)}</td></tr>`;
+
+  // Jurnal 2: Close Beban → ILR
+  const j2Lines = `<tr style="color:var(--blue);"><td>Debit</td><td>${p.ilrAkun.kode} Ikhtisar Laba Rugi</td><td style="text-align:right;">${fmt(p.totalBeban)}</td></tr>` +
+    p.saldoBeban.map(x =>
+      `<tr><td>Kredit</td><td>${x.akun.kode} ${x.akun.nama}</td><td style="text-align:right;">${fmt(x.saldo)}</td></tr>`
+    ).join('');
+
+  // Jurnal 3: ILR → Laba Ditahan
+  const j3Lines = p.netIncome >= 0
+    ? `<tr style="color:var(--blue);"><td>Debit</td><td>${p.ilrAkun.kode} Ikhtisar Laba Rugi</td><td style="text-align:right;">${fmt(p.netIncome)}</td></tr>
+       <tr style="color:var(--accent);"><td>Kredit</td><td>${p.ldAkun?.kode||'3-002'} Laba Ditahan</td><td style="text-align:right;">${fmt(p.netIncome)}</td></tr>`
+    : `<tr style="color:var(--accent);"><td>Kredit</td><td>${p.ilrAkun.kode} Ikhtisar Laba Rugi</td><td style="text-align:right;">${fmt(-p.netIncome)}</td></tr>
+       <tr style="color:var(--red);"><td>Debit</td><td>${p.ldAkun?.kode||'3-002'} Laba Ditahan</td><td style="text-align:right;">${fmt(-p.netIncome)}</td></tr>`;
+
+  function stepCard(num, title, linesHtml, total, done) {
+    return `<div class="closing-step">
+      <div class="closing-step-num ${done?'done':''}">${num}</div>
+      <div style="flex:1;">
+        <div style="font-weight:500;font-size:13px;margin-bottom:6px;">${title}</div>
+        <table class="closing-preview-table">
+          <thead><tr style="font-size:11px;color:var(--text3);"><th>Pos</th><th>Akun</th><th style="text-align:right;">Nominal</th></tr></thead>
+          <tbody>${linesHtml}</tbody>
+          <tfoot><tr style="font-weight:600;border-top:1px solid var(--border);"><td colspan="2">Total</td><td style="text-align:right;">${fmt(total)}</td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  const txCount   = JURNAL.filter(j => j.tanggal >= p.from && j.tanggal <= p.to && !j.isClosing).length;
+  const isLaba    = p.netIncome >= 0;
+
+  el.innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:10px;">📊 Ringkasan Periode ${year}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
+        <div><div style="font-size:11px;color:var(--text3);">Total Transaksi</div><div style="font-weight:500;">${txCount} jurnal</div></div>
+        <div><div style="font-size:11px;color:var(--text3);">Total Pendapatan</div><div style="font-weight:500;color:var(--accent);">${fmt(p.totalPend)}</div></div>
+        <div><div style="font-size:11px;color:var(--text3);">Total Beban</div><div style="font-weight:500;color:var(--red);">${fmt(p.totalBeban)}</div></div>
+        <div><div style="font-size:11px;color:var(--text3);">${isLaba?'Laba Bersih':'Rugi Bersih'}</div>
+          <div style="font-weight:600;font-family:'Lora',serif;color:${isLaba?'var(--accent)':'var(--red)'};">${fmt(Math.abs(p.netIncome))}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">3 Jurnal Closing Otomatis:</div>
+
+    ${stepCard(1, 'Close Pendapatan → Ikhtisar Laba Rugi', j1Lines, p.totalPend, false)}
+    ${stepCard(2, 'Close Beban → Ikhtisar Laba Rugi', j2Lines, p.totalBeban, false)}
+    ${stepCard(3, `Transfer ${isLaba?'Laba':'Rugi'} Bersih → Laba Ditahan`, j3Lines, Math.abs(p.netIncome), false)}
+
+    ${noLD ? `<div class="alert alert-error show">⚠️ Akun Laba Ditahan tidak ditemukan di COA! Pastikan ada akun dengan Tipe <strong>Laba Ditahan</strong> sebelum closing.</div>` : ''}
+
+    <div style="padding:12px 16px;background:var(--red-light);border:1px solid #D4A09A;border-radius:8px;font-size:12px;color:var(--red);margin:16px 0;">
+      ⚠️ <strong>Perhatian:</strong> Setelah tutup buku, semua ${txCount} transaksi di tahun ${year} akan <strong>terkunci permanen</strong> dan tidak bisa diedit atau dihapus.
+      Pastikan kamu sudah melakukan backup data (<strong>Export Data</strong> di topbar) sebelum melanjutkan.
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${noLD ? '' : `<button class="btn btn-primary" onclick="eksekusiTutupBuku('${year}')" style="background:var(--red);border-color:#7A2E23;">
+        🔒 Tutup Buku Tahun ${year}
+      </button>`}
+      <button class="btn" onclick="exportData()">💾 Backup Data Dulu</button>
+    </div>
+  `;
+}
+
+function eksekusiTutupBuku(year) {
+  if (!confirm(`Tutup buku tahun ${year}?\n\nProses ini TIDAK BISA dibatalkan.\nSemua transaksi ${year} akan terkunci.\n\nLanjutkan?`)) return;
+
+  const p = previewClosingEntries(year);
+  if (!p.ldAkun) { alert('Akun Laba Ditahan tidak ditemukan!'); return; }
+
+  // Ensure Ikhtisar LR akun exists in COA
+  if (!COA.find(a => a.kode === '4-099')) {
+    COA.push({ kode:'4-099', nama:'Ikhtisar Laba Rugi', kategori:'Pendapatan', tipe:'Pendapatan Lain-lain', normal:'Kredit', desc:'Akun sementara untuk closing entries' });
+    COA.sort((a,b) => a.kode.localeCompare(b.kode));
+    saveCOA();
+  }
+
+  const closingDate = year + '-12-31';
+  const ts = Date.now();
+
+  // Jurnal 1: Debit semua Pendapatan, Kredit ILR
+  if (p.saldoPendapatan.length > 0) {
+    JURNAL.unshift({
+      id: ts + 1, tanggal: closingDate,
+      deskripsi: `[CLOSING ${year}] Menutup akun Pendapatan ke Ikhtisar Laba Rugi`,
+      referensi: `CLS-${year}-1`, isClosing: true, locked: true,
+      lines: [
+        ...p.saldoPendapatan.map(x => ({ akun: x.akun.kode, tipe: 'Debit',  nominal: x.saldo })),
+        { akun: '4-099', tipe: 'Kredit', nominal: p.totalPend },
+      ]
+    });
+  }
+
+  // Jurnal 2: Debit ILR, Kredit semua Beban
+  if (p.saldoBeban.length > 0) {
+    JURNAL.unshift({
+      id: ts + 2, tanggal: closingDate,
+      deskripsi: `[CLOSING ${year}] Menutup akun Beban ke Ikhtisar Laba Rugi`,
+      referensi: `CLS-${year}-2`, isClosing: true, locked: true,
+      lines: [
+        { akun: '4-099', tipe: 'Debit', nominal: p.totalBeban },
+        ...p.saldoBeban.map(x => ({ akun: x.akun.kode, tipe: 'Kredit', nominal: x.saldo })),
+      ]
+    });
+  }
+
+  // Jurnal 3: Close ILR ke Laba Ditahan
+  const netAbs = Math.abs(p.netIncome);
+  if (netAbs > 0) {
+    JURNAL.unshift({
+      id: ts + 3, tanggal: closingDate,
+      deskripsi: `[CLOSING ${year}] Transfer ${p.netIncome>=0?'Laba':'Rugi'} Bersih ke Laba Ditahan`,
+      referensi: `CLS-${year}-3`, isClosing: true, locked: true,
+      lines: p.netIncome >= 0
+        ? [{ akun: '4-099',         tipe: 'Debit',  nominal: netAbs },
+           { akun: p.ldAkun.kode,   tipe: 'Kredit', nominal: netAbs }]
+        : [{ akun: p.ldAkun.kode,   tipe: 'Debit',  nominal: netAbs },
+           { akun: '4-099',         tipe: 'Kredit', nominal: netAbs }],
+    });
+  }
+
+  // Lock all non-closing journals in this period
+  const txCount = JURNAL.filter(j => j.tanggal >= p.from && j.tanggal <= p.to && !j.isClosing).length;
+  JURNAL.forEach(j => {
+    if (j.tanggal >= p.from && j.tanggal <= p.to) j.locked = true;
+  });
+
+  // Register period
+  PERIODS.push({
+    name:         year,
+    startDate:    p.from,
+    endDate:      p.to,
+    closed:       true,
+    closedAt:     today(),
+    netIncome:    p.netIncome,
+    journalCount: txCount,
+  });
+
+  saveJRN(); savePER(); saveCOA();
+  renderAll();
+  renderTutupBuku();
+  alert(`✅ Tutup buku tahun ${year} berhasil!\n\n• 3 jurnal closing dibuat otomatis\n• ${txCount} transaksi terkunci\n• ${p.netIncome>=0?'Laba':'Rugi'} bersih ${fmt(Math.abs(p.netIncome))} → Laba Ditahan`);
+}
+
+// ══════════════════════════════════════════════════
 //  EXPORT / IMPORT / RESET
 // ══════════════════════════════════════════════════
 function exportData() {
-  const data = { coa: COA, jurnal: JURNAL, exported: new Date().toISOString(), app: 'Jurnal Tani dari Nol' };
+  const data = { coa: COA, jurnal: JURNAL, periods: PERIODS, exported: new Date().toISOString(), app: 'Jurnal Tani dari Nol v4' };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1734,9 +2800,10 @@ function importData(e) {
       const data = JSON.parse(ev.target.result);
       if (!data.coa || !data.jurnal) { alert('Format file tidak valid.'); return; }
       if (!confirm('Import akan mengganti semua data yang ada. Lanjutkan?')) return;
-      COA = data.coa;
-      JURNAL = data.jurnal;
-      saveCOA(); saveJRN();
+      COA     = data.coa;
+      JURNAL  = data.jurnal;
+      PERIODS = data.periods || [];
+      saveCOA(); saveJRN(); savePER();
       renderAll();
       alert('✅ Data berhasil diimport!');
     } catch(err) { alert('Gagal membaca file: ' + err.message); }
@@ -1745,10 +2812,10 @@ function importData(e) {
   e.target.value = '';
 }
 function resetData() {
-  if (!confirm('⚠️ HAPUS SEMUA DATA? Semua jurnal dan COA akan dihapus permanen. Pastikan sudah export terlebih dahulu!')) return;
+  if (!confirm('⚠️ HAPUS SEMUA DATA? Semua jurnal, COA, dan data periode akan dihapus permanen. Pastikan sudah export terlebih dahulu!')) return;
   if (!confirm('Yakin? Ini tidak bisa dibatalkan.')) return;
-  COA = []; JURNAL = [];
-  saveCOA(); saveJRN();
+  COA = []; JURNAL = []; PERIODS = [];
+  saveCOA(); saveJRN(); savePER();
   renderAll();
   alert('Data berhasil direset.');
 }
@@ -1768,6 +2835,7 @@ function init() {
   renderAll();
   resetForm();
   autoTipe();
+  refreshIndukSelect();
   document.getElementById('j-tanggal').value = today();
 }
 
