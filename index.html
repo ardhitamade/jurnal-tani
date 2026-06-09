@@ -276,6 +276,7 @@ tfoot td {
 .alert-success { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
 .alert-error { background: var(--red-light); color: var(--red); border: 1px solid #D4A09A; }
 .alert-info { background: var(--blue-light); color: var(--blue); border: 1px solid #B5C8DF; }
+.alert-info { background: var(--blue-light); color: var(--blue); border: 1px solid #B5C8DF; }
 
 /* ── JOURNAL ENTRY ── */
 .je-card {
@@ -498,10 +499,70 @@ tfoot td {
 
 /* ── PRINT ── */
 @media print {
-  .sidebar, .topbar, .btn, .tabs, .no-print { display: none !important; }
-  .main { margin-left: 0; }
-  .content { padding: 0; }
-  .card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+  /* Sembunyikan semua elemen UI yang tidak relevan */
+  .sidebar, .topbar, .btn, .tabs, .no-print,
+  .info-box, .period-filter-bar, .period-quick-btns,
+  .sidebar-toggle, .tpl-save-modal,
+  #jurnal-templates-card, #ak-mapping-info,
+  .je-head > div:last-child { display: none !important; }
+
+  /* Layout reset */
+  .main { margin-left: 0 !important; }
+  .content { padding: 8px !important; }
+  body { font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Sembunyikan semua halaman kecuali yang aktif */
+  .page { display: none !important; }
+  .page.active { display: block !important; }
+
+  /* Card: jangan paksa break, biarkan konten mengalir natural */
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    margin-bottom: 12px;
+  }
+  .card-header { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Tabel: header tabel muncul ulang di setiap halaman */
+  table { break-inside: auto !important; page-break-inside: auto !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Metrik dashboard — tampilkan ringkas */
+  .metrics-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .metric-card { break-inside: avoid; padding: 8px !important; }
+  .metric-card::before { display: none; }
+
+  /* Dua kolom laporan */
+  .two-col { grid-template-columns: 1fr 1fr !important; }
+
+  /* Hilangkan border radius agar lebih rapi */
+  .card, .metric-card, .je-card, .badge { border-radius: 0 !important; }
+
+  /* Riwayat transaksi — kartu entri */
+  .je-card { border: 1px solid #ddd !important; margin-bottom: 6px; break-inside: avoid; page-break-inside: avoid; }
+
+  /* Sembunyikan elemen navigasi & interaktif */
+  .nav-item, .balance-bar, #riwayat-stats,
+  .coa-summary, #closing-preview, .tabs-sub { display: none !important; }
+
+  /* Tambah judul halaman otomatis */
+  .page.active::before {
+    content: "Jurnal Tani dari Nol";
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #3D6B47;
+    border-bottom: 2px solid #3D6B47;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
 }
 
 /* ── PERIOD FILTER BAR ── */
@@ -545,6 +606,47 @@ tfoot td {
   display: flex; justify-content: space-between; align-items: center;
   padding: 10px 14px; border-radius: 8px; background: var(--surface2);
   border: 1px solid var(--border); margin-bottom: 8px;
+}
+
+/* ── JURNAL EDIT MODE ── */
+.jurnal-form-editing {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 0 3px rgba(43,78,122,0.10) !important;
+}
+.jurnal-edit-banner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 14px; border-radius: 8px; margin-bottom: 14px;
+  background: var(--blue-light); border: 1px solid #B5C8DF;
+  font-size: 13px; color: var(--blue);
+}
+.jurnal-edit-banner strong { font-weight: 600; }
+
+/* ── CUSTOM TEMPLATES ── */
+.template-btn-custom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; border-radius: 8px; font-size: 13px;
+  border: 1px solid var(--border); background: var(--surface2);
+  cursor: pointer; transition: all 0.15s; gap: 8px;
+  text-align: left; font-family: 'DM Sans', sans-serif; color: var(--text);
+}
+.template-btn-custom:hover { background: var(--bg2); border-color: var(--border2); }
+.template-btn-custom .tpl-icon { font-size: 16px; flex-shrink: 0; }
+.template-btn-custom .tpl-body { flex: 1; min-width: 0; }
+.template-btn-custom .tpl-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.template-btn-custom .tpl-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.template-btn-custom .tpl-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.tpl-save-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; padding: 20px;
+}
+.tpl-save-modal-inner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px; width: 100%;
+  max-width: 480px; box-shadow: var(--shadow-lg);
+}
+.tpl-save-modal-inner h3 {
+  font-family: 'Lora', serif; font-size: 16px; margin-bottom: 16px; color: var(--text);
 }
 
 /* ── ARUS KAS ── */
@@ -662,9 +764,10 @@ tfoot td {
         <div class="topbar-title" id="topbar-title">Dashboard</div>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-sm" onclick="exportData()">⬇ Export Data</button>
-        <button class="btn btn-sm" onclick="importDataClick()">⬆ Import Data</button>
-        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)" />
+        <button class="btn btn-sm btn-gold" onclick="downloadTemplate()">📄 Template CSV</button>
+        <button class="btn btn-sm btn-primary" onclick="exportFullCSV()">⬇ Export CSV</button>
+        <button class="btn btn-sm" onclick="importCSVClick()">⬆ Import CSV</button>
+        <input type="file" id="import-file" accept=".csv" style="display:none" onchange="importCSV(event)" />
         <button class="btn btn-sm btn-danger" onclick="resetData()">🗑 Reset</button>
       </div>
     </div>
@@ -707,8 +810,15 @@ tfoot td {
           Contoh: Beli bibit → Debit "Bibit Kelapa" (Aset bertambah) + Kredit "Kas" (Kas berkurang).
         </div>
 
-        <div class="card">
-          <div class="card-title" style="margin-bottom:18px;"><span class="ct-icon">📝</span> Input Transaksi Baru</div>
+        <div class="card" id="jurnal-form-card">
+          <div class="card-header">
+            <div class="card-title" id="jurnal-form-title"><span class="ct-icon">📝</span> Input Transaksi Baru</div>
+            <button class="btn" id="jurnal-cancel-edit" onclick="cancelEditJurnal()" style="display:none;">✕ Batal Edit</button>
+          </div>
+          <div id="jurnal-edit-banner" class="jurnal-edit-banner" style="display:none;">
+            ✏️ <span>Mode Edit — <strong id="jurnal-edit-desc-label"></strong></span>
+            <span style="color:var(--text3);font-size:11px;">Perubahan akan menggantikan data jurnal yang lama.</span>
+          </div>
           <div class="alert" id="jurnal-alert"></div>
           <div class="form-grid">
             <div class="form-group">
@@ -737,22 +847,76 @@ tfoot td {
             <span id="balance-text">Isi nominal untuk melihat status keseimbangan</span>
           </div>
 
-          <div style="margin-top:16px; display:flex; gap:10px;">
-            <button class="btn btn-primary" onclick="simpanJurnal()">💾 Simpan Jurnal</button>
+          <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="jurnal-submit-btn" onclick="simpanJurnal()">💾 Simpan Jurnal</button>
             <button class="btn" onclick="resetForm()">↺ Reset Form</button>
           </div>
         </div>
 
         <!-- QUICK TEMPLATES -->
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px;"><span class="ct-icon">⚡</span> Template Transaksi Cepat</div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;">
-            <button class="btn" onclick="applyTemplate('modal')">💰 Setor Modal Awal</button>
-            <button class="btn" onclick="applyTemplate('bibit')">🌱 Beli Bibit</button>
-            <button class="btn" onclick="applyTemplate('pupuk')">🧪 Beli Pupuk</button>
-            <button class="btn" onclick="applyTemplate('tenaga')">👷 Bayar Tenaga Kerja</button>
-            <button class="btn" onclick="applyTemplate('panen')">🥥 Terima Hasil Panen</button>
-            <button class="btn" onclick="applyTemplate('peralatan')">🔧 Beli Peralatan</button>
+        <div class="card" id="jurnal-templates-card">
+          <div class="card-header">
+            <div class="card-title"><span class="ct-icon">⚡</span> Template Transaksi Cepat</div>
+            <button class="btn btn-sm btn-primary" onclick="bukaModalSimpanTemplate()">💾 Simpan Form Ini sebagai Template</button>
+          </div>
+
+          <!-- Default templates -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Default Pertanian</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;">
+              <button class="btn" onclick="applyTemplate('modal')">💰 Setor Modal Awal</button>
+              <button class="btn" onclick="applyTemplate('bibit')">🌱 Beli Bibit</button>
+              <button class="btn" onclick="applyTemplate('pupuk')">🧪 Beli Pupuk</button>
+              <button class="btn" onclick="applyTemplate('tenaga')">👷 Bayar Tenaga Kerja</button>
+              <button class="btn" onclick="applyTemplate('panen')">🥥 Terima Hasil Panen</button>
+              <button class="btn" onclick="applyTemplate('peralatan')">🔧 Beli Peralatan</button>
+            </div>
+          </div>
+
+          <!-- Custom templates -->
+          <div id="custom-templates-section">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+              Template Saya <span id="custom-tpl-count" style="font-weight:400;"></span>
+            </div>
+            <div id="custom-templates-list"></div>
+          </div>
+        </div>
+
+        <!-- MODAL SIMPAN TEMPLATE -->
+        <div class="tpl-save-modal" id="tpl-save-modal" style="display:none;" onclick="if(event.target===this)tutupModalTemplate()">
+          <div class="tpl-save-modal-inner">
+            <h3>💾 Simpan sebagai Template</h3>
+            <div class="alert" id="tpl-modal-alert"></div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Nama Template *</label>
+              <input type="text" id="tpl-nama" placeholder="cth: Bayar Upah Mingguan" maxlength="60" />
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Ikon (emoji, opsional)</label>
+              <input type="text" id="tpl-ikon" placeholder="cth: 💵" maxlength="4" style="width:80px;" />
+            </div>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label>Catatan (opsional)</label>
+              <input type="text" id="tpl-catatan" placeholder="cth: Template untuk upah buruh harian" maxlength="100" />
+            </div>
+            <div id="tpl-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--text2);"></div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" onclick="simpanTemplate()">💾 Simpan Template</button>
+              <button class="btn" onclick="tutupModalTemplate()">Batal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ IMPORT CSV MODAL ═══════════════════════════════════ -->
+      <div class="tpl-save-modal" id="import-csv-modal" style="display:none;" onclick="if(event.target===this)tutupImportModal()">
+        <div class="tpl-save-modal-inner" style="max-width:600px;">
+          <h3>⬆ Import Data dari CSV</h3>
+          <div class="alert" id="import-csv-alert"></div>
+          <div id="import-csv-preview" style="margin-bottom:16px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="import-csv-confirm-btn" onclick="konfirmasiImportCSV()" style="display:none;">✅ Konfirmasi Import</button>
+            <button class="btn" onclick="tutupImportModal()">Batal</button>
           </div>
         </div>
       </div>
@@ -762,7 +926,10 @@ tfoot td {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">📋</span> Riwayat Transaksi</div>
-            <button class="btn btn-sm no-print" onclick="window.print()">🖨 Cetak</button>
+            <div style="display:flex;gap:8px;" class="no-print">
+              <button class="btn btn-sm" onclick="cetakRiwayat()">🖨 Cetak</button>
+              <button class="btn btn-sm btn-primary" onclick="downloadRiwayatPDF()">⬇ Unduh PDF</button>
+            </div>
           </div>
           <div class="period-filter-bar no-print">
             <label>Periode:</label>
@@ -774,7 +941,7 @@ tfoot td {
               <button class="period-quick-btn" id="rw-q-year" onclick="setRiwayatPeriod('year')">Tahun Ini</button>
               <button class="period-quick-btn" id="rw-q-custom" onclick="setRiwayatPeriod('custom')">Kustom</button>
             </div>
-            <div id="rw-custom-range" style="display:none; display:flex; gap:6px; align-items:center;">
+            <div id="rw-custom-range" style="display:none; gap:6px; align-items:center;">
               <input type="date" id="rw-date-from" onchange="renderRiwayat()" style="width:140px;" />
               <span style="color:var(--text3); font-size:12px;">s/d</span>
               <input type="date" id="rw-date-to" onchange="renderRiwayat()" style="width:140px;" />
@@ -880,6 +1047,7 @@ tfoot td {
               <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;">
                 <input type="checkbox" id="coa-show-zero" onchange="renderCOA()" style="width:auto;" /> Sembunyikan saldo nol
               </label>
+              <button class="btn btn-sm no-print" onclick="cetakCOA()">🖨 Cetak COA</button>
             </div>
           </div>
           <div class="table-wrap">
@@ -908,9 +1076,12 @@ tfoot td {
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="ct-icon">📒</span> Buku Besar</div>
-            <select id="bb-select" onchange="renderBukuBesar()" style="width:280px;">
-              <option value="">— Pilih Akun —</option>
-            </select>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="bb-select" onchange="renderBukuBesar()" style="width:280px;">
+                <option value="">— Pilih Akun —</option>
+              </select>
+              <button class="btn btn-sm no-print" id="bb-cetak-btn" onclick="cetakBukuBesar()" style="display:none;">🖨 Cetak</button>
+            </div>
           </div>
           <div id="bb-content">
             <div class="empty-state">
@@ -1064,24 +1235,29 @@ tfoot td {
 const LS_COA = 'jtani_coa_v2';
 const LS_JRN = 'jtani_jrn_v2';
 const LS_PER = 'jtani_periods_v1';
+const LS_TPL = 'jtani_templates_v1';
 
 function loadData() {
   try {
     const c = localStorage.getItem(LS_COA);
     const j = localStorage.getItem(LS_JRN);
     const p = localStorage.getItem(LS_PER);
-    COA     = c ? JSON.parse(c) : [];
-    JURNAL  = j ? JSON.parse(j) : [];
-    PERIODS = p ? JSON.parse(p) : [];
-  } catch(e) { COA = []; JURNAL = []; PERIODS = []; }
+    const t = localStorage.getItem(LS_TPL);
+    COA       = c ? JSON.parse(c) : [];
+    JURNAL    = j ? JSON.parse(j) : [];
+    PERIODS   = p ? JSON.parse(p) : [];
+    TEMPLATES = t ? JSON.parse(t) : [];
+  } catch(e) { COA = []; JURNAL = []; PERIODS = []; TEMPLATES = []; }
 }
 function saveCOA() { localStorage.setItem(LS_COA, JSON.stringify(COA)); }
 function saveJRN() { localStorage.setItem(LS_JRN, JSON.stringify(JURNAL)); }
 function savePER() { localStorage.setItem(LS_PER, JSON.stringify(PERIODS)); }
+function saveTPL() { localStorage.setItem(LS_TPL, JSON.stringify(TEMPLATES)); }
 
-let COA     = [];
-let JURNAL  = [];
-let PERIODS = [];
+let COA       = [];
+let JURNAL    = [];
+let PERIODS   = [];
+let TEMPLATES = [];
 
 // ══════════════════════════════════════════════════
 //  DEFAULT COA
@@ -1280,18 +1456,113 @@ function refreshSelects() {
 }
 
 // ══════════════════════════════════════════════════
-//  JURNAL FORM
+//  JURNAL FORM — with Edit Mode
 // ══════════════════════════════════════════════════
+let _editingJurnalId = null;
+
 function resetForm() {
+  _editingJurnalId = null;
   document.getElementById('j-tanggal').value = today();
-  document.getElementById('j-ref').value = '';
-  document.getElementById('j-desc').value = '';
+  document.getElementById('j-ref').value     = '';
+  document.getElementById('j-desc').value    = '';
+
   const container = document.getElementById('jurnal-lines');
   container.innerHTML = '';
   addLineEl(container, 'Debit');
   addLineEl(container, 'Kredit');
   refreshSelects();
   checkBalance();
+
+  // Reset edit-mode UI
+  const formCard = document.getElementById('jurnal-form-card');
+  if (formCard) formCard.classList.remove('jurnal-form-editing');
+  const banner = document.getElementById('jurnal-edit-banner');
+  if (banner) banner.style.display = 'none';
+  const cancelBtn = document.getElementById('jurnal-cancel-edit');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  const titleEl = document.getElementById('jurnal-form-title');
+  if (titleEl) titleEl.innerHTML = '<span class="ct-icon">📝</span> Input Transaksi Baru';
+  const submitBtn = document.getElementById('jurnal-submit-btn');
+  if (submitBtn) submitBtn.textContent = '💾 Simpan Jurnal';
+  const tmplCard = document.getElementById('jurnal-templates-card');
+  if (tmplCard) tmplCard.style.display = '';
+}
+
+function editJurnal(id) {
+  const j = JURNAL.find(x => x.id === id);
+  if (!j) return;
+
+  // Guard: locked / closing entries cannot be edited
+  if (j.locked) {
+    alert('⛔ Jurnal ini terkunci (periode sudah ditutup) dan tidak bisa diedit.');
+    return;
+  }
+  if (j.isClosing) {
+    alert('⛔ Jurnal closing tidak bisa diedit secara manual.');
+    return;
+  }
+
+  // Switch to jurnal page
+  showPage('jurnal');
+
+  // Set edit state
+  _editingJurnalId = id;
+
+  // Fill form fields
+  document.getElementById('j-tanggal').value = j.tanggal;
+  document.getElementById('j-ref').value     = j.referensi || '';
+  document.getElementById('j-desc').value    = j.deskripsi;
+
+  // Fill journal lines
+  const container = document.getElementById('jurnal-lines');
+  container.innerHTML = '';
+  j.lines.forEach(l => {
+    addLineEl(container, l.tipe);
+    // Set values after DOM update (select options need to be populated first)
+  });
+  refreshSelects();
+  // Now set the selected values
+  const rows = container.querySelectorAll('.line-row');
+  j.lines.forEach((l, i) => {
+    if (!rows[i]) return;
+    const selAkun  = rows[i].querySelector('.j-akun');
+    const selTipe  = rows[i].querySelector('.j-tipe');
+    const inpNom   = rows[i].querySelector('.j-nominal');
+    if (selAkun)  selAkun.value  = l.akun;
+    if (selTipe)  selTipe.value  = l.tipe;
+    if (inpNom)   inpNom.value   = l.nominal;
+  });
+  checkBalance();
+
+  // Activate edit-mode UI
+  const formCard = document.getElementById('jurnal-form-card');
+  if (formCard) formCard.classList.add('jurnal-form-editing');
+
+  const banner = document.getElementById('jurnal-edit-banner');
+  const descLabel = document.getElementById('jurnal-edit-desc-label');
+  if (banner) banner.style.display = 'flex';
+  if (descLabel) descLabel.textContent = j.deskripsi + ' (' + fmtDate(j.tanggal) + ')';
+
+  const cancelBtn = document.getElementById('jurnal-cancel-edit');
+  if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+
+  const titleEl = document.getElementById('jurnal-form-title');
+  if (titleEl) titleEl.innerHTML = '<span class="ct-icon">✏️</span> Edit Jurnal';
+
+  const submitBtn = document.getElementById('jurnal-submit-btn');
+  if (submitBtn) submitBtn.textContent = '💾 Update Jurnal';
+
+  // Hide template card during edit to avoid confusion
+  const tmplCard = document.getElementById('jurnal-templates-card');
+  if (tmplCard) tmplCard.style.display = 'none';
+
+  // Scroll to form
+  document.getElementById('jurnal-form-card')
+    .scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelEditJurnal() {
+  resetForm();
 }
 
 function addLine() {
@@ -1329,7 +1600,7 @@ function checkBalance() {
   let d = 0, k = 0;
   document.querySelectorAll('.line-row').forEach(row => {
     const tipe = row.querySelector('.j-tipe').value;
-    const nom = parseFloat(row.querySelector('.j-nominal').value) || 0;
+    const nom  = parseFloat(row.querySelector('.j-nominal').value) || 0;
     if (tipe === 'Debit') d += nom; else k += nom;
   });
   const bar = document.getElementById('balance-bar');
@@ -1341,30 +1612,36 @@ function checkBalance() {
   }
   if (Math.abs(d - k) < 0.01) {
     bar.className = 'balance-bar ok';
-    txt.innerHTML = '✅ Seimbang — Debit = Kredit = <strong>' + fmt(d) + '</strong>';
+    txt.innerHTML  = '✅ Seimbang — Debit = Kredit = <strong>' + fmt(d) + '</strong>';
   } else {
     bar.className = 'balance-bar err';
-    txt.innerHTML = '❌ Belum seimbang — Debit <strong>' + fmt(d) + '</strong> vs Kredit <strong>' + fmt(k) + '</strong> (selisih: ' + fmt(Math.abs(d-k)) + ')';
+    txt.innerHTML  = '❌ Belum seimbang — Debit <strong>' + fmt(d) + '</strong> vs Kredit <strong>' + fmt(k) + '</strong> (selisih: ' + fmt(Math.abs(d-k)) + ')';
   }
 }
 
 function simpanJurnal() {
-  const tgl = document.getElementById('j-tanggal').value;
+  const tgl  = document.getElementById('j-tanggal').value;
   const desc = document.getElementById('j-desc').value.trim();
-  const ref = document.getElementById('j-ref').value.trim();
+  const ref  = document.getElementById('j-ref').value.trim();
+  const isEdit = !!_editingJurnalId;
+
   if (!tgl) { showAlert('jurnal-alert','⚠️ Tanggal wajib diisi.','error'); return; }
-  // Guard: blocked locked periods
+
+  // Guard: locked period — only check for NEW entries, not edits within same date
   const lockedPeriod = PERIODS.find(p => p.closed && tgl >= p.startDate && tgl <= p.endDate);
-  if (lockedPeriod) { showAlert('jurnal-alert', `⛔ Periode ${lockedPeriod.name} sudah ditutup. Tidak bisa menambah transaksi di tanggal ini.`, 'error'); return; }
+  if (lockedPeriod) {
+    showAlert('jurnal-alert', `⛔ Periode ${lockedPeriod.name} sudah ditutup. Tidak bisa ${isEdit ? 'mengubah' : 'menambah'} transaksi di tanggal ini.`, 'error');
+    return;
+  }
   if (!desc) { showAlert('jurnal-alert','⚠️ Keterangan wajib diisi.','error'); return; }
+
   const lines = [];
   let d = 0, k = 0, valid = true;
   document.querySelectorAll('.line-row').forEach(row => {
     const akun = row.querySelector('.j-akun').value;
     const tipe = row.querySelector('.j-tipe').value;
-    const nom = parseFloat(row.querySelector('.j-nominal').value) || 0;
+    const nom  = parseFloat(row.querySelector('.j-nominal').value) || 0;
     if (!akun || nom <= 0) { valid = false; return; }
-    // Guard: akun induk tidak boleh dipakai di jurnal
     if (hasChildren(akun)) {
       showAlert('jurnal-alert', '❌ Akun "' + akun + '" adalah akun induk dan tidak bisa digunakan di jurnal. Gunakan sub-akunnya.', 'error');
       valid = false; return;
@@ -1373,45 +1650,236 @@ function simpanJurnal() {
     if (tipe === 'Debit') d += nom; else k += nom;
   });
   if (!valid || lines.length < 2) { showAlert('jurnal-alert','⚠️ Minimal 2 baris entri. Semua akun dan nominal wajib diisi.','error'); return; }
-  if (Math.abs(d - k) > 0.01) { showAlert('jurnal-alert','❌ Jurnal tidak seimbang! Total Debit harus = Total Kredit.','error'); return; }
-  const entry = { id: Date.now(), tanggal: tgl, deskripsi: desc, referensi: ref, lines };
-  JURNAL.unshift(entry);
-  saveJRN();
-  resetForm();
-  showAlert('jurnal-alert','✅ Jurnal berhasil disimpan!','success');
+  if (Math.abs(d - k) > 0.01)     { showAlert('jurnal-alert','❌ Jurnal tidak seimbang! Total Debit harus = Total Kredit.','error'); return; }
+
+  if (isEdit) {
+    // UPDATE existing entry — preserve original id and metadata
+    const idx = JURNAL.findIndex(x => x.id === _editingJurnalId);
+    if (idx === -1) { showAlert('jurnal-alert','⚠️ Jurnal tidak ditemukan.','error'); return; }
+    const original = JURNAL[idx];
+    JURNAL[idx] = {
+      ...original,
+      tanggal:   tgl,
+      deskripsi: desc,
+      referensi: ref,
+      lines,
+      editedAt:  today(),
+    };
+    saveJRN();
+    resetForm();
+    showAlert('jurnal-alert','✅ Jurnal berhasil diupdate!','success');
+  } else {
+    // NEW entry
+    const entry = { id: Date.now(), tanggal: tgl, deskripsi: desc, referensi: ref, lines };
+    JURNAL.unshift(entry);
+    saveJRN();
+    resetForm();
+    showAlert('jurnal-alert','✅ Jurnal berhasil disimpan!','success');
+  }
 }
 
 // ══════════════════════════════════════════════════
-//  TEMPLATES
+//  TEMPLATES — DEFAULT + CUSTOM
 // ══════════════════════════════════════════════════
+
+/** Apply one of the built-in default templates */
 function applyTemplate(type) {
   resetForm();
-  const akun = (kode) => {
-    const found = COA.find(a => a.kode === kode);
-    return found ? kode : '';
+  const findAkun = (kode) => COA.find(a => a.kode === kode) ? kode : '';
+  const defaults = {
+    modal:     { desc: 'Setor modal awal',             lines: [{ akun:'1-001', tipe:'Debit' },  { akun:'3-001', tipe:'Kredit' }] },
+    bibit:     { desc: 'Pembelian bibit',              lines: [{ akun:'1-102', tipe:'Debit' },  { akun:'1-001', tipe:'Kredit' }] },
+    pupuk:     { desc: 'Pembelian pupuk & pestisida',  lines: [{ akun:'5-002', tipe:'Debit' },  { akun:'1-001', tipe:'Kredit' }] },
+    tenaga:    { desc: 'Pembayaran upah tenaga kerja', lines: [{ akun:'5-001', tipe:'Debit' },  { akun:'1-001', tipe:'Kredit' }] },
+    panen:     { desc: 'Penerimaan hasil panen',       lines: [{ akun:'1-001', tipe:'Debit' },  { akun:'4-001', tipe:'Kredit' }] },
+    peralatan: { desc: 'Pembelian peralatan tani',     lines: [{ akun:'1-201', tipe:'Debit' },  { akun:'1-001', tipe:'Kredit' }] },
   };
-  const templates = {
-    modal: { desc: 'Setor modal awal', lines: [{ akun: '1-001', tipe: 'Debit' }, { akun: '3-001', tipe: 'Kredit' }] },
-    bibit: { desc: 'Pembelian bibit', lines: [{ akun: '1-102', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
-    pupuk: { desc: 'Pembelian pupuk & pestisida', lines: [{ akun: '5-002', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
-    tenaga: { desc: 'Pembayaran upah tenaga kerja', lines: [{ akun: '5-001', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
-    panen: { desc: 'Penerimaan hasil panen', lines: [{ akun: '1-001', tipe: 'Debit' }, { akun: '4-001', tipe: 'Kredit' }] },
-    peralatan: { desc: 'Pembelian peralatan tani', lines: [{ akun: '1-201', tipe: 'Debit' }, { akun: '1-001', tipe: 'Kredit' }] },
-  };
-  const t = templates[type];
+  const t = defaults[type];
   if (!t) return;
-  document.getElementById('j-desc').value = t.desc;
+  _applyTemplateData({ desc: t.desc, lines: t.lines });
+}
+
+/** Apply a custom template by its ID */
+function applyCustomTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  resetForm();
+  _applyTemplateData(t);
+}
+
+/** Shared apply logic for both default and custom templates */
+function _applyTemplateData(t) {
+  document.getElementById('j-desc').value = t.desc || '';
   const container = document.getElementById('jurnal-lines');
   container.innerHTML = '';
-  t.lines.forEach(l => addLineEl(container, l.tipe));
+  (t.lines || []).forEach(l => addLineEl(container, l.tipe));
   refreshSelects();
   const rows = container.querySelectorAll('.line-row');
-  t.lines.forEach((l, i) => {
-    if (rows[i]) {
-      const sel = rows[i].querySelector('.j-akun');
-      if (sel && akun(l.akun)) sel.value = l.akun;
-    }
+  (t.lines || []).forEach((l, i) => {
+    if (!rows[i]) return;
+    const selAkun = rows[i].querySelector('.j-akun');
+    const selTipe = rows[i].querySelector('.j-tipe');
+    const inpNom  = rows[i].querySelector('.j-nominal');
+    if (selAkun) selAkun.value = l.akun || '';
+    if (selTipe) selTipe.value = l.tipe  || 'Debit';
+    if (inpNom && l.nominal) inpNom.value = l.nominal;
   });
+  checkBalance();
+  document.getElementById('jurnal-form-card')
+    .scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Modal: buka/tutup/simpan template ──────────────
+function bukaModalSimpanTemplate() {
+  // Read current form state for preview
+  const desc  = document.getElementById('j-desc').value.trim();
+  const lines = _readCurrentLines();
+
+  if (!desc && lines.length === 0) {
+    showAlert('jurnal-alert','⚠️ Isi form jurnal terlebih dahulu sebelum menyimpan sebagai template.','error');
+    return;
+  }
+
+  // Pre-fill name from description
+  document.getElementById('tpl-nama').value    = desc || '';
+  document.getElementById('tpl-ikon').value    = '📋';
+  document.getElementById('tpl-catatan').value = '';
+
+  // Build preview
+  const previewEl = document.getElementById('tpl-preview');
+  if (previewEl) {
+    const linesHtml = lines.length
+      ? lines.map(l => {
+          const akun = COA.find(a => a.kode === l.akun);
+          const nm   = akun ? akun.nama : (l.akun || '—');
+          return `<div style="display:flex;justify-content:space-between;padding:2px 0;">
+            <span><span class="badge ${l.tipe==='Debit'?'badge-debit':'badge-kredit'}" style="font-size:10px;margin-right:5px;">${l.tipe[0]}</span>${l.akun} ${nm}</span>
+            ${l.nominal ? `<span style="font-weight:500;">${fmt(l.nominal)}</span>` : ''}
+          </div>`;
+        }).join('')
+      : '<span style="color:var(--text3);">Belum ada baris akun yang diisi</span>';
+    previewEl.innerHTML = `<div style="font-weight:500;margin-bottom:6px;">${desc || '(tanpa deskripsi)'}</div>${linesHtml}`;
+  }
+
+  document.getElementById('tpl-save-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('tpl-nama').focus(), 50);
+}
+
+function tutupModalTemplate() {
+  document.getElementById('tpl-save-modal').style.display = 'none';
+  document.getElementById('tpl-modal-alert').classList.remove('show');
+}
+
+function simpanTemplate() {
+  const nama    = document.getElementById('tpl-nama').value.trim();
+  const ikon    = document.getElementById('tpl-ikon').value.trim() || '📋';
+  const catatan = document.getElementById('tpl-catatan').value.trim();
+  if (!nama) {
+    showAlert('tpl-modal-alert','⚠️ Nama template wajib diisi.','error'); return;
+  }
+
+  const desc  = document.getElementById('j-desc').value.trim();
+  const lines = _readCurrentLines();
+
+  if (lines.length < 1) {
+    showAlert('tpl-modal-alert','⚠️ Template harus memiliki minimal 1 baris akun.','error'); return;
+  }
+
+  const tpl = {
+    id:       Date.now(),
+    nama,
+    ikon,
+    catatan,
+    desc,
+    lines,    // simpan akun + tipe + nominal (nominal opsional)
+    createdAt: today(),
+  };
+
+  TEMPLATES.unshift(tpl);
+  saveTPL();
+  tutupModalTemplate();
+  renderCustomTemplates();
+  showAlert('jurnal-alert','✅ Template "' + nama + '" berhasil disimpan!','success');
+}
+
+function hapusTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  if (!confirm('Hapus template "' + t.nama + '"?')) return;
+  TEMPLATES = TEMPLATES.filter(x => x.id !== id);
+  saveTPL();
+  renderCustomTemplates();
+}
+
+function editTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  // Load template into form, then open save-as-template modal pre-filled
+  _applyTemplateData(t);
+  setTimeout(() => {
+    // Remove old template and re-save as new
+    TEMPLATES = TEMPLATES.filter(x => x.id !== id);
+    saveTPL();
+    bukaModalSimpanTemplate();
+    document.getElementById('tpl-nama').value    = t.nama;
+    document.getElementById('tpl-ikon').value    = t.ikon || '📋';
+    document.getElementById('tpl-catatan').value = t.catatan || '';
+    showAlert('tpl-modal-alert','ℹ️ Edit template: ubah yang perlu, lalu klik Simpan.','info');
+  }, 200);
+}
+
+/** Read current form lines (akun + tipe + nominal) */
+function _readCurrentLines() {
+  const lines = [];
+  document.querySelectorAll('.line-row').forEach(row => {
+    const akun = row.querySelector('.j-akun')?.value   || '';
+    const tipe = row.querySelector('.j-tipe')?.value   || 'Debit';
+    const nom  = parseFloat(row.querySelector('.j-nominal')?.value) || 0;
+    if (akun || nom) lines.push({ akun, tipe, nominal: nom || undefined });
+  });
+  return lines;
+}
+
+/** Render the custom templates section */
+function renderCustomTemplates() {
+  const el       = document.getElementById('custom-templates-list');
+  const countEl  = document.getElementById('custom-tpl-count');
+  if (!el) return;
+
+  if (countEl) countEl.textContent = TEMPLATES.length ? `(${TEMPLATES.length})` : '';
+
+  if (!TEMPLATES.length) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:10px 0;">
+      Belum ada template kustom. Isi form jurnal lalu klik <strong>"💾 Simpan Form Ini sebagai Template"</strong>.
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;">` +
+    TEMPLATES.map(t => {
+      const linesSummary = (t.lines || []).slice(0,3).map(l => {
+        const akun = COA.find(a => a.kode === l.akun);
+        const nm   = akun ? akun.nama : (l.akun || '—');
+        return `<span class="badge ${l.tipe==='Debit'?'badge-debit':'badge-kredit'}" style="font-size:10px;">${l.tipe[0]}</span> ${nm}`;
+      }).join(' · ') + ((t.lines||[]).length > 3 ? ` +${t.lines.length-3}` : '');
+
+      return `<div class="template-btn-custom">
+        <div onclick="applyCustomTemplate(${t.id})" style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;min-width:0;">
+          <span class="tpl-icon">${t.ikon || '📋'}</span>
+          <div class="tpl-body">
+            <div class="tpl-name">${t.nama}</div>
+            <div class="tpl-meta">${t.desc ? t.desc + ' · ' : ''}${(t.lines||[]).length} baris</div>
+            <div class="tpl-meta" style="margin-top:2px;">${linesSummary}</div>
+            ${t.catatan ? `<div class="tpl-meta" style="color:var(--text3);font-style:italic;">${t.catatan}</div>` : ''}
+          </div>
+        </div>
+        <div class="tpl-actions">
+          <button class="btn btn-sm btn-icon" onclick="editTemplate(${t.id})" title="Edit template" style="padding:4px 7px;">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="hapusTemplate(${t.id})" title="Hapus template" style="padding:4px 7px;">✕</button>
+        </div>
+      </div>`;
+    }).join('') +
+  `</div>`;
 }
 
 // ══════════════════════════════════════════════════
@@ -1448,6 +1916,27 @@ function hasChildren(kode) {
 function getChildren(kode) {
   return COA.filter(a => a.induk === kode);
 }
+
+/**
+ * Cek apakah akun PUNYA TRANSAKSI LANGSUNG di jurnal.
+ * Akun yang punya transaksi langsung TIDAK BOLEH dijadikan akun induk —
+ * karena jika dijadikan induk, saldo transaksionalnya akan hilang dari
+ * perhitungan (leaf saldo diabaikan untuk akun yang punya anak).
+ */
+function hasDirectTransactions(kode) {
+  return JURNAL.some(j => j.lines.some(l => l.akun === kode));
+}
+
+/**
+ * Akun boleh ditambah sub-akun HANYA JIKA:
+ * 1. Tidak punya transaksi langsung (saldo = 0 dari jurnal), DAN
+ * 2. Tidak sedang diedit dalam jurnal aktif
+ * Atau jika sudah punya anak (berarti sudah jadi induk — boleh tambah saudara)
+ */
+function canBeParent(kode) {
+  if (hasChildren(kode)) return true;         // sudah jadi induk, boleh tambah anak lagi
+  return !hasDirectTransactions(kode);        // belum jadi induk: hanya boleh jika belum ada transaksi
+}
 function getAncestors(kode) {
   const result = [];
   let current = COA.find(a => a.kode === kode);
@@ -1477,7 +1966,11 @@ function refreshIndukSelect(skipKode) {
     const items = COA.filter(a => {
       if (a.kode === skipKode) return false;
       if (skipKode && getAncestors(a.kode).includes(skipKode)) return false;
-      return a.kategori === g;
+      if (a.kategori !== g) return false;
+      // ATURAN KUNCI: akun yang punya transaksi langsung tapi belum punya anak
+      // TIDAK BOLEH jadi induk — akan menyebabkan saldo hilang
+      if (!canBeParent(a.kode)) return false;
+      return true;
     });
     if (!items.length) return;
     const og = document.createElement('optgroup');
@@ -1553,6 +2046,19 @@ function resetCOAForm() {
 }
 
 function addSubAkun(parentKode) {
+  // GUARD: akun yang punya transaksi langsung tidak bisa jadi induk
+  if (!canBeParent(parentKode)) {
+    const txCount = JURNAL.filter(j => j.lines.some(l => l.akun === parentKode)).length;
+    alert(
+      `⛔ Akun "${parentKode}" tidak bisa dijadikan akun induk.\n\n` +
+      `Akun ini memiliki ${txCount} transaksi jurnal langsung (saldo tidak nol).\n\n` +
+      `Aturan akuntansi: akun yang sudah bertransaksi tidak boleh dijadikan induk, ` +
+      `karena saldo transaksinya akan hilang dari perhitungan.\n\n` +
+      `Solusi: hapus semua transaksi pada akun ini terlebih dahulu, ` +
+      `lalu tambahkan sub-akun.`
+    );
+    return;
+  }
   resetCOAForm();
   setTimeout(() => {
     document.getElementById('coa-induk').value = parentKode;
@@ -1608,6 +2114,17 @@ function simpanCOA() {
   if (!kode || !nama) { showAlert('coa-alert','⚠️ Kode dan Nama akun wajib diisi.','error'); return; }
   if (induk && !COA.find(a => a.kode === induk)) { showAlert('coa-alert','⚠️ Akun induk tidak ditemukan.','error'); return; }
 
+  // GUARD: akun induk tidak boleh punya transaksi langsung (kecuali sudah punya anak sebelumnya)
+  if (induk && !canBeParent(induk)) {
+    const txCount = JURNAL.filter(j => j.lines.some(l => l.akun === induk)).length;
+    showAlert('coa-alert',
+      `⛔ Akun "${induk}" tidak bisa dijadikan induk karena memiliki ${txCount} transaksi jurnal langsung. ` +
+      `Hapus semua transaksinya terlebih dahulu.`,
+      'error'
+    );
+    return;
+  }
+
   if (isEdit) {
     const idx = COA.findIndex(a => a.kode === kodeOriginal);
     if (idx === -1) return;
@@ -1654,36 +2171,116 @@ function hapusCOA(kode) {
 // ══════════════════════════════════════════════════
 //  COA — SALDO WITH ROLL-UP
 // ══════════════════════════════════════════════════
-function calcSaldo() {
+
+/**
+ * Core saldo engine.
+ *
+ * ATURAN AKUNTANSI HIERARKI:
+ * - Akun LEAF (tidak punya anak): saldo dari transaksi langsung di jurnal.
+ * - Akun INDUK (punya anak): saldo = ROLL-UP dari semua leaf-descendant-nya.
+ *   Akun induk TIDAK BOLEH punya transaksi langsung di jurnal.
+ *   Raw debit/kredit induk = agregat raw debit/kredit anak-anaknya (untuk Trial Balance).
+ */
+function calcSaldoFromJournals(journals) {
+  // Step 1: Hitung raw D/K hanya dari jurnal (leaf transactions)
   const raw = {};
   COA.forEach(a => { raw[a.kode] = { d: 0, k: 0 }; });
-  JURNAL.forEach(j => {
+  journals.forEach(j => {
     j.lines.forEach(l => {
       if (!raw[l.akun]) raw[l.akun] = { d: 0, k: 0 };
       if (l.tipe === 'Debit') raw[l.akun].d += l.nominal;
-      else raw[l.akun].k += l.nominal;
+      else                    raw[l.akun].k += l.nominal;
     });
   });
+
+  // Step 2: Leaf saldo (hanya akun tanpa anak)
   const leafSaldo = {};
   COA.forEach(a => {
-    const r = raw[a.kode] || { d: 0, k: 0 };
-    leafSaldo[a.kode] = a.normal === 'Debit' ? r.d - r.k : r.k - r.d;
+    if (!hasChildren(a.kode)) {
+      const r = raw[a.kode] || { d: 0, k: 0 };
+      leafSaldo[a.kode] = a.normal === 'Debit' ? r.d - r.k : r.k - r.d;
+    }
   });
-  function rollUp(kode) {
-    const children = getChildren(kode);
-    if (children.length === 0) return leafSaldo[kode] || 0;
-    return children.reduce((sum, child) => sum + rollUp(child.kode), 0);
+
+  // Step 3: Roll-up saldo rekursif untuk akun induk
+  function rollUpSaldo(kode) {
+    if (!hasChildren(kode)) return leafSaldo[kode] || 0;
+    return getChildren(kode).reduce((sum, child) => sum + rollUpSaldo(child.kode), 0);
   }
+
+  // Step 4: Roll-up raw D/K untuk akun induk (dipakai Trial Balance)
+  function rollUpDebit(kode) {
+    if (!hasChildren(kode)) return raw[kode]?.d || 0;
+    return getChildren(kode).reduce((sum, child) => sum + rollUpDebit(child.kode), 0);
+  }
+  function rollUpKredit(kode) {
+    if (!hasChildren(kode)) return raw[kode]?.k || 0;
+    return getChildren(kode).reduce((sum, child) => sum + rollUpKredit(child.kode), 0);
+  }
+
+  // Step 5: Bangun result — induk pakai roll-up, leaf pakai raw langsung
   const result = {};
   COA.forEach(a => {
-    const r = raw[a.kode] || { d: 0, k: 0 };
+    const isParent = hasChildren(a.kode);
     result[a.kode] = {
-      debit: r.d, kredit: r.k,
-      saldo: rollUp(a.kode),
-      isRollup: hasChildren(a.kode),
+      debit:    isParent ? rollUpDebit(a.kode)   : (raw[a.kode]?.d || 0),
+      kredit:   isParent ? rollUpKredit(a.kode)  : (raw[a.kode]?.k || 0),
+      saldo:    rollUpSaldo(a.kode),
+      isRollup: isParent,
     };
   });
   return result;
+}
+
+/** Default: use all journals (no date filter) */
+function calcSaldo() {
+  return calcSaldoFromJournals(JURNAL);
+}
+
+/** Neraca: cumulative up to dateTo (all journals where tanggal <= dateTo) */
+function calcSaldoUpTo(dateTo) {
+  const journals = dateTo ? JURNAL.filter(j => j.tanggal <= dateTo) : JURNAL;
+  return calcSaldoFromJournals(journals);
+}
+
+/** Laba Rugi / Arus Kas: only journals within date range */
+function calcSaldoRange(dateFrom, dateTo) {
+  const journals = JURNAL.filter(j => {
+    if (dateFrom && j.tanggal < dateFrom) return false;
+    if (dateTo   && j.tanggal > dateTo)   return false;
+    return true;
+  });
+  return calcSaldoFromJournals(journals);
+}
+
+// ══════════════════════════════════════════════════
+//  NERACA — PERIOD STATE & HANDLERS
+// ══════════════════════════════════════════════════
+let _neracaPeriod = { type: 'all', dateTo: null };
+
+function setNeracaPeriod(type) {
+  _neracaPeriod.type = type;
+
+  // Update active button styles
+  ['all','month','year','custom'].forEach(t => {
+    const btn = document.getElementById('nr-q-' + t);
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+
+  // Show/hide custom input
+  const cr = document.getElementById('nr-custom-range');
+  if (cr) cr.style.display = type === 'custom' ? 'flex' : 'none';
+
+  // Compute dateTo
+  const now = new Date();
+  const y   = now.getFullYear();
+  const m   = String(now.getMonth() + 1).padStart(2, '0');
+
+  if (type === 'all')   _neracaPeriod.dateTo = null;
+  if (type === 'month') _neracaPeriod.dateTo = `${y}-${m}-${new Date(y, now.getMonth()+1, 0).getDate()}`;
+  if (type === 'year')  _neracaPeriod.dateTo = `${y}-12-31`;
+
+  if (type !== 'custom') renderNeraca();
 }
 
 // ══════════════════════════════════════════════════
@@ -1746,14 +2343,27 @@ function renderCOA() {
     else if (isChild)  levelHtml = `<span class="level-badge-child">↳ Sub</span>`;
     else               levelHtml = `<span class="level-badge-standalone">Akun</span>`;
 
+    const canAddChild  = canBeParent(a.kode);
+    const addBtnTitle  = canAddChild
+      ? 'Tambah sub-akun'
+      : 'Tidak bisa tambah sub-akun — akun ini sudah memiliki transaksi jurnal langsung';
+    const addBtnStyle  = canAddChild
+      ? 'padding:4px 7px;background:var(--gold-light);border-color:#D4B06A;font-size:13px;'
+      : 'padding:4px 7px;background:var(--bg2);border-color:var(--border);font-size:13px;opacity:0.4;cursor:not-allowed;';
+
     let actionHtml = `<div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-sm btn-icon" onclick="editCOA('${a.kode}')" title="Edit" style="padding:4px 7px;">✏️</button>
-      <button class="btn btn-sm btn-icon" onclick="addSubAkun('${a.kode}')" title="Tambah sub-akun" style="padding:4px 7px;background:var(--gold-light);border-color:#D4B06A;font-size:13px;">＋</button>
+      <button class="btn btn-sm btn-icon" onclick="${canAddChild ? `addSubAkun('${a.kode}')` : `showAlert('coa-alert','⛔ Akun ini sudah memiliki transaksi. Hapus semua transaksinya dahulu sebelum menambah sub-akun.','error')`}" title="${addBtnTitle}" style="${addBtnStyle}">＋</button>
       <button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus" style="padding:4px 7px;">✕</button>
     </div>`;
 
     const indentPx  = depth * 22;
-    const noEntryBadge = isParent ? `<span class="coa-no-txn-badge">No Entry</span>` : '';
+    const hasTxn = hasDirectTransactions(a.kode);
+    const noEntryBadge = isParent
+      ? `<span class="coa-no-txn-badge">No Entry</span>`
+      : hasTxn
+      ? `<span style="font-size:10px;background:var(--blue-light);color:var(--blue);border:1px solid #B5C8DF;border-radius:4px;padding:1px 6px;margin-left:5px;">Ada Transaksi</span>`
+      : '';
     const nameCellContent = `<div style="padding-left:${indentPx}px">
       ${depth > 0 ? '<span style="color:var(--border2);margin-right:5px;">↳</span>' : ''}
       <span style="font-weight:${isParent?'600':'500'};">${a.nama}</span>${noEntryBadge}
@@ -1808,58 +2418,332 @@ function renderCOA() {
 }
 
 // ══════════════════════════════════════════════════
-//  RIWAYAT
 // ══════════════════════════════════════════════════
-function renderRiwayat() {
-  const search = (document.getElementById('search-jurnal').value || '').toLowerCase();
-  const bulan = document.getElementById('filter-bulan').value;
+//  COA — CETAK
+// ══════════════════════════════════════════════════
+function cetakCOA() {
+  const now     = new Date();
+  const printed = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+                + ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 
-  // Populate bulan filter
-  const bulanSel = document.getElementById('filter-bulan');
-  const currentBulan = bulanSel.value;
-  const bulanSet = new Set(JURNAL.map(j => j.tanggal.substring(0,7)));
-  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  bulanSel.innerHTML = '<option value="">Semua Bulan</option>';
-  [...bulanSet].sort().reverse().forEach(b => {
-    const [y,m] = b.split('-');
-    bulanSel.innerHTML += `<option value="${b}" ${b===currentBulan?'selected':''}>${months[parseInt(m)-1]} ${y}</option>`;
+  // Read current filter state
+  const search    = (document.getElementById('coa-search')?.value || '').toLowerCase();
+  const filterKat = document.getElementById('coa-filter-kat')?.value || '';
+  const hideZero  = document.getElementById('coa-show-zero')?.checked || false;
+
+  const saldo   = calcSaldo();
+  const groups  = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const catLabel = filterKat || 'Semua Kategori';
+
+  // Build summary totals (root only)
+  const sumKatRoot = (kat) => COA.filter(a => a.kategori === kat && !a.induk)
+    .reduce((s, a) => s + (saldo[a.kode]?.saldo || 0), 0);
+  const tAset  = sumKatRoot('Aset');
+  const tLiab  = sumKatRoot('Liabilitas');
+  const tModal = sumKatRoot('Modal');
+  const tPend  = sumKatRoot('Pendapatan');
+  const tBeban = sumKatRoot('Beban');
+  const labaRugi = tPend - tBeban;
+
+  // Build rows recursively
+  let rowsHtml = '';
+  let totalAkun = 0;
+
+  function buildRows(a, depth) {
+    if (filterKat && a.kategori !== filterKat) return;
+    if (search && !a.kode.toLowerCase().includes(search) && !a.nama.toLowerCase().includes(search)) {
+      // Check if any child matches
+      if (!COA.some(c => c.induk === a.kode &&
+        (c.kode.toLowerCase().includes(search) || c.nama.toLowerCase().includes(search)))) return;
+    }
+    const s       = saldo[a.kode]?.saldo || 0;
+    const isParent = hasChildren(a.kode);
+    if (hideZero && s === 0 && !isParent) return;
+
+    const indent  = depth * 18;
+    const colD    = a.normal === 'Debit'  && s > 0 ? s : a.normal === 'Kredit' && s < 0 ? -s : 0;
+    const colK    = a.normal === 'Kredit' && s > 0 ? s : a.normal === 'Debit'  && s < 0 ? -s : 0;
+    const rowBg   = isParent ? '#F0EDE6' : depth > 0 ? '#FAFAF8' : '#FFFFFF';
+    const fontW   = isParent ? '700' : '400';
+    const indukBadge = isParent
+      ? '<span style="font-size:9px;background:#F5E8C8;color:#A07C3A;border:1px solid #D4B06A;border-radius:3px;padding:0 5px;margin-left:5px;">Induk</span>'
+      : '';
+    const noEntryBadge = isParent
+      ? '<span style="font-size:9px;background:#FFF8E8;color:#A07C3A;border:1px solid #E8D5A0;border-radius:3px;padding:0 5px;margin-left:4px;">No Entry</span>'
+      : '';
+
+    rowsHtml += '<tr style="background:' + rowBg + ';border-top:1px solid #E8E4DC;">'
+      + '<td style="padding:6px 10px;font-family:monospace;font-size:11px;color:#5A5449;white-space:nowrap;">' + a.kode + '</td>'
+      + '<td style="padding:6px 10px 6px ' + (10 + indent) + 'px;font-weight:' + fontW + ';font-size:12px;font-family:Arial,sans-serif;">'
+      + (depth > 0 ? '<span style="color:#aaa;margin-right:5px;">-</span>' : '')
+      + a.nama + indukBadge + noEntryBadge
+      + (a.desc ? '<div style="font-size:10px;color:#8A8278;font-weight:400;">' + a.desc + '</div>' : '')
+      + '</td>'
+      + '<td style="padding:6px 10px;font-size:11px;text-align:center;">' + a.kategori + '</td>'
+      + '<td style="padding:6px 10px;font-size:11px;text-align:center;">' + a.normal + '</td>'
+      + '<td style="padding:6px 10px;text-align:right;font-size:12px;font-family:Arial,sans-serif;color:' + (colD?'#2B4E7A':'#aaa') + ';font-weight:' + (colD?'600':'400') + ';">' + (colD ? fmt(colD) : '-') + '</td>'
+      + '<td style="padding:6px 10px;text-align:right;font-size:12px;font-family:Arial,sans-serif;color:' + (colK?'#3D6B47':'#aaa') + ';font-weight:' + (colK?'600':'400') + ';">' + (colK ? fmt(colK) : '-') + '</td>'
+      + '</tr>';
+    totalAkun++;
+
+    // Render children
+    COA.filter(c => c.induk === a.kode).forEach(child => buildRows(child, depth + 1));
+  }
+
+  groups.forEach(g => {
+    if (filterKat && g !== filterKat) return;
+    const roots = COA.filter(a => a.kategori === g && !a.induk);
+    if (!roots.length) return;
+    const groupTotal = roots.reduce((s, a) => s + (saldo[a.kode]?.saldo || 0), 0);
+    rowsHtml += '<tr style="background:#1C1A16;">'
+      + '<td colspan="4" style="padding:6px 10px;color:#FDFAF5;font-size:11px;font-weight:700;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.04em;">' + g + '</td>'
+      + '<td style="text-align:right;padding:6px 10px;color:#FDFAF5;font-size:11px;font-weight:600;">' + (groupTotal > 0 ? fmt(groupTotal) : groupTotal < 0 ? fmt(groupTotal) : '-') + '</td>'
+      + '<td></td>'
+      + '</tr>';
+    roots.forEach(a => buildRows(a, 0));
   });
 
+  const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<title>Chart of Accounts - Jurnal Tani dari Nol</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Arial,sans-serif; color:#1C1A16; background:#fff; padding:20px; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; padding-bottom:12px; border-bottom:3px solid #3D6B47; }
+.brand { font-size:17px; font-weight:700; color:#3D6B47; }
+.brand-sub { font-size:11px; color:#8A8278; margin-top:2px; }
+.doc-info { text-align:right; font-size:11px; color:#5A5449; }
+.doc-info strong { display:block; font-size:14px; color:#1C1A16; margin-bottom:3px; }
+.summary-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:16px; }
+.sum-box { background:#F5F2EC; border-radius:5px; padding:8px 10px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.sum-label { font-size:9px; text-transform:uppercase; color:#8A8278; margin-bottom:2px; }
+.sum-value { font-size:12px; font-weight:700; color:#1C1A16; }
+.sum-value.green { color:#3D6B47; }
+.sum-value.red { color:#9B3A2E; }
+.sum-value.blue { color:#2B4E7A; }
+.filter-info { font-size:11px; color:#8A8278; margin-bottom:12px; padding:6px 10px; background:#F5F2EC; border-radius:5px; border-left:3px solid #3D6B47; }
+table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; }
+thead { display:table-header-group; }
+tfoot { display:table-footer-group; }
+thead th { background:#1C1A16; color:#fff; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+thead th:nth-child(5), thead th:nth-child(6) { text-align:right; }
+tbody tr { break-inside:avoid; page-break-inside:avoid; }
+tfoot td { background:#E8F0EA; color:#2E5238; font-weight:700; padding:9px 10px; font-size:12px; border-top:2px solid #3D6B47; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+tfoot td:nth-child(5), tfoot td:nth-child(6) { text-align:right; }
+.footer { margin-top:16px; padding-top:8px; border-top:1px solid #D8D2C5; font-size:10px; color:#8A8278; display:flex; justify-content:space-between; }
+@media print {
+  body { padding:10px; }
+  thead { display:table-header-group; }
+  tfoot { display:table-footer-group; }
+  tbody tr { break-inside:avoid; page-break-inside:avoid; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Jurnal Tani dari Nol</div>
+    <div class="brand-sub">Sistem Keuangan Pertanian - Ardhi's Farm</div>
+  </div>
+  <div class="doc-info">
+    <strong>Chart of Accounts (COA)</strong>
+    Dicetak: ${printed}
+  </div>
+</div>
+
+<div class="summary-grid">
+  <div class="sum-box"><div class="sum-label">Total Akun</div><div class="sum-value">${totalAkun} akun</div></div>
+  <div class="sum-box"><div class="sum-label">Total Aset</div><div class="sum-value green">${fmt(tAset)}</div></div>
+  <div class="sum-box"><div class="sum-label">Total Liabilitas</div><div class="sum-value red">${fmt(tLiab)}</div></div>
+  <div class="sum-box"><div class="sum-label">Total Modal</div><div class="sum-value blue">${fmt(tModal)}</div></div>
+  <div class="sum-box"><div class="sum-label">Pendapatan</div><div class="sum-value green">${fmt(tPend)}</div></div>
+  <div class="sum-box"><div class="sum-label">${labaRugi >= 0 ? 'Laba Bersih' : 'Rugi Bersih'}</div><div class="sum-value ${labaRugi >= 0 ? 'green' : 'red'}">${fmt(Math.abs(labaRugi))}</div></div>
+</div>
+
+${(search || filterKat || hideZero) ? '<div class="filter-info">Filter aktif: ' + [filterKat ? 'Kategori: ' + filterKat : '', search ? 'Pencarian: "' + search + '"' : '', hideZero ? 'Sembunyikan saldo nol' : ''].filter(Boolean).join(' · ') + '</div>' : ''}
+
+<table>
+  <thead><tr>
+    <th style="width:80px;">Kode</th>
+    <th>Nama Akun</th>
+    <th style="width:90px;text-align:center;">Kategori</th>
+    <th style="width:70px;text-align:center;">Normal</th>
+    <th style="width:130px;text-align:right;">Saldo Debit</th>
+    <th style="width:130px;text-align:right;">Saldo Kredit</th>
+  </tr></thead>
+  <tbody>${rowsHtml || '<tr><td colspan="6" style="padding:16px;text-align:center;color:#8A8278;">Tidak ada akun yang cocok dengan filter</td></tr>'}</tbody>
+  <tfoot><tr>
+    <td colspan="4">Total (${totalAkun} akun)</td>
+    <td>${fmt(tAset + tBeban)}</td>
+    <td>${fmt(tLiab + tModal + tPend)}</td>
+  </tr></tfoot>
+</table>
+
+<div class="footer">
+  <span>Jurnal Tani dari Nol - Sistem Keuangan Pertanian</span>
+  <span>Dicetak pada ${printed}</span>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=950,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+//  RIWAYAT — PERIOD STATE & HANDLERS
+// ══════════════════════════════════════════════════
+let _riwayatPeriod = { type: 'all', from: null, to: null };
+
+function setRiwayatPeriod(type) {
+  _riwayatPeriod.type = type;
+
+  // Update active button styles
+  ['all','today','week','month','year','custom'].forEach(t => {
+    const btn = document.getElementById('rw-q-' + t);
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+
+  // Show/hide custom date inputs
+  const cr = document.getElementById('rw-custom-range');
+  if (cr) cr.style.display = type === 'custom' ? 'flex' : 'none';
+
+  // Compute date range
+  const now  = new Date();
+  const y    = now.getFullYear();
+  const m    = String(now.getMonth() + 1).padStart(2, '0');
+  const d    = String(now.getDate()).padStart(2, '0');
+  const tod  = `${y}-${m}-${d}`;
+
+  // 7 days ago
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 6);
+  const weekFrom = weekAgo.toISOString().split('T')[0];
+
+  // End of month
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+
+  if (type === 'all')   { _riwayatPeriod.from = null;         _riwayatPeriod.to = null; }
+  if (type === 'today') { _riwayatPeriod.from = tod;          _riwayatPeriod.to = tod; }
+  if (type === 'week')  { _riwayatPeriod.from = weekFrom;     _riwayatPeriod.to = tod; }
+  if (type === 'month') { _riwayatPeriod.from = `${y}-${m}-01`; _riwayatPeriod.to = `${y}-${m}-${String(lastDay).padStart(2,'0')}`; }
+  if (type === 'year')  { _riwayatPeriod.from = `${y}-01-01`; _riwayatPeriod.to = `${y}-12-31`; }
+
+  if (type !== 'custom') renderRiwayat();
+}
+
+// ══════════════════════════════════════════════════
+//  RIWAYAT — RENDER
+// ══════════════════════════════════════════════════
+function renderRiwayat() {
+  const search = (document.getElementById('search-jurnal')?.value || '').toLowerCase();
+
+  // Resolve date range from period state
+  let dateFrom = _riwayatPeriod.from;
+  let dateTo   = _riwayatPeriod.to;
+  if (_riwayatPeriod.type === 'custom') {
+    dateFrom = document.getElementById('rw-date-from')?.value || null;
+    dateTo   = document.getElementById('rw-date-to')?.value   || null;
+  }
+
+  // Populate bulan dropdown (always reflects full JURNAL, not filtered)
+  const bulanSel = document.getElementById('filter-bulan');
+  if (bulanSel) {
+    const currentBulan = bulanSel.value;
+    const bulanSet = new Set(JURNAL.map(j => j.tanggal.substring(0, 7)));
+    const months   = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    bulanSel.innerHTML = '<option value="">Semua Bulan</option>';
+    [...bulanSet].sort().reverse().forEach(b => {
+      const [y, mn] = b.split('-');
+      const opt = document.createElement('option');
+      opt.value = b;
+      opt.textContent = months[parseInt(mn) - 1] + ' ' + y;
+      if (b === currentBulan) opt.selected = true;
+      bulanSel.appendChild(opt);
+    });
+  }
+
+  // Additional bulan filter (stacks on top of period filter)
+  const bulanFilter = bulanSel?.value || '';
+
+  // Apply all filters
   let list = [...JURNAL];
-  if (search) list = list.filter(j => j.deskripsi.toLowerCase().includes(search) || (j.referensi||'').toLowerCase().includes(search));
-  if (bulan) list = list.filter(j => j.tanggal.startsWith(bulan));
+  if (dateFrom)    list = list.filter(j => j.tanggal >= dateFrom);
+  if (dateTo)      list = list.filter(j => j.tanggal <= dateTo);
+  if (bulanFilter) list = list.filter(j => j.tanggal.startsWith(bulanFilter));
+  if (search)      list = list.filter(j =>
+    j.deskripsi.toLowerCase().includes(search) ||
+    (j.referensi || '').toLowerCase().includes(search) ||
+    j.lines.some(l => {
+      const akun = COA.find(a => a.kode === l.akun);
+      return akun?.nama.toLowerCase().includes(search) || l.akun.toLowerCase().includes(search);
+    })
+  );
+
+  // Summary stats bar
+  const statsEl = document.getElementById('riwayat-stats');
+  if (statsEl) {
+    const totalDebit  = list.reduce((s, j) => s + j.lines.filter(l => l.tipe === 'Debit').reduce((x, l) => x + l.nominal, 0), 0);
+    const totalTxn    = list.length;
+    const lockedCount = list.filter(j => j.locked).length;
+    const periodLabel = dateFrom || dateTo
+      ? `${dateFrom ? fmtDate(dateFrom) : 'awal'} — ${dateTo ? fmtDate(dateTo) : 'sekarang'}`
+      : 'Semua periode';
+    statsEl.innerHTML = `
+      <div class="coa-summary-pill"><span style="color:var(--text3);">📅 Periode</span><span>${periodLabel}</span></div>
+      <div class="coa-summary-pill"><span style="color:var(--text3);">📋 Transaksi</span><span style="font-weight:600;">${totalTxn}</span></div>
+      <div class="coa-summary-pill"><span style="color:var(--text3);">💰 Total Nilai</span><span style="color:var(--accent);font-weight:600;">${fmt(totalDebit)}</span></div>
+      ${lockedCount ? `<div class="coa-summary-pill"><span style="color:var(--text3);">🔒 Terkunci</span><span>${lockedCount}</span></div>` : ''}
+    `;
+  }
 
   const el = document.getElementById('riwayat-list');
+  if (!el) return;
+
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><h3>Tidak ada transaksi</h3><p>Belum ada jurnal yang cocok dengan filter ini.</p></div>';
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><h3>Tidak ada transaksi</h3><p>Tidak ada jurnal yang cocok dengan filter yang dipilih.</p></div>';
     return;
   }
 
   el.innerHTML = list.map(j => {
-    const totalD = j.lines.filter(l => l.tipe === 'Debit').reduce((s,l) => s+l.nominal, 0);
+    const totalD  = j.lines.filter(l => l.tipe === 'Debit').reduce((s, l) => s + l.nominal, 0);
     const linesHtml = j.lines.map(l => {
       const akun = COA.find(a => a.kode === l.akun);
-      const nm = akun ? akun.nama : l.akun;
-      const isK = l.tipe === 'Kredit';
+      const nm   = akun ? akun.nama : l.akun;
+      const isK  = l.tipe === 'Kredit';
       return `<div class="je-line">
-        <span class="je-acct ${isK?'indent':''}"><span class="badge ${isK?'badge-kredit':'badge-debit'}" style="font-size:10px;padding:1px 6px;margin-right:5px;">${l.tipe[0]}</span>${l.akun} ${nm}</span>
-        <span class="je-amt ${isK?'k':'d'}">${fmt(l.nominal)}</span>
+        <span class="je-acct ${isK ? 'indent' : ''}">
+          <span class="badge ${isK ? 'badge-kredit' : 'badge-debit'}" style="font-size:10px;padding:1px 6px;margin-right:5px;">${l.tipe[0]}</span>
+          ${l.akun} ${nm}
+        </span>
+        <span class="je-amt ${isK ? 'k' : 'd'}">${fmt(l.nominal)}</span>
       </div>`;
     }).join('');
-    const isLocked   = !!j.locked;
-    const isClosing  = !!j.isClosing;
-    const lockBadge  = isClosing
+
+    const isLocked  = !!j.locked;
+    const isClosing = !!j.isClosing;
+    const lockBadge = isClosing
       ? `<span style="font-size:10px;background:var(--gold-light);color:var(--gold);border:1px solid #D4B06A;border-radius:4px;padding:1px 7px;margin-left:6px;">CLOSING</span>`
       : isLocked
       ? `<span style="font-size:10px;background:var(--bg2);color:var(--text3);border:1px solid var(--border);border-radius:4px;padding:1px 7px;margin-left:6px;">🔒 Terkunci</span>`
       : '';
-    return `<div class="je-card" style="${isClosing?'border-color:var(--gold);background:var(--gold-light);':''}${isLocked&&!isClosing?'opacity:0.85;':''}">
+
+    return `<div class="je-card" style="${isClosing ? 'border-color:var(--gold);background:var(--gold-light);' : ''}${isLocked && !isClosing ? 'opacity:0.85;' : ''}">
       <div class="je-head">
         <div class="je-meta">
-          <div class="je-desc">${j.deskripsi}${j.referensi?`<span class="je-ref">${j.referensi}</span>`:''}${lockBadge}</div>
-          <div class="je-date">${fmtDate(j.tanggal)} &nbsp;·&nbsp; Total: <strong>${fmt(totalD)}</strong></div>
+          <div class="je-desc">${j.deskripsi}${j.referensi ? `<span class="je-ref">${j.referensi}</span>` : ''}${lockBadge}</div>
+          <div class="je-date">${fmtDate(j.tanggal)} &nbsp;·&nbsp; Total: <strong>${fmt(totalD)}</strong>${j.editedAt ? ` &nbsp;·&nbsp; <span style="font-size:10px;background:var(--blue-light);color:var(--blue);border:1px solid #B5C8DF;border-radius:4px;padding:1px 6px;">Diedit: ${fmtDate(j.editedAt)}</span>` : ''}</div>
         </div>
-        ${isLocked ? '<span style="font-size:20px;" title="Terkunci">🔒</span>' : `<button class="btn btn-danger btn-sm" onclick="hapusJurnal(${j.id})">🗑 Hapus</button>`}
+        ${isLocked
+          ? '<span style="font-size:20px;" title="Terkunci">🔒</span>'
+          : `<div style="display:flex;gap:6px;">
+               <button class="btn btn-sm" onclick="editJurnal(${j.id})" style="background:var(--blue-light);color:var(--blue);border-color:#B5C8DF;">✏️ Edit</button>
+               <button class="btn btn-danger btn-sm" onclick="hapusJurnal(${j.id})">🗑 Hapus</button>
+             </div>`
+        }
       </div>
       <div class="je-lines">${linesHtml}</div>
     </div>`;
@@ -1877,14 +2761,214 @@ function hapusJurnal(id) {
 }
 
 // ══════════════════════════════════════════════════
+//  BUKU BESAR — CETAK
+// ══════════════════════════════════════════════════
+function cetakBukuBesar() {
+  const kode = document.getElementById('bb-select').value;
+  if (!kode) { alert('Pilih akun terlebih dahulu.'); return; }
+  const akun = COA.find(a => a.kode === kode);
+  if (!akun) return;
+
+  const now     = new Date();
+  const printed = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+                + ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  const saldoAll = calcSaldo();
+  const isParent = hasChildren(kode);
+  const catNames = {Aset:'Aset',Liabilitas:'Liabilitas',Modal:'Modal',Pendapatan:'Pendapatan',Beban:'Beban'};
+
+  // Helper: build ledger rows for a single leaf account
+  function buildLedgerRows(leafAkun) {
+    const entries = [];
+    JURNAL.forEach(j => {
+      j.lines.forEach(l => {
+        if (l.akun === leafAkun.kode) {
+          entries.push({ tanggal: j.tanggal, desc: j.deskripsi, ref: j.referensi||'', tipe: l.tipe, nominal: l.nominal, locked: !!j.locked, closing: !!j.isClosing });
+        }
+      });
+    });
+    entries.sort((a,b) => a.tanggal.localeCompare(b.tanggal));
+
+    if (!entries.length) return { rows: '<tr><td colspan="6" style="text-align:center;color:#8A8278;padding:12px;">Belum ada transaksi</td></tr>', totalD: 0, totalK: 0, saldoAkhir: 0 };
+
+    let saldo = 0, totalD = 0, totalK = 0;
+    const rows = entries.map((e, idx) => {
+      const delta  = (e.tipe === 'Debit' ? 1 : -1) * (leafAkun.normal === 'Debit' ? 1 : -1) * e.nominal;
+      saldo       += delta;
+      if (e.tipe === 'Debit')  totalD += e.nominal;
+      else                     totalK += e.nominal;
+      const rowBg  = e.closing ? '#FFF8E8' : idx % 2 === 0 ? '#FAFAF8' : '#FFFFFF';
+      const statusBadge = e.closing ? '<span style="font-size:9px;background:#F5E8C8;color:#A07C3A;border-radius:3px;padding:0 4px;margin-left:4px;">CLOSING</span>'
+                        : e.locked  ? '<span style="font-size:9px;color:#aaa;margin-left:4px;">[L]</span>' : '';
+      return '<tr style="background:' + rowBg + ';border-top:1px solid #E8E4DC;">'
+        + '<td style="padding:7px 10px;white-space:nowrap;font-size:11px;color:#5A5449;">' + fmtDate(e.tanggal) + '</td>'
+        + '<td style="padding:7px 10px;font-size:12px;font-family:Arial,sans-serif;">' + e.desc + statusBadge
+          + (e.ref ? '<span style="font-size:10px;background:#EEE;border-radius:3px;padding:0 5px;margin-left:4px;">' + e.ref + '</span>' : '') + '</td>'
+        + '<td style="text-align:right;padding:7px 10px;font-size:12px;color:' + (e.tipe==='Debit'?'#2B4E7A':'#aaa') + ';font-family:Arial,sans-serif;">' + (e.tipe==='Debit' ? fmt(e.nominal) : '-') + '</td>'
+        + '<td style="text-align:right;padding:7px 10px;font-size:12px;color:' + (e.tipe==='Kredit'?'#3D6B47':'#aaa') + ';font-family:Arial,sans-serif;">' + (e.tipe==='Kredit' ? fmt(e.nominal) : '-') + '</td>'
+        + '<td style="text-align:right;padding:7px 10px;font-size:12px;font-weight:600;color:' + (saldo>=0?'#1C1A16':'#9B3A2E') + ';font-family:Arial,sans-serif;">' + fmt(saldo) + '</td>'
+        + '</tr>';
+    }).join('');
+    return { rows, totalD, totalK, saldoAkhir: saldo };
+  }
+
+  // Build table section for one leaf account
+  function buildTable(leafAkun, showHeader) {
+    const { rows, totalD, totalK, saldoAkhir } = buildLedgerRows(leafAkun);
+    const saldoColor = saldoAkhir >= 0 ? '#3D6B47' : '#9B3A2E';
+    const subHeader = showHeader
+      ? '<tr style="background:#2B4E7A;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
+        + '<td colspan="5" style="padding:7px 10px;color:#fff;font-weight:700;font-size:12px;font-family:Arial,sans-serif;">'
+        + leafAkun.kode + ' — ' + leafAkun.nama
+        + '</td></tr>'
+      : '';
+    return '<div style="margin-bottom:' + (showHeader?'16px':'0') + ';">'
+      + '<table>'
+      + '<thead><tr>'
+      + '<th style="width:140px;">Tanggal</th>'
+      + '<th>Keterangan</th>'
+      + '<th style="width:130px;text-align:right;">Debit (Rp)</th>'
+      + '<th style="width:130px;text-align:right;">Kredit (Rp)</th>'
+      + '<th style="width:140px;text-align:right;">Saldo (Rp)</th>'
+      + '</tr></thead>'
+      + '<tbody>' + subHeader + rows + '</tbody>'
+      + '<tfoot><tr>'
+      + '<td colspan="2">Total / Saldo Akhir (' + leafAkun.normal + ')</td>'
+      + '<td style="text-align:right;">' + fmt(totalD) + '</td>'
+      + '<td style="text-align:right;">' + fmt(totalK) + '</td>'
+      + '<td style="text-align:right;color:' + saldoColor + ';">' + fmt(saldoAkhir) + '</td>'
+      + '</tr></tfoot>'
+      + '</table></div>';
+  }
+
+  // Main content
+  let contentHtml = '';
+  let infoHtml    = '';
+
+  if (isParent) {
+    const children   = getChildren(kode);
+    const totalSaldo = saldoAll[kode]?.saldo || 0;
+    infoHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:16px;">'
+      + children.map(c => {
+          const cs = saldoAll[c.kode]?.saldo || 0;
+          return '<div style="background:#F5F2EC;border-radius:5px;padding:8px 10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
+            + '<div style="font-size:10px;color:#8A8278;text-transform:uppercase;">' + c.kode + '</div>'
+            + '<div style="font-size:12px;font-weight:600;margin:2px 0;">' + c.nama + '</div>'
+            + '<div style="font-size:13px;font-weight:700;color:' + (cs>=0?'#3D6B47':'#9B3A2E') + ';">' + fmt(cs) + '</div>'
+            + '</div>';
+        }).join('')
+      + '<div style="background:#3D6B47;border-radius:5px;padding:8px 10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">'
+      + '<div style="font-size:10px;color:#B8D4BC;text-transform:uppercase;">Total Roll-up</div>'
+      + '<div style="font-size:12px;font-weight:600;margin:2px 0;color:#fff;">' + akun.nama + '</div>'
+      + '<div style="font-size:13px;font-weight:700;color:#fff;">' + fmt(totalSaldo) + '</div>'
+      + '</div>'
+      + '</div>';
+    // Each child's ledger
+    contentHtml = children.map(c => buildTable(c, true)).join('');
+  } else {
+    const s = saldoAll[kode]?.saldo || 0;
+    infoHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">'
+      + '<div style="background:#F5F2EC;border-radius:5px;padding:8px 10px;"><div style="font-size:10px;color:#8A8278;text-transform:uppercase;">Kategori</div><div style="font-size:13px;font-weight:700;">' + akun.kategori + '</div></div>'
+      + '<div style="background:#F5F2EC;border-radius:5px;padding:8px 10px;"><div style="font-size:10px;color:#8A8278;text-transform:uppercase;">Normal Saldo</div><div style="font-size:13px;font-weight:700;">' + akun.normal + '</div></div>'
+      + '<div style="background:#F5F2EC;border-radius:5px;padding:8px 10px;"><div style="font-size:10px;color:#8A8278;text-transform:uppercase;">Tipe</div><div style="font-size:13px;font-weight:700;">' + (akun.tipe||'-') + '</div></div>'
+      + '<div style="background:' + (s>=0?'#E8F0EA':'#F5E8E6') + ';border-radius:5px;padding:8px 10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;"><div style="font-size:10px;color:#8A8278;text-transform:uppercase;">Saldo Akhir</div><div style="font-size:13px;font-weight:700;color:' + (s>=0?'#3D6B47':'#9B3A2E') + ';">' + fmt(s) + '</div></div>'
+      + '</div>';
+    contentHtml = buildTable(akun, false);
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<title>Buku Besar ${akun.kode} - Jurnal Tani dari Nol</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Arial,sans-serif; color:#1C1A16; background:#fff; padding:20px; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:12px; border-bottom:3px solid #3D6B47; }
+.brand { font-size:17px; font-weight:700; color:#3D6B47; }
+.brand-sub { font-size:11px; color:#8A8278; margin-top:2px; }
+.doc-info { text-align:right; font-size:11px; color:#5A5449; }
+.doc-info strong { display:block; font-size:14px; color:#1C1A16; margin-bottom:3px; }
+.akun-header { padding:12px 14px; background:#1C1A16; border-radius:6px; margin-bottom:14px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.akun-header .kode { font-size:11px; color:#aaa; margin-bottom:2px; }
+.akun-header .nama { font-size:15px; font-weight:700; color:#fff; }
+.akun-header .badges { margin-top:5px; display:flex; gap:6px; flex-wrap:wrap; }
+.badge-print { font-size:10px; padding:1px 8px; border-radius:3px; font-weight:600; }
+.badge-kat { background:#3D6B47; color:#fff; }
+.badge-normal { background:#2B4E7A; color:#fff; }
+.badge-induk { background:#A07C3A; color:#fff; }
+table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; }
+thead { display:table-header-group; }
+tfoot { display:table-footer-group; }
+thead th { background:#1C1A16; color:#fff; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5) { text-align:right; }
+tbody tr { break-inside:avoid; page-break-inside:avoid; }
+tfoot td { background:#E8F0EA; color:#2E5238; font-weight:700; padding:9px 10px; font-size:12px; border-top:2px solid #3D6B47; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+tfoot td:nth-child(3), tfoot td:nth-child(4), tfoot td:nth-child(5) { text-align:right; }
+.footer { margin-top:16px; padding-top:8px; border-top:1px solid #D8D2C5; font-size:10px; color:#8A8278; display:flex; justify-content:space-between; }
+@media print {
+  body { padding:10px; }
+  thead { display:table-header-group; }
+  tfoot { display:table-footer-group; }
+  tbody tr { break-inside:avoid; page-break-inside:avoid; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Jurnal Tani dari Nol</div>
+    <div class="brand-sub">Sistem Keuangan Pertanian - Ardhi's Farm</div>
+  </div>
+  <div class="doc-info">
+    <strong>Buku Besar</strong>
+    Dicetak: ${printed}
+  </div>
+</div>
+
+<div class="akun-header">
+  <div class="kode">${akun.kode}</div>
+  <div class="nama">${akun.nama}</div>
+  <div class="badges">
+    <span class="badge-print badge-kat">${akun.kategori}</span>
+    <span class="badge-print badge-normal">Normal: ${akun.normal}</span>
+    ${isParent ? '<span class="badge-print badge-induk">Akun Induk - Roll-up</span>' : ''}
+    ${akun.induk ? '<span class="badge-print" style="background:#555;color:#fff;">Sub-akun dari: ' + akun.induk + '</span>' : ''}
+  </div>
+</div>
+
+${infoHtml}
+${contentHtml}
+
+<div class="footer">
+  <span>Jurnal Tani dari Nol - Sistem Keuangan Pertanian</span>
+  <span>Dicetak pada ${printed}</span>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=950,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+// ══════════════════════════════════════════════════
 //  BUKU BESAR
 // ══════════════════════════════════════════════════
 function renderBukuBesar() {
   const kode = document.getElementById('bb-select').value;
-  const el = document.getElementById('bb-content');
-  if (!kode) { el.innerHTML = '<div class="empty-state"><div class="es-icon">📒</div><h3>Pilih akun di atas</h3></div>'; return; }
+  const el   = document.getElementById('bb-content');
+  const cetakBtn = document.getElementById('bb-cetak-btn');
+
+  if (!kode) {
+    el.innerHTML = '<div class="empty-state"><div class="es-icon">📒</div><h3>Pilih akun di atas</h3></div>';
+    if (cetakBtn) cetakBtn.style.display = 'none';
+    return;
+  }
   const akun = COA.find(a => a.kode === kode);
   if (!akun) return;
+  if (cetakBtn) cetakBtn.style.display = 'inline-flex';
 
   const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
   const saldoAll = calcSaldo();
@@ -1948,7 +3032,7 @@ function renderBukuBesar() {
         const delta = (e.tipe === 'Debit' ? 1 : -1) * (child.normal === 'Debit' ? 1 : -1) * e.nominal;
         childSaldo += delta;
         return `<tr>
-          <td>${fmtDate(e.tanggal)}</td><td>${e.desc}</td>
+          <td style="white-space:nowrap;">${fmtDate(e.tanggal)}</td><td>${e.desc}</td>
           <td style="text-align:right;color:var(--blue);">${e.tipe==='Debit'?fmt(e.nominal):''}</td>
           <td style="text-align:right;color:var(--accent);">${e.tipe==='Kredit'?fmt(e.nominal):''}</td>
           <td style="text-align:right;font-weight:500;">${fmt(childSaldo)}</td>
@@ -1962,7 +3046,7 @@ function renderBukuBesar() {
         </div>
         <div class="table-wrap"><table>
           <thead><tr>
-            <th style="width:100px">Tanggal</th><th>Keterangan</th>
+            <th style="width:140px">Tanggal</th><th>Keterangan</th>
             <th style="text-align:right;width:120px">Debit</th>
             <th style="text-align:right;width:120px">Kredit</th>
             <th style="text-align:right;width:130px">Saldo</th>
@@ -1990,7 +3074,7 @@ function renderBukuBesar() {
     const delta = (e.tipe === 'Debit' ? 1 : -1) * (akun.normal === 'Debit' ? 1 : -1) * e.nominal;
     saldo += delta;
     return `<tr>
-      <td>${fmtDate(e.tanggal)}</td>
+      <td style="white-space:nowrap;">${fmtDate(e.tanggal)}</td>
       <td>${e.desc}</td>
       <td style="text-align:right; color:var(--blue);">${e.tipe==='Debit' ? fmt(e.nominal) : ''}</td>
       <td style="text-align:right; color:var(--accent);">${e.tipe==='Kredit' ? fmt(e.nominal) : ''}</td>
@@ -2002,7 +3086,7 @@ function renderBukuBesar() {
     <div class="table-wrap">
     <table>
       <thead><tr>
-        <th style="width:100px">Tanggal</th>
+        <th style="width:140px">Tanggal</th>
         <th>Keterangan</th>
         <th style="text-align:right;width:130px">Debit</th>
         <th style="text-align:right;width:130px">Kredit</th>
@@ -2021,70 +3105,170 @@ function renderBukuBesar() {
 //  TRIAL BALANCE
 // ══════════════════════════════════════════════════
 function renderTrialBalance() {
-  const saldo = calcSaldo();
-  const el = document.getElementById('tb-content');
-  const groups = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
+  const saldo    = calcSaldo();
+  const el       = document.getElementById('tb-content');
+  const groups   = ['Aset','Liabilitas','Modal','Pendapatan','Beban'];
   const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
   let totalD = 0, totalK = 0;
   let rows = '';
 
   groups.forEach(g => {
-    const items = COA.filter(a => a.kategori === g);
-    if (!items.length) return;
+    const allInGroup = COA.filter(a => a.kategori === g);
+    if (!allInGroup.length) return;
     rows += `<tr class="coa-group-header"><td colspan="4">${g}</td></tr>`;
-    items.forEach(a => {
-      const s = saldo[a.kode] || { debit:0, kredit:0, saldo:0 };
-      const tbD = a.normal === 'Debit' && s.saldo > 0 ? s.saldo : (a.normal === 'Kredit' && s.saldo < 0 ? -s.saldo : 0);
-      const tbK = a.normal === 'Kredit' && s.saldo > 0 ? s.saldo : (a.normal === 'Debit' && s.saldo < 0 ? -s.saldo : 0);
-      totalD += tbD; totalK += tbK;
-      rows += `<tr>
-        <td><code style="font-size:12px; background:var(--bg2); padding:2px 6px; border-radius:4px;">${a.kode}</code></td>
-        <td>${a.nama} <span class="badge ${badgeMap[a.kategori]}" style="font-size:10px;">${a.kategori}</span></td>
-        <td style="text-align:right; color:var(--blue); font-weight:${tbD?500:400};">${tbD ? fmt(tbD) : '—'}</td>
-        <td style="text-align:right; color:var(--accent); font-weight:${tbK?500:400};">${tbK ? fmt(tbK) : '—'}</td>
+
+    allInGroup.forEach(a => {
+      const isParent = hasChildren(a.kode);
+      const isRoot   = !a.induk;            // tidak punya induk = root level
+      const s        = saldo[a.kode] || { debit: 0, kredit: 0, saldo: 0 };
+
+      // Saldo bersih akun (roll-up sudah ditangani calcSaldoFromJournals)
+      const netSaldo = s.saldo || 0;
+
+      // Tentukan posisi Debit / Kredit dari saldo bersih
+      // Normal Debit: saldo positif → kolom Debit, saldo negatif → kolom Kredit
+      // Normal Kredit: saldo positif → kolom Kredit, saldo negatif → kolom Debit
+      const colD = a.normal === 'Debit'  && netSaldo > 0 ? netSaldo
+                 : a.normal === 'Kredit' && netSaldo < 0 ? -netSaldo : 0;
+      const colK = a.normal === 'Kredit' && netSaldo > 0 ? netSaldo
+                 : a.normal === 'Debit'  && netSaldo < 0 ? -netSaldo : 0;
+
+      // Grand total hanya dari akun ROOT (tidak punya induk)
+      // Karena akun induk sudah include semua anak → tidak dobel
+      if (isRoot) {
+        totalD += colD;
+        totalK += colK;
+      }
+
+      // Style baris
+      const indent   = a.induk ? `padding-left:${getDepthStyle(a.kode)}px;` : '';
+      const prefix   = a.induk ? '↳ ' : '';
+      const boldStyle = isParent ? 'font-weight:600;' : '';
+      const rowBg    = isParent ? 'background:var(--surface2);' : '';
+      const parentBadge = isParent
+        ? `<span style="font-size:10px;background:var(--gold-light);color:var(--gold);border:1px solid #D4B06A;border-radius:4px;padding:1px 6px;margin-left:6px;">Induk</span>`
+        : '';
+
+      rows += `<tr style="${rowBg}">
+        <td><code style="font-size:11px;background:var(--bg2);padding:2px 6px;border-radius:4px;${isParent?'font-weight:700;':''}">${a.kode}</code></td>
+        <td style="${indent}${boldStyle}">
+          ${prefix}${a.nama}${parentBadge}
+          ${!isParent ? `<span class="badge ${badgeMap[a.kategori]}" style="font-size:10px;margin-left:4px;">${a.kategori}</span>` : ''}
+        </td>
+        <td style="text-align:right;color:var(--blue);font-weight:${colD?500:400};">${colD ? fmt(colD) : '—'}</td>
+        <td style="text-align:right;color:var(--accent);font-weight:${colK?500:400};">${colK ? fmt(colK) : '—'}</td>
       </tr>`;
     });
   });
 
   const balanced = Math.abs(totalD - totalK) < 0.01 && totalD > 0;
   el.innerHTML = `
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">
+      ℹ️ Nilai di kolom Debit/Kredit adalah <strong>saldo bersih</strong> per akun.
+      Akun Induk menampilkan roll-up saldo dari sub-akunnya.
+      Grand Total dihitung dari akun root saja (agar tidak dobel).
+    </div>
     <div class="table-wrap">
     <table>
-      <thead><tr><th style="width:80px">Kode</th><th>Nama Akun</th><th style="text-align:right;width:140px">Debit</th><th style="text-align:right;width:140px">Kredit</th></tr></thead>
+      <thead><tr>
+        <th style="width:85px">Kode</th>
+        <th>Nama Akun</th>
+        <th style="text-align:right;width:140px">Debit (Rp)</th>
+        <th style="text-align:right;width:140px">Kredit (Rp)</th>
+      </tr></thead>
       <tbody>${rows || '<tr><td colspan="4"><div class="empty-state"><h3>Belum ada transaksi</h3></div></td></tr>'}</tbody>
       <tfoot><tr>
-        <td colspan="2">Total</td>
-        <td style="text-align:right; color:var(--blue);">${fmt(totalD)}</td>
-        <td style="text-align:right; color:var(--accent);">${fmt(totalK)}</td>
+        <td colspan="2" style="font-family:'Lora',serif;font-weight:600;">TOTAL BALANCED</td>
+        <td style="text-align:right;color:var(--blue);font-weight:700;">${fmt(totalD)}</td>
+        <td style="text-align:right;color:var(--accent);font-weight:700;">${fmt(totalK)}</td>
       </tr></tfoot>
     </table>
     </div>
-    ${balanced ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Trial Balance seimbang — pembukuan kamu sudah benar! Total Debit = Total Kredit = ${fmt(totalD)}</div>` : (totalD > 0 ? `<div class="alert alert-error show" style="margin-top:14px;">❌ Trial Balance tidak seimbang. Periksa kembali entri jurnal kamu.</div>` : '')}
+    ${balanced
+      ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Trial Balance seimbang — Total Debit = Total Kredit = ${fmt(totalD)}</div>`
+      : totalD > 0
+        ? `<div class="alert alert-error show" style="margin-top:14px;">❌ Trial Balance tidak seimbang — selisih ${fmt(Math.abs(totalD - totalK))}. Periksa kembali entri jurnal.</div>`
+        : ''
+    }
   `;
+}
+
+/** Helper: hitung indent pixel berdasarkan kedalaman hierarki akun */
+function getDepthStyle(kode) {
+  return getAncestors(kode).length * 20 + 12;
 }
 
 // ══════════════════════════════════════════════════
 //  NERACA
 // ══════════════════════════════════════════════════
 function renderNeraca() {
-  const saldo = calcSaldo();
   const el = document.getElementById('neraca-content');
+  if (!el) return;
 
-  const sumKat = (kat) => COA.filter(a => a.kategori === kat).reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const rowsKat = (kat) => COA.filter(a => a.kategori === kat).map(a => {
-    const s = saldo[a.kode]?.saldo || 0;
-    if (s === 0) return '';
-    return `<div class="report-row"><span>${a.nama}</span><span class="num">${fmt(s)}</span></div>`;
-  }).join('');
+  // Resolve dateTo from state or custom input
+  let dateTo = _neracaPeriod.dateTo;
+  if (_neracaPeriod.type === 'custom') {
+    dateTo = document.getElementById('nr-date-to')?.value || null;
+  }
 
-  const tAset = sumKat('Aset');
-  const tLiab = sumKat('Liabilitas');
-  const tModal = sumKat('Modal');
-  const tPend = sumKat('Pendapatan');
-  const tBeban = sumKat('Beban');
+  // Neraca uses CUMULATIVE saldo up to dateTo (balance sheet = point in time)
+  const saldo = calcSaldoUpTo(dateTo);
+
+  // Period label
+  const labelEl = document.getElementById('neraca-period-label');
+  if (labelEl) {
+    labelEl.textContent = dateTo
+      ? `Per tanggal: ${fmtDate(dateTo)}`
+      : 'Per tanggal: Sekarang (semua transaksi)';
+  }
+
+  // Only show root-level accounts (no induk) per category to avoid double-counting
+  const sumKat = (kat) => COA
+    .filter(a => a.kategori === kat && !a.induk)
+    .reduce((s, a) => s + (saldo[a.kode]?.saldo || 0), 0);
+
+  const rowsKat = (kat) => {
+    const roots = COA.filter(a => a.kategori === kat && !a.induk);
+    return roots.map(a => {
+      const s = saldo[a.kode]?.saldo || 0;
+      const isParent = hasChildren(a.kode);
+      if (s === 0 && !isParent) return '';
+      const children = isParent ? getChildren(a.kode) : [];
+      let childRows = '';
+      if (isParent && children.length) {
+        childRows = children.map(c => {
+          const cs = saldo[c.kode]?.saldo || 0;
+          if (cs === 0) return '';
+          return `<div class="report-row" style="padding-left:20px; font-size:12px; color:var(--text2);">
+            <span>↳ ${c.nama}</span>
+            <span class="num">${fmt(cs)}</span>
+          </div>`;
+        }).join('');
+      }
+      return `
+        <div class="report-row" style="${isParent ? 'font-weight:500;' : ''}">
+          <span>${a.nama}${isParent ? ' <span style="font-size:10px;color:var(--text3);font-weight:400;">(roll-up)</span>' : ''}</span>
+          <span class="num">${fmt(s)}</span>
+        </div>
+        ${childRows}`;
+    }).join('');
+  };
+
+  const tAset   = sumKat('Aset');
+  const tLiab   = sumKat('Liabilitas');
+  const tModal  = sumKat('Modal');
+
+  // Laba Rugi di neraca = kumulatif s/d dateTo, hanya akun nominal (tanpa closing entries supaya tidak double)
+  const nonClosingJournals = dateTo
+    ? JURNAL.filter(j => j.tanggal <= dateTo && !j.isClosing)
+    : JURNAL.filter(j => !j.isClosing);
+  const saldoNominal = calcSaldoFromJournals(nonClosingJournals);
+  const tPend  = COA.filter(a => a.kategori === 'Pendapatan' && !a.induk).reduce((s,a) => s + (saldoNominal[a.kode]?.saldo||0), 0);
+  const tBeban = COA.filter(a => a.kategori === 'Beban'      && !a.induk).reduce((s,a) => s + (saldoNominal[a.kode]?.saldo||0), 0);
   const labaRugi = tPend - tBeban;
+
   const totalLiabModal = tLiab + tModal + labaRugi;
-  const balanced = Math.abs(tAset - totalLiabModal) < 0.01;
+  const balanced = tAset > 0 && Math.abs(tAset - totalLiabModal) < 1;
 
   el.innerHTML = `
     <div class="two-col">
@@ -2104,38 +3288,125 @@ function renderNeraca() {
         <div class="report-section" style="margin-top:16px;">
           <div class="report-heading">MODAL</div>
           ${rowsKat('Modal') || '<div class="report-row" style="color:var(--text3);">—</div>'}
-          <div class="report-row"><span>Laba / Rugi Periode Ini</span><span class="num" style="color:${labaRugi>=0?'var(--accent)':'var(--red)'};">${fmt(labaRugi)}</span></div>
+          <div class="report-row">
+            <span>Laba / Rugi Periode Berjalan</span>
+            <span class="num" style="color:${labaRugi>=0?'var(--accent)':'var(--red)'};">${fmt(labaRugi)}</span>
+          </div>
           <div class="report-total"><span>Total Modal</span><span class="num">${fmt(tModal + labaRugi)}</span></div>
         </div>
-        <div class="report-total" style="margin-top:8px;"><span>Total Liabilitas + Modal</span><span class="num">${fmt(totalLiabModal)}</span></div>
+        <div class="report-total" style="margin-top:8px; border-top: 2px solid var(--text);">
+          <span>Total Liabilitas + Modal</span><span class="num">${fmt(totalLiabModal)}</span>
+        </div>
       </div>
     </div>
-    ${balanced && tAset > 0 ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Neraca seimbang — Aset (${fmt(tAset)}) = Liabilitas + Modal (${fmt(totalLiabModal)})</div>` : ''}
+    ${balanced
+      ? `<div class="alert alert-success show" style="margin-top:14px;">✅ Neraca seimbang — Aset = Liabilitas + Modal = ${fmt(tAset)}</div>`
+      : tAset > 0
+        ? `<div class="alert alert-error show" style="margin-top:14px;">⚠️ Neraca belum seimbang — Aset ${fmt(tAset)} vs Liabilitas+Modal ${fmt(totalLiabModal)} (selisih ${fmt(Math.abs(tAset-totalLiabModal))})</div>`
+        : ''
+    }
   `;
 }
 
 // ══════════════════════════════════════════════════
 //  LABA RUGI
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  LABA RUGI — PERIOD STATE & HANDLERS
+// ══════════════════════════════════════════════════
+let _lrPeriod = { type: 'all', from: null, to: null };
+
+function setLRPeriod(type) {
+  _lrPeriod.type = type;
+
+  // Update active button styles
+  ['all','month','q1','q2','q3','q4','year','custom'].forEach(t => {
+    const btn = document.getElementById('lr-q-' + t);
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+
+  // Show/hide custom date range
+  const cr = document.getElementById('lr-custom-range');
+  if (cr) cr.style.display = type === 'custom' ? 'flex' : 'none';
+
+  const now = new Date();
+  const y   = now.getFullYear();
+  const m   = String(now.getMonth() + 1).padStart(2, '0');
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+
+  if (type === 'all')   { _lrPeriod.from = null;            _lrPeriod.to = null; }
+  if (type === 'month') { _lrPeriod.from = `${y}-${m}-01`;  _lrPeriod.to = `${y}-${m}-${String(lastDay).padStart(2,'0')}`; }
+  if (type === 'q1')    { _lrPeriod.from = `${y}-01-01`;    _lrPeriod.to = `${y}-03-31`; }
+  if (type === 'q2')    { _lrPeriod.from = `${y}-04-01`;    _lrPeriod.to = `${y}-06-30`; }
+  if (type === 'q3')    { _lrPeriod.from = `${y}-07-01`;    _lrPeriod.to = `${y}-09-30`; }
+  if (type === 'q4')    { _lrPeriod.from = `${y}-10-01`;    _lrPeriod.to = `${y}-12-31`; }
+  if (type === 'year')  { _lrPeriod.from = `${y}-01-01`;    _lrPeriod.to = `${y}-12-31`; }
+
+  if (type !== 'custom') renderLabaRugi();
+}
+
+// ══════════════════════════════════════════════════
+//  LABA RUGI — RENDER
+// ══════════════════════════════════════════════════
 function renderLabaRugi() {
-  const saldo = calcSaldo();
   const el = document.getElementById('lr-content');
+  if (!el) return;
 
-  const rowsKat = (kat) => COA.filter(a => a.kategori === kat).map(a => {
-    const s = saldo[a.kode]?.saldo || 0;
-    if (s === 0) return '';
-    return `<div class="report-row"><span>${a.nama}</span><span class="num">${fmt(s)}</span></div>`;
-  }).join('');
+  // Resolve date range from state or custom inputs
+  let dateFrom = _lrPeriod.from;
+  let dateTo   = _lrPeriod.to;
+  if (_lrPeriod.type === 'custom') {
+    dateFrom = document.getElementById('lr-date-from')?.value || null;
+    dateTo   = document.getElementById('lr-date-to')?.value   || null;
+  }
 
-  const tPend = COA.filter(a => a.kategori === 'Pendapatan').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const tBeban = COA.filter(a => a.kategori === 'Beban').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  // Laba Rugi = flow report → only journals in range, exclude closing entries
+  const journals = JURNAL.filter(j => {
+    if (j.isClosing) return false;
+    if (dateFrom && j.tanggal < dateFrom) return false;
+    if (dateTo   && j.tanggal > dateTo)   return false;
+    return true;
+  });
+  const saldo = calcSaldoFromJournals(journals);
+
+  // Period label
+  const labelEl = document.getElementById('lr-period-label');
+  if (labelEl) {
+    labelEl.textContent = dateFrom || dateTo
+      ? `Periode: ${dateFrom ? fmtDate(dateFrom) : 'awal'} s/d ${dateTo ? fmtDate(dateTo) : 'sekarang'}`
+      : 'Semua periode (kumulatif)';
+  }
+
+  // Only root-level (no induk) to avoid double-counting with parent roll-up
+  const rowsKat = (kat) => {
+    const roots = COA.filter(a => a.kategori === kat && !a.induk);
+    return roots.map(a => {
+      const s        = saldo[a.kode]?.saldo || 0;
+      const isParent = hasChildren(a.kode);
+      if (s === 0 && !isParent) return '';
+      // Show sub-accounts indented if parent has children
+      const childRows = isParent ? getChildren(a.kode).map(c => {
+        const cs = saldo[c.kode]?.saldo || 0;
+        if (cs === 0) return '';
+        return `<div class="report-row" style="padding-left:20px; font-size:12px; color:var(--text2);">
+          <span>↳ ${c.nama}</span><span class="num">${fmt(cs)}</span>
+        </div>`;
+      }).join('') : '';
+      return `<div class="report-row" style="${isParent ? 'font-weight:500;' : ''}">
+        <span>${a.nama}</span><span class="num">${fmt(s)}</span>
+      </div>${childRows}`;
+    }).join('');
+  };
+
+  const tPend   = COA.filter(a => a.kategori === 'Pendapatan' && !a.induk).reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tBeban  = COA.filter(a => a.kategori === 'Beban'      && !a.induk).reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
   const labaRugi = tPend - tBeban;
-  const isLaba = labaRugi >= 0;
+  const isLaba   = labaRugi >= 0;
 
   el.innerHTML = `
     <div class="report-section">
       <div class="report-heading">PENDAPATAN</div>
-      ${rowsKat('Pendapatan') || '<div class="report-row" style="color:var(--text3);">Belum ada pendapatan tercatat. Bismillah, hasil panen akan segera datang. 🌿</div>'}
+      ${rowsKat('Pendapatan') || '<div class="report-row" style="color:var(--text3);">Belum ada pendapatan pada periode ini. Bismillah, hasil panen akan segera datang. 🌿</div>'}
       <div class="report-total"><span>Total Pendapatan</span><span class="num" style="color:var(--accent);">${fmt(tPend)}</span></div>
     </div>
     <div class="report-section" style="margin-top:18px;">
@@ -2143,11 +3414,14 @@ function renderLabaRugi() {
       ${rowsKat('Beban') || '<div class="report-row" style="color:var(--text3);">—</div>'}
       <div class="report-total"><span>Total Beban</span><span class="num" style="color:var(--red);">${fmt(tBeban)}</span></div>
     </div>
-    <div class="report-grand ${isLaba?'profit':'loss'}">
+    <div class="report-grand ${isLaba ? 'profit' : 'loss'}">
       <span>${isLaba ? '🌿 Laba Bersih' : '⚠️ Rugi Bersih'}</span>
       <span class="num">${fmt(Math.abs(labaRugi))}</span>
     </div>
-    ${!isLaba ? `<div class="alert alert-info show" style="margin-top:12px;">💡 Hasil rugi di fase awal ini adalah normal — ini adalah fase investasi pertanian. Biaya tanam adalah amanah yang ditanamkan. Insya Allah hasilnya akan datang saat panen. 🌾</div>` : `<div class="alert alert-success show" style="margin-top:12px;">Alhamdulillah! 🎉 Usaha tani mulai memberikan hasil positif.</div>`}
+    ${!isLaba
+      ? `<div class="alert alert-info show" style="margin-top:12px;">💡 Hasil rugi pada periode ini adalah normal di fase investasi pertanian. Biaya tanam adalah amanah yang ditanamkan. Insya Allah hasilnya akan datang saat panen. 🌾</div>`
+      : `<div class="alert alert-success show" style="margin-top:12px;">Alhamdulillah! 🎉 Usaha tani memberikan hasil positif pada periode ini.</div>`
+    }
   `;
 }
 
@@ -2158,11 +3432,19 @@ let chartBeban = null, chartMonthly = null;
 
 function renderDashboard() {
   const saldo = calcSaldo();
-  const tAset = COA.filter(a => a.kategori === 'Aset').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const tLiab = COA.filter(a => a.kategori === 'Liabilitas').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const tModal = COA.filter(a => a.kategori === 'Modal').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const tPend = COA.filter(a => a.kategori === 'Pendapatan').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
-  const tBeban = COA.filter(a => a.kategori === 'Beban').reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+
+  // ATURAN: hanya akun root (tidak punya induk) per kategori yang dijumlah.
+  // Akun induk sudah include roll-up anaknya. Akun anak sudah terhitung dalam induk.
+  // Untuk kategori yang tidak punya hierarki (flat), ini tetap benar.
+  const sumKatRoot = (kat) => COA
+    .filter(a => a.kategori === kat && !a.induk)
+    .reduce((s, a) => s + (saldo[a.kode]?.saldo || 0), 0);
+
+  const tAset   = sumKatRoot('Aset');
+  const tLiab   = sumKatRoot('Liabilitas');
+  const tModal  = sumKatRoot('Modal');
+  const tPend   = sumKatRoot('Pendapatan');
+  const tBeban  = sumKatRoot('Beban');
   const labaRugi = tPend - tBeban;
 
   document.getElementById('dash-metrics').innerHTML = `
@@ -2204,13 +3486,18 @@ function renderDashboard() {
     recentEl.innerHTML = '<div class="empty-state"><div class="es-icon">📝</div><h3>Belum ada transaksi</h3><p>Mulai dengan menekan tombol "+ Input Baru"</p></div>';
   } else {
     recentEl.innerHTML = JURNAL.slice(0,7).map(j => {
-      const totalD = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
-      const isPend = j.lines.some(l => { const a = COA.find(c=>c.kode===l.akun); return a?.kategori==='Pendapatan' && l.tipe==='Kredit'; });
-      return `<div class="report-row" style="cursor:pointer;" onclick="showPage('riwayat')">
-        <span style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${j.deskripsi}</span>
-        <span style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:11px; color:var(--text3);">${fmtDate(j.tanggal)}</span>
-          <span style="font-weight:500; color:${isPend?'var(--accent)':'var(--text)'};">${fmt(totalD)}</span>
+      const totalD   = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
+      const isPend   = j.lines.some(l => { const a = COA.find(c=>c.kode===l.akun); return a?.kategori==='Pendapatan' && l.tipe==='Kredit'; });
+      const isLocked = !!j.locked;
+      return `<div class="report-row">
+        <span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" onclick="showPage('riwayat')">${j.deskripsi}</span>
+        <span style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span style="font-size:11px;color:var(--text3);">${fmtDate(j.tanggal)}</span>
+          <span style="font-weight:500;color:${isPend?'var(--accent)':'var(--text)'};">${fmt(totalD)}</span>
+          ${isLocked
+            ? '<span style="font-size:14px;" title="Terkunci">🔒</span>'
+            : `<button class="btn btn-sm" onclick="editJurnal(${j.id})" style="padding:3px 9px;font-size:11px;background:var(--blue-light);color:var(--blue);border-color:#B5C8DF;">✏️</button>`
+          }
         </span>
       </div>`;
     }).join('');
@@ -2566,9 +3853,12 @@ function renderTutupBuku() {
         <div style="font-weight:500;">Tahun ${p.name}</div>
         <div style="font-size:12px;color:var(--text3);">Ditutup: ${fmtDate(p.closedAt)} · ${p.journalCount} transaksi terkunci</div>
       </div>
-      <div style="text-align:right;">
-        <span class="badge badge-${p.netIncome>=0?'success':'warning'}">${p.netIncome>=0?'Laba':'Rugi'}: ${fmt(Math.abs(p.netIncome))}</span>
-        <div style="font-size:11px;color:var(--text3);margin-top:3px;">→ Laba Ditahan</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="text-align:right;">
+          <span class="badge badge-${p.netIncome>=0?'success':'warning'}">${p.netIncome>=0?'Laba':'Rugi'}: ${fmt(Math.abs(p.netIncome))}</span>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px;">→ Laba Ditahan</div>
+        </div>
+        <button class="btn btn-sm" onclick="cetakTutupBuku('${p.name}')">🖨 Cetak</button>
       </div>
     </div>`) .join('') :
     '<div style="color:var(--text3);font-size:13px;padding:12px 0;">Belum ada periode yang ditutup.</div>';
@@ -2690,11 +3980,12 @@ function renderClosingPreview() {
       Pastikan kamu sudah melakukan backup data (<strong>Export Data</strong> di topbar) sebelum melanjutkan.
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       ${noLD ? '' : `<button class="btn btn-primary" onclick="eksekusiTutupBuku('${year}')" style="background:var(--red);border-color:#7A2E23;">
         🔒 Tutup Buku Tahun ${year}
       </button>`}
-      <button class="btn" onclick="exportData()">💾 Backup Data Dulu</button>
+      <button class="btn btn-gold" onclick="exportCSV()">⬇ Backup Data (CSV)</button>
+      <button class="btn" onclick="exportData()">⬇ Backup Data (JSON)</button>
     </div>
   `;
 }
@@ -2782,40 +4073,607 @@ function eksekusiTutupBuku(year) {
 // ══════════════════════════════════════════════════
 //  EXPORT / IMPORT / RESET
 // ══════════════════════════════════════════════════
+
+/** Escape a CSV cell value */
+function csvCell(val) {
+  const s = String(val === null || val === undefined ? '' : val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+/** Export all data as CSV — 3 sheets packed into one file with section headers */
+function exportCSV() {
+  const now    = new Date().toISOString().split('T')[0];
+  const rows   = [];
+  const sep    = () => rows.push('');
+
+  // ── Sheet 1: Informasi Umum
+  rows.push('JURNAL TANI DARI NOL - BACKUP DATA CSV');
+  rows.push('Tanggal Export,' + csvCell(fmtDate(now)));
+  rows.push('Total Akun COA,' + COA.length);
+  rows.push('Total Jurnal,' + JURNAL.length);
+  rows.push('Total Periode Tertutup,' + PERIODS.filter(p=>p.closed).length);
+  sep();
+
+  // ── Sheet 2: Chart of Accounts
+  rows.push('=== CHART OF ACCOUNTS ===');
+  rows.push(['Kode','Nama Akun','Kategori','Tipe','Normal Saldo','Akun Induk','Deskripsi'].map(csvCell).join(','));
+  COA.forEach(a => rows.push([a.kode, a.nama, a.kategori, a.tipe||'', a.normal, a.induk||'', a.desc||''].map(csvCell).join(',')));
+  sep();
+
+  // ── Sheet 3: Jurnal Umum (expanded per line)
+  rows.push('=== JURNAL UMUM ===');
+  rows.push(['ID','Tanggal','Deskripsi','Referensi','Kode Akun','Nama Akun','Debit','Kredit','Status'].map(csvCell).join(','));
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => {
+      const akun = COA.find(a => a.kode === l.akun);
+      const nm   = akun ? akun.nama : l.akun;
+      const status = j.isClosing ? 'CLOSING' : j.locked ? 'TERKUNCI' : 'AKTIF';
+      rows.push([
+        j.id, j.tanggal, j.deskripsi, j.referensi||'',
+        l.akun, nm,
+        l.tipe === 'Debit'  ? l.nominal : '',
+        l.tipe === 'Kredit' ? l.nominal : '',
+        status,
+      ].map(csvCell).join(','));
+    });
+  });
+  sep();
+
+  // ── Sheet 4: Riwayat Tutup Buku
+  rows.push('=== RIWAYAT TUTUP BUKU ===');
+  rows.push(['Tahun','Tanggal Ditutup','Laba/Rugi Bersih','Jumlah Transaksi Terkunci'].map(csvCell).join(','));
+  PERIODS.filter(p=>p.closed).forEach(p => {
+    rows.push([p.name, fmtDate(p.closedAt), p.netIncome, p.journalCount].map(csvCell).join(','));
+  });
+
+  const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'jurnal-tani-backup-' + now + '.csv';
+  a.click();
+}
+
+/** Cetak ringkasan tutup buku untuk tahun tertentu */
+function cetakTutupBuku(year) {
+  const period = PERIODS.find(p => p.name === year && p.closed);
+  if (!period) { alert('Data periode tidak ditemukan.'); return; }
+
+  const now     = new Date();
+  const printed = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+                + ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  const isLaba  = period.netIncome >= 0;
+
+  // Ambil jurnal closing untuk tahun ini
+  const closingJurnals = JURNAL.filter(j => j.isClosing && j.tanggal.startsWith(year));
+  // Ambil semua jurnal operasional periode ini (non-closing)
+  const opJurnals = JURNAL.filter(j => !j.isClosing && j.tanggal >= period.startDate && j.tanggal <= period.endDate);
+
+  // Hitung ringkasan per kategori dari jurnal operasional
+  const saldo = calcSaldoFromJournals(opJurnals);
+  const sumKat = (kat) => COA.filter(a => a.kategori === kat && !a.induk).reduce((s,a) => s + (saldo[a.kode]?.saldo||0), 0);
+  const tPend  = sumKat('Pendapatan');
+  const tBeban = sumKat('Beban');
+
+  // Build closing journal rows
+  const closingRows = closingJurnals.map(j => {
+    const lines = j.lines.map(l => {
+      const akun = COA.find(a => a.kode === l.akun);
+      const nm   = akun ? akun.nama : l.akun;
+      const isK  = l.tipe === 'Kredit';
+      return '<tr style="font-size:11px;background:#FAFAFA;">'
+        + '<td style="padding:3px 10px;"></td>'
+        + '<td style="padding:3px 10px 3px ' + (isK?'30px':'12px') + ';font-family:Arial,sans-serif;color:#444;">'
+        + '<b style="color:' + (isK?'#3D6B47':'#2B4E7A') + ';margin-right:5px;">' + (isK?'[K]':'[D]') + '</b>'
+        + l.akun + ' ' + nm + '</td>'
+        + '<td style="text-align:right;padding:3px 10px;font-family:Arial,sans-serif;color:#333;">' + (!isK?fmt(l.nominal):'') + '</td>'
+        + '<td style="text-align:right;padding:3px 10px;font-family:Arial,sans-serif;color:#333;">' + (isK?fmt(l.nominal):'') + '</td>'
+        + '</tr>';
+    }).join('');
+    const totalD = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
+    return '<tr style="background:#FFF8E8;border-top:2px solid #E4DFD5;">'
+      + '<td style="padding:8px 10px;font-size:11px;color:#8A8278;white-space:nowrap;vertical-align:top;">' + fmtDate(j.tanggal) + '</td>'
+      + '<td style="padding:8px 10px;font-size:12px;font-weight:700;font-family:Arial,sans-serif;vertical-align:top;color:#A07C3A;">'
+      + j.deskripsi + '<span style="font-size:10px;background:#EEE;border-radius:3px;padding:1px 5px;margin-left:6px;">' + j.referensi + '</span></td>'
+      + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;vertical-align:top;color:#1C1A16;">' + fmt(totalD) + '</td>'
+      + '<td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;vertical-align:top;color:#1C1A16;">' + fmt(totalD) + '</td>'
+      + '</tr>' + lines;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<title>Laporan Tutup Buku ${year} - Jurnal Tani dari Nol</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:Arial,sans-serif; color:#1C1A16; background:#fff; padding:20px; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; padding-bottom:14px; border-bottom:3px solid #3D6B47; }
+.brand { font-size:18px; font-weight:700; color:#3D6B47; }
+.brand-sub { font-size:11px; color:#8A8278; margin-top:2px; }
+.doc-info { text-align:right; font-size:11px; color:#5A5449; }
+.doc-info strong { display:block; font-size:14px; color:#1C1A16; margin-bottom:3px; }
+.summary-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+.sum-box { background:#F5F2EC; border-radius:6px; padding:10px 12px; }
+.sum-label { font-size:10px; text-transform:uppercase; color:#8A8278; margin-bottom:3px; }
+.sum-value { font-size:14px; font-weight:700; color:#1C1A16; }
+.sum-value.green { color:#3D6B47; }
+.sum-value.red { color:#9B3A2E; }
+.sum-value.gold { color:#A07C3A; }
+.section-title { font-size:12px; font-weight:700; text-transform:uppercase; color:#5A5449; border-bottom:1px solid #D8D2C5; padding-bottom:6px; margin:16px 0 10px; letter-spacing:0.03em; }
+table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; }
+thead { display:table-header-group; }
+tfoot { display:table-footer-group; }
+thead th { background:#1C1A16; color:#fff; padding:8px 10px; text-align:left; font-size:11px; font-weight:700; }
+thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+tbody tr { break-inside:avoid; page-break-inside:avoid; }
+tfoot td { background:#E8F0EA; color:#2E5238; font-weight:700; padding:10px; font-size:12px; border-top:2px solid #3D6B47; }
+tfoot td:nth-child(3), tfoot td:nth-child(4) { text-align:right; }
+.result-box { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-radius:8px; margin-top:20px; font-size:16px; font-weight:700; }
+.result-box.laba { background:#E8F0EA; color:#2E5238; border:2px solid #3D6B47; }
+.result-box.rugi { background:#F5E8E6; color:#9B3A2E; border:2px solid #9B3A2E; }
+.footer { margin-top:24px; padding-top:10px; border-top:1px solid #D8D2C5; font-size:10px; color:#8A8278; display:flex; justify-content:space-between; }
+.stamp { display:inline-block; border:2px solid #3D6B47; border-radius:6px; padding:4px 16px; color:#3D6B47; font-size:14px; font-weight:700; margin-top:4px; }
+@media print {
+  body { padding:10px; }
+  thead { display:table-header-group; }
+  tfoot { display:table-footer-group; }
+  tbody tr { break-inside:avoid; page-break-inside:avoid; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Jurnal Tani dari Nol</div>
+    <div class="brand-sub">Sistem Keuangan Pertanian - Ardhi's Farm</div>
+  </div>
+  <div class="doc-info">
+    <strong>Laporan Tutup Buku Tahun ${year}</strong>
+    Dicetak: ${printed}
+    <div class="stamp">PERIODE TERTUTUP</div>
+  </div>
+</div>
+
+<div class="summary-grid">
+  <div class="sum-box">
+    <div class="sum-label">Periode</div>
+    <div class="sum-value">${fmtDate(period.startDate)} - ${fmtDate(period.endDate)}</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-label">Total Pendapatan</div>
+    <div class="sum-value green">${fmt(tPend)}</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-label">Total Beban</div>
+    <div class="sum-value red">${fmt(tBeban)}</div>
+  </div>
+  <div class="sum-box">
+    <div class="sum-label">${isLaba ? 'Laba Bersih' : 'Rugi Bersih'}</div>
+    <div class="sum-value ${isLaba?'green':'red'}">${fmt(Math.abs(period.netIncome))}</div>
+  </div>
+</div>
+
+<div class="section-title">Jurnal Closing Otomatis (${closingJurnals.length} entri)</div>
+<table>
+  <thead><tr>
+    <th style="width:90px;">Tanggal</th>
+    <th>Keterangan</th>
+    <th style="width:130px;text-align:right;">Debit (Rp)</th>
+    <th style="width:130px;text-align:right;">Kredit (Rp)</th>
+  </tr></thead>
+  <tbody>
+    ${closingRows || '<tr><td colspan="4" style="padding:12px;text-align:center;color:#8A8278;">Tidak ada jurnal closing</td></tr>'}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">Total Closing Entries</td>
+      <td style="text-align:right;">${fmt(closingJurnals.reduce((s,j) => s + j.lines.filter(l=>l.tipe==='Debit').reduce((x,l)=>x+l.nominal,0), 0))}</td>
+      <td style="text-align:right;">${fmt(closingJurnals.reduce((s,j) => s + j.lines.filter(l=>l.tipe==='Kredit').reduce((x,l)=>x+l.nominal,0), 0))}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="result-box ${isLaba?'laba':'rugi'}">
+  <span>${isLaba ? 'Laba Bersih Tahun ' + year + ' dipindahkan ke Laba Ditahan' : 'Rugi Bersih Tahun ' + year + ' dikurangkan dari Laba Ditahan'}</span>
+  <span>${fmt(Math.abs(period.netIncome))}</span>
+</div>
+
+<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  <div>
+    <div class="section-title">Informasi Penutupan</div>
+    <table style="font-size:11px;">
+      <tr><td style="padding:4px 0;color:#8A8278;">Tanggal Ditutup</td><td style="padding:4px 0 4px 16px;font-weight:500;">${fmtDate(period.closedAt)}</td></tr>
+      <tr><td style="padding:4px 0;color:#8A8278;">Transaksi Terkunci</td><td style="padding:4px 0 4px 16px;font-weight:500;">${period.journalCount} jurnal</td></tr>
+      <tr><td style="padding:4px 0;color:#8A8278;">Jurnal Closing</td><td style="padding:4px 0 4px 16px;font-weight:500;">${closingJurnals.length} entri otomatis</td></tr>
+      <tr><td style="padding:4px 0;color:#8A8278;">Status Periode</td><td style="padding:4px 0 4px 16px;font-weight:700;color:#3D6B47;">TERTUTUP</td></tr>
+    </table>
+  </div>
+  <div>
+    <div class="section-title">Tanda Tangan</div>
+    <div style="border-bottom:1px solid #333;width:180px;margin-top:40px;"></div>
+    <div style="font-size:11px;color:#8A8278;margin-top:6px;">Ardhi — Pemilik Usaha</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Jurnal Tani dari Nol — Sistem Keuangan Pertanian</span>
+  <span>Dicetak pada ${printed}</span>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=950,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+// ══════════════════════════════════════════════════
+//  EXPORT / IMPORT / RESET — CSV-based
+// ══════════════════════════════════════════════════
+
+/** Escape a CSV cell value */
+function csvCell(val) {
+  const s = String(val === null || val === undefined ? '' : val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+/** Build the full CSV export content string */
+function buildFullCSV() {
+  const now  = new Date().toISOString().split('T')[0];
+  const rows = [];
+  const hr   = (title) => { rows.push(''); rows.push(title); };
+
+  // ── Info
+  rows.push('##INFO');
+  rows.push(['app','Jurnal Tani dari Nol'].map(csvCell).join(','));
+  rows.push(['version','4'].map(csvCell).join(','));
+  rows.push(['exported', now].map(csvCell).join(','));
+  rows.push(['total_coa', COA.length].map(csvCell).join(','));
+  rows.push(['total_jurnal', JURNAL.length].map(csvCell).join(','));
+  rows.push(['total_templates', TEMPLATES.length].map(csvCell).join(','));
+  rows.push(['total_periods', PERIODS.length].map(csvCell).join(','));
+
+  // ── COA
+  hr('##COA');
+  rows.push(['kode','nama','kategori','tipe','normal','induk','desc'].map(csvCell).join(','));
+  COA.forEach(a => rows.push([
+    a.kode, a.nama, a.kategori, a.tipe||'', a.normal, a.induk||'', a.desc||''
+  ].map(csvCell).join(',')));
+
+  // ── JURNAL (one row per line, grouped by journal id)
+  hr('##JURNAL');
+  rows.push(['id','tanggal','deskripsi','referensi','akun','tipe','nominal','locked','isClosing'].map(csvCell).join(','));
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => rows.push([
+      j.id, j.tanggal, j.deskripsi, j.referensi||'',
+      l.akun, l.tipe, l.nominal,
+      j.locked ? '1' : '0',
+      j.isClosing ? '1' : '0',
+    ].map(csvCell).join(',')));
+  });
+
+  // ── TEMPLATES
+  hr('##TEMPLATES');
+  rows.push(['id','nama','ikon','catatan','desc','createdAt','lines_json'].map(csvCell).join(','));
+  TEMPLATES.forEach(t => rows.push([
+    t.id, t.nama, t.ikon||'', t.catatan||'', t.desc||'', t.createdAt||'',
+    JSON.stringify(t.lines||[])
+  ].map(csvCell).join(',')));
+
+  // ── PERIODS
+  hr('##PERIODS');
+  rows.push(['name','startDate','endDate','closed','closedAt','netIncome','journalCount'].map(csvCell).join(','));
+  PERIODS.forEach(p => rows.push([
+    p.name, p.startDate, p.endDate,
+    p.closed ? '1' : '0',
+    p.closedAt||'', p.netIncome||0, p.journalCount||0
+  ].map(csvCell).join(',')));
+
+  return '\uFEFF' + rows.join('\n');
+}
+
+/** Export full data as CSV */
+function exportFullCSV() {
+  const now  = new Date().toISOString().split('T')[0];
+  const blob = new Blob([buildFullCSV()], { type: 'text/csv;charset=utf-8;' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'jurnal-tani-' + now + '.csv';
+  a.click();
+}
+
+/** Keep JSON export for tutup buku backup compatibility */
 function exportData() {
-  const data = { coa: COA, jurnal: JURNAL, periods: PERIODS, exported: new Date().toISOString(), app: 'Jurnal Tani dari Nol v4' };
+  const data = { coa: COA, jurnal: JURNAL, periods: PERIODS, templates: TEMPLATES, exported: new Date().toISOString(), app: 'Jurnal Tani dari Nol v4' };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
   a.download = 'jurnal-tani-' + today() + '.json';
   a.click();
 }
-function importDataClick() { document.getElementById('import-file').click(); }
-function importData(e) {
+
+/** Download blank CSV template with headers + example rows + instructions */
+function downloadTemplate() {
+  const rows = [];
+
+  rows.push('# ============================================================');
+  rows.push('# TEMPLATE IMPORT - JURNAL TANI DARI NOL');
+  rows.push('# Petunjuk:');
+  rows.push('#   1. Hapus baris yang diawali # (komentar)');
+  rows.push('#   2. Isi data di bawah setiap header section (##XXX)');
+  rows.push('#   3. Jangan ubah nama section header (##INFO dst)');
+  rows.push('#   4. Simpan sebagai .csv lalu import via tombol Import CSV');
+  rows.push('#   5. Kolom yang wajib diisi ditandai [WAJIB]');
+  rows.push('# ============================================================');
+  rows.push('');
+
+  // INFO
+  rows.push('##INFO');
+  rows.push('app,Jurnal Tani dari Nol');
+  rows.push('version,4');
+  rows.push('exported,' + today());
+  rows.push('total_coa,0');
+  rows.push('total_jurnal,0');
+  rows.push('total_templates,0');
+  rows.push('total_periods,0');
+  rows.push('');
+
+  // COA
+  rows.push('##COA');
+  rows.push('# kode[WAJIB] | nama[WAJIB] | kategori[WAJIB: Aset/Liabilitas/Modal/Pendapatan/Beban]');
+  rows.push('# tipe | normal[WAJIB: Debit/Kredit] | induk[kode akun induk, kosongkan jika tidak ada] | desc');
+  rows.push('kode,nama,kategori,tipe,normal,induk,desc');
+  rows.push('1-001,Kas Tunai,Aset,Kas & Setara Kas,Debit,,Uang tunai di tangan');
+  rows.push('1-002,Bank/Rekening,Aset,Kas & Setara Kas,Debit,,Rekening bank (akun induk)');
+  rows.push('1-002.01,Bank BRI,Aset,Kas & Setara Kas,Debit,1-002,Rekening BRI Tabungan');
+  rows.push('1-002.02,Bank BCA,Aset,Kas & Setara Kas,Debit,1-002,Rekening BCA Giro');
+  rows.push('3-001,Modal Pemilik,Modal,Modal Pemilik,Kredit,,Modal awal Ardhi');
+  rows.push('4-001,Pendapatan Panen Kelapa,Pendapatan,Pendapatan Usaha,Kredit,,Hasil jual kelapa');
+  rows.push('5-001,Beban Tenaga Kerja,Beban,Beban Operasional,Debit,,Upah buruh tani');
+  rows.push('');
+
+  // JURNAL
+  rows.push('##JURNAL');
+  rows.push('# id[WAJIB: angka unik] | tanggal[WAJIB: YYYY-MM-DD] | deskripsi[WAJIB]');
+  rows.push('# referensi | akun[WAJIB: kode COA] | tipe[WAJIB: Debit/Kredit] | nominal[WAJIB]');
+  rows.push('# locked[0/1] | isClosing[0/1]');
+  rows.push('# Setiap jurnal minimal 2 baris (1 Debit + 1 Kredit), total Debit = total Kredit');
+  rows.push('id,tanggal,deskripsi,referensi,akun,tipe,nominal,locked,isClosing');
+  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,1-002.01,Debit,10000000,0,0');
+  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,3-001,Kredit,10000000,0,0');
+  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-102,Debit,750000,0,0');
+  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-002.01,Kredit,750000,0,0');
+  rows.push('');
+
+  // TEMPLATES
+  rows.push('##TEMPLATES');
+  rows.push('# id[WAJIB] | nama[WAJIB] | ikon | catatan | desc | createdAt | lines_json[WAJIB: JSON array]');
+  rows.push('id,nama,ikon,catatan,desc,createdAt,lines_json');
+  rows.push('2001,Bayar Upah Mingguan,💵,Untuk pembayaran upah setiap hari Sabtu,Pembayaran upah tenaga kerja,' + today() + ',"[{""akun"":""5-001"",""tipe"":""Debit""},{""akun"":""1-001"",""tipe"":""Kredit""}]"');
+  rows.push('');
+
+  // PERIODS
+  rows.push('##PERIODS');
+  rows.push('# name[WAJIB: tahun] | startDate | endDate | closed[0/1] | closedAt | netIncome | journalCount');
+  rows.push('# Kosongkan section ini jika belum ada tutup buku');
+  rows.push('name,startDate,endDate,closed,closedAt,netIncome,journalCount');
+  rows.push('# 2024,2024-01-01,2024-12-31,1,2025-01-01,5000000,24');
+
+  const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'jurnal-tani-TEMPLATE-IMPORT.csv';
+  a.click();
+}
+
+// ── CSV Import ─────────────────────────────────────
+
+let _pendingImport = null; // holds parsed data before confirmation
+
+function importCSVClick() { document.getElementById('import-file').click(); }
+
+function tutupImportModal() {
+  document.getElementById('import-csv-modal').style.display = 'none';
+  _pendingImport = null;
+}
+
+/** Parse the multi-section CSV into structured data */
+function parseImportCSV(text) {
+  // Strip BOM
+  const raw    = text.replace(/^\uFEFF/, '');
+  const lines  = raw.split(/\r?\n/);
+
+  const sections = { INFO: [], COA: [], JURNAL: [], TEMPLATES: [], PERIODS: [] };
+  let current = null;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return; // skip comments & blanks
+    if (trimmed.startsWith('##')) {
+      current = trimmed.substring(2).toUpperCase();
+      return;
+    }
+    if (current && sections[current] !== undefined) {
+      sections[current].push(trimmed);
+    }
+  });
+
+  // Parse CSV row (handle quoted fields)
+  function parseRow(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"' && !inQ) { inQ = true; continue; }
+      if (ch === '"' && inQ)  {
+        if (line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+        continue;
+      }
+      if (ch === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    result.push(cur);
+    return result;
+  }
+
+  // ── Parse COA
+  const coaData = [];
+  if (sections.COA.length > 1) {
+    const hdr = parseRow(sections.COA[0]);
+    sections.COA.slice(1).forEach(line => {
+      const row = parseRow(line);
+      const obj = {};
+      hdr.forEach((h, i) => obj[h.trim()] = (row[i]||'').trim());
+      if (obj.kode && obj.nama && obj.kategori && obj.normal) {
+        coaData.push({
+          kode:     obj.kode,
+          nama:     obj.nama,
+          kategori: obj.kategori,
+          tipe:     obj.tipe || '',
+          normal:   obj.normal,
+          induk:    obj.induk || undefined,
+          desc:     obj.desc  || '',
+        });
+      }
+    });
+  }
+
+  // ── Parse JURNAL (group by id)
+  const jurnalMap = {};
+  if (sections.JURNAL.length > 1) {
+    const hdr = parseRow(sections.JURNAL[0]);
+    sections.JURNAL.slice(1).forEach(line => {
+      const row = parseRow(line);
+      const obj = {};
+      hdr.forEach((h, i) => obj[h.trim()] = (row[i]||'').trim());
+      if (!obj.id || !obj.tanggal || !obj.akun) return;
+      if (!jurnalMap[obj.id]) {
+        jurnalMap[obj.id] = {
+          id:        parseInt(obj.id),
+          tanggal:   obj.tanggal,
+          deskripsi: obj.deskripsi || '',
+          referensi: obj.referensi || '',
+          locked:    obj.locked === '1',
+          isClosing: obj.isClosing === '1',
+          lines:     [],
+        };
+      }
+      const nom = parseFloat(obj.nominal);
+      if (obj.akun && obj.tipe && !isNaN(nom)) {
+        jurnalMap[obj.id].lines.push({ akun: obj.akun, tipe: obj.tipe, nominal: nom });
+      }
+    });
+  }
+  const jurnalData = Object.values(jurnalMap).filter(j => j.lines.length >= 2);
+
+  // ── Parse TEMPLATES
+  const tplData = [];
+  if (sections.TEMPLATES.length > 1) {
+    const hdr = parseRow(sections.TEMPLATES[0]);
+    sections.TEMPLATES.slice(1).forEach(line => {
+      const row = parseRow(line);
+      const obj = {};
+      hdr.forEach((h, i) => obj[h.trim()] = (row[i]||'').trim());
+      if (!obj.id || !obj.nama) return;
+      let lines = [];
+      try { lines = JSON.parse(obj.lines_json || '[]'); } catch(e) {}
+      tplData.push({ id: parseInt(obj.id), nama: obj.nama, ikon: obj.ikon||'📋', catatan: obj.catatan||'', desc: obj.desc||'', createdAt: obj.createdAt||today(), lines });
+    });
+  }
+
+  // ── Parse PERIODS
+  const perData = [];
+  if (sections.PERIODS.length > 1) {
+    const hdr = parseRow(sections.PERIODS[0]);
+    sections.PERIODS.slice(1).forEach(line => {
+      const row = parseRow(line);
+      const obj = {};
+      hdr.forEach((h, i) => obj[h.trim()] = (row[i]||'').trim());
+      if (!obj.name) return;
+      perData.push({ name: obj.name, startDate: obj.startDate||'', endDate: obj.endDate||'', closed: obj.closed==='1', closedAt: obj.closedAt||'', netIncome: parseFloat(obj.netIncome)||0, journalCount: parseInt(obj.journalCount)||0 });
+    });
+  }
+
+  return { coa: coaData, jurnal: jurnalData, templates: tplData, periods: perData };
+}
+
+function importCSV(e) {
   const file = e.target.files[0];
   if (!file) return;
+  e.target.value = '';
+
   const reader = new FileReader();
   reader.onload = (ev) => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (!data.coa || !data.jurnal) { alert('Format file tidak valid.'); return; }
-      if (!confirm('Import akan mengganti semua data yang ada. Lanjutkan?')) return;
-      COA     = data.coa;
-      JURNAL  = data.jurnal;
-      PERIODS = data.periods || [];
-      saveCOA(); saveJRN(); savePER();
-      renderAll();
-      alert('✅ Data berhasil diimport!');
-    } catch(err) { alert('Gagal membaca file: ' + err.message); }
+      const parsed = parseImportCSV(ev.target.result);
+      _pendingImport = parsed;
+
+      // Show preview modal
+      const alertEl   = document.getElementById('import-csv-alert');
+      const previewEl = document.getElementById('import-csv-preview');
+      const confirmBtn= document.getElementById('import-csv-confirm-btn');
+
+      const hasData = parsed.coa.length > 0 || parsed.jurnal.length > 0;
+      if (!hasData) {
+        alertEl.className = 'alert alert-error show';
+        alertEl.textContent = '❌ File CSV tidak mengandung data COA atau Jurnal yang valid. Pastikan format sesuai template.';
+        previewEl.innerHTML = '';
+        confirmBtn.style.display = 'none';
+      } else {
+        alertEl.className = 'alert alert-info show';
+        alertEl.textContent = '⚠️ Import akan MENGGANTI semua data yang ada. Pastikan sudah export backup terlebih dahulu.';
+        previewEl.innerHTML =
+          '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;">'
+          + _previewBox('📑 Akun COA',       parsed.coa.length      + ' akun',       parsed.coa.length > 0)
+          + _previewBox('📋 Jurnal',          parsed.jurnal.length   + ' entri',      parsed.jurnal.length > 0)
+          + _previewBox('⚡ Templates',        parsed.templates.length + ' template',  parsed.templates.length > 0)
+          + _previewBox('🔒 Periode',          parsed.periods.length  + ' periode',   parsed.periods.length > 0)
+          + '</div>'
+          + '<div style="margin-top:12px;font-size:12px;color:var(--text2);">'
+          + '<strong>Preview COA (5 pertama):</strong><br>'
+          + parsed.coa.slice(0,5).map(a => `<span style="font-family:monospace;font-size:11px;">${a.kode}</span> ${a.nama} <span style="color:var(--text3);">(${a.kategori})</span>`).join('<br>')
+          + (parsed.coa.length > 5 ? `<br><span style="color:var(--text3);">... dan ${parsed.coa.length-5} akun lainnya</span>` : '')
+          + '</div>';
+        confirmBtn.style.display = 'inline-flex';
+      }
+
+      document.getElementById('import-csv-modal').style.display = 'flex';
+    } catch(err) {
+      alert('Gagal membaca file CSV: ' + err.message);
+    }
   };
-  reader.readAsText(file);
-  e.target.value = '';
+  reader.readAsText(file, 'UTF-8');
 }
+
+function _previewBox(label, value, hasData) {
+  return '<div style="background:' + (hasData ? 'var(--accent-light)' : 'var(--bg2)') + ';border-radius:6px;padding:10px 12px;">'
+    + '<div style="font-size:11px;color:var(--text3);">' + label + '</div>'
+    + '<div style="font-size:14px;font-weight:600;color:' + (hasData ? 'var(--accent2)' : 'var(--text3)') + ';">' + value + '</div>'
+    + '</div>';
+}
+
+function konfirmasiImportCSV() {
+  if (!_pendingImport) return;
+  const parsed = _pendingImport;
+  COA       = parsed.coa;
+  JURNAL    = parsed.jurnal;
+  TEMPLATES = parsed.templates;
+  PERIODS   = parsed.periods;
+  saveCOA(); saveJRN(); saveTPL(); savePER();
+  renderAll();
+  tutupImportModal();
+  alert('✅ Import berhasil!\n\n• ' + COA.length + ' akun COA\n• ' + JURNAL.length + ' jurnal\n• ' + TEMPLATES.length + ' template\n• ' + PERIODS.length + ' periode');
+}
+
 function resetData() {
-  if (!confirm('⚠️ HAPUS SEMUA DATA? Semua jurnal, COA, dan data periode akan dihapus permanen. Pastikan sudah export terlebih dahulu!')) return;
+  if (!confirm('⚠️ HAPUS SEMUA DATA? Semua jurnal, COA, template, dan data periode akan dihapus permanen.\n\nPastikan sudah Export CSV terlebih dahulu!')) return;
   if (!confirm('Yakin? Ini tidak bisa dibatalkan.')) return;
-  COA = []; JURNAL = []; PERIODS = [];
-  saveCOA(); saveJRN(); savePER();
+  COA = []; JURNAL = []; PERIODS = []; TEMPLATES = [];
+  saveCOA(); saveJRN(); savePER(); saveTPL();
   renderAll();
   alert('Data berhasil direset.');
 }
@@ -2827,6 +4685,7 @@ function renderAll() {
   renderDashboard();
   renderCOA();
   refreshSelects();
+  renderCustomTemplates();
 }
 
 function init() {
@@ -2839,7 +4698,338 @@ function init() {
   document.getElementById('j-tanggal').value = today();
 }
 
+// ══════════════════════════════════════════════════
+//  RIWAYAT — CETAK & DOWNLOAD PDF
+// ══════════════════════════════════════════════════
+
+/** Collect current filtered list + metadata for print/PDF */
+function getFilteredRiwayatData() {
+  const search     = (document.getElementById('search-jurnal')?.value || '').toLowerCase();
+  const bulanFilter= document.getElementById('filter-bulan')?.value || '';
+  let dateFrom     = _riwayatPeriod.from;
+  let dateTo       = _riwayatPeriod.to;
+  if (_riwayatPeriod.type === 'custom') {
+    dateFrom = document.getElementById('rw-date-from')?.value || null;
+    dateTo   = document.getElementById('rw-date-to')?.value   || null;
+  }
+
+  let list = [...JURNAL];
+  if (dateFrom)    list = list.filter(j => j.tanggal >= dateFrom);
+  if (dateTo)      list = list.filter(j => j.tanggal <= dateTo);
+  if (bulanFilter) list = list.filter(j => j.tanggal.startsWith(bulanFilter));
+  if (search)      list = list.filter(j =>
+    j.deskripsi.toLowerCase().includes(search) ||
+    (j.referensi||'').toLowerCase().includes(search) ||
+    j.lines.some(l => {
+      const a = COA.find(x => x.kode === l.akun);
+      return a?.nama.toLowerCase().includes(search) || l.akun.toLowerCase().includes(search);
+    })
+  );
+
+  // Period label
+  let periodeLabel = 'Semua Periode';
+  if (dateFrom || dateTo)  periodeLabel = `${dateFrom ? fmtDate(dateFrom) : 'Awal'} s/d ${dateTo ? fmtDate(dateTo) : 'Sekarang'}`;
+  if (bulanFilter) {
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const [y, m] = bulanFilter.split('-');
+    periodeLabel = months[parseInt(m)-1] + ' ' + y;
+  }
+  if (search) periodeLabel += ` · Pencarian: "${search}"`;
+
+  const totalDebit  = list.reduce((s,j) => s + j.lines.filter(l=>l.tipe==='Debit').reduce((x,l)=>x+l.nominal,0), 0);
+  const totalKredit = list.reduce((s,j) => s + j.lines.filter(l=>l.tipe==='Kredit').reduce((x,l)=>x+l.nominal,0), 0);
+
+  return { list, periodeLabel, dateFrom, dateTo, totalDebit, totalKredit, search };
+}
+
+/** Build a standalone printable HTML string */
+function buildRiwayatPrintHTML(data) {
+  const now    = new Date();
+  const printed = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) +
+                  ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  const rowsHtml = data.list.map((j, idx) => {
+    const totalD   = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
+    const isClosing= !!j.isClosing;
+    const isLocked = !!j.locked;
+
+    const linesHtml = j.lines.map(l => {
+      const akun = COA.find(a => a.kode === l.akun);
+      const nm   = akun ? akun.nama : l.akun;
+      const isK  = l.tipe === 'Kredit';
+      const tag  = isK ? '[K]' : '[D]';
+      const tagColor = isK ? '#3D6B47' : '#2B4E7A';
+      const pl   = isK ? '32px' : '14px';
+      return '<tr style="background:#F8F6F2;">'
+        + '<td style="padding:3px 10px;"></td>'
+        + '<td style="padding:3px 10px 3px ' + pl + ';font-size:11px;color:#444;font-family:Arial,sans-serif;letter-spacing:0;">'
+        + '<b style="color:' + tagColor + ';margin-right:6px;font-family:Arial,sans-serif;">' + tag + '</b>'
+        + l.akun + ' ' + nm
+        + '</td>'
+        + '<td style="text-align:right;padding:3px 10px;font-size:11px;color:#333;white-space:nowrap;font-family:Arial,sans-serif;">' + (!isK ? fmt(l.nominal) : '') + '</td>'
+        + '<td style="text-align:right;padding:3px 10px;font-size:11px;color:#333;white-space:nowrap;font-family:Arial,sans-serif;">' + (isK ? fmt(l.nominal) : '') + '</td>'
+        + '<td></td>'
+        + '</tr>';
+    }).join('');
+
+    const statusBadge = isClosing ? ' [CLOSING]' : isLocked ? ' [TERKUNCI]' : '';
+    const rowBg = isClosing ? '#FFF8E8' : idx % 2 === 0 ? '#FAFAF8' : '#FFFFFF';
+    const totalK = j.lines.filter(l=>l.tipe==='Kredit').reduce((s,l)=>s+l.nominal,0);
+    const refSpan = j.referensi ? `<span style="font-size:10px;background:#EEE;border-radius:3px;padding:1px 5px;margin-left:5px;">${j.referensi}</span>` : '';
+    const editSpan = j.editedAt ? `<span style="font-size:10px;color:#8A8278;display:block;margin-top:1px;">Diedit: ${fmtDate(j.editedAt)}</span>` : '';
+    return `<tr style="background:${rowBg};border-top:2px solid #D8D2C5;"><td style="padding:8px 10px;font-size:11px;color:#5A5449;white-space:nowrap;vertical-align:top;font-weight:500;">${fmtDate(j.tanggal)}</td><td style="padding:8px 10px;font-size:12px;font-weight:600;vertical-align:top;color:#1C1A16;">${j.deskripsi}${statusBadge}${refSpan}${editSpan}</td><td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:600;vertical-align:top;color:#1C1A16;white-space:nowrap;">${fmt(totalD)}</td><td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:600;vertical-align:top;color:#1C1A16;white-space:nowrap;">${fmt(totalK)}</td><td style="padding:8px 10px;font-size:10px;vertical-align:top;color:#8A8278;text-align:center;">${isClosing?'CLOSING':isLocked?'KUNCI':''}</td></tr>${linesHtml}`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<title>Riwayat Transaksi — Jurnal Tani dari Nol</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; color: #1C1A16; background: #fff; padding: 20px; font-size: 12px; letter-spacing: 0; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #3D6B47; }
+  .brand { font-size: 18px; font-weight: 700; color: #3D6B47; font-family: Arial, sans-serif; }
+  .brand-sub { font-size: 11px; color: #8A8278; margin-top: 2px; }
+  .doc-info { text-align: right; font-size: 11px; color: #5A5449; }
+  .doc-info strong { display: block; font-size: 14px; color: #1C1A16; margin-bottom: 3px; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .meta-box { background: #F5F2EC; border-radius: 6px; padding: 8px 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .meta-label { font-size: 10px; text-transform: uppercase; color: #8A8278; margin-bottom: 2px; }
+  .meta-value { font-size: 13px; font-weight: 700; color: #1C1A16; }
+  .meta-value.green { color: #3D6B47; }
+  table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  thead th { background: #1C1A16; color: #FFFFFF; padding: 9px 10px; text-align: left; font-size: 11px; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  thead th:nth-child(3) { text-align: right; border-left: 3px solid #2B4E7A; }
+  thead th:nth-child(4) { text-align: right; border-left: 3px solid #3D6B47; }
+  tbody td { color: #1C1A16; font-family: Arial, sans-serif; }
+  tbody tr { break-inside: avoid; page-break-inside: avoid; }
+  tfoot td { background: #E8F0EA; color: #2E5238; font-weight: 700; padding: 10px; font-size: 12px; border-top: 2px solid #3D6B47; font-family: Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  tfoot td:nth-child(3), tfoot td:nth-child(4) { text-align: right; }
+  .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #D8D2C5; font-size: 10px; color: #8A8278; display: flex; justify-content: space-between; }
+  @media print {
+    body { padding: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+    tbody tr { break-inside: avoid; page-break-inside: avoid; }
+    .footer { position: fixed; bottom: 0; left: 10px; right: 10px; background: white; border-top: 1px solid #D8D2C5; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Jurnal Tani dari Nol</div>
+    <div class="brand-sub">Sistem Keuangan Pertanian — Ardhi's Farm</div>
+  </div>
+  <div class="doc-info">
+    <strong>Riwayat Transaksi</strong>
+    Dicetak / Diunduh: ${printed}
+  </div>
+</div>
+
+<div class="meta-grid">
+  <div class="meta-box">
+    <div class="meta-label">Periode</div>
+    <div class="meta-value">${data.periodeLabel}</div>
+  </div>
+  <div class="meta-box">
+    <div class="meta-label">Jumlah Transaksi</div>
+    <div class="meta-value">${data.list.length} jurnal</div>
+  </div>
+  <div class="meta-box">
+    <div class="meta-label">Total Nilai</div>
+    <div class="meta-value green">${fmt(data.totalDebit)}</div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:90px;">Tanggal</th>
+      <th>Keterangan</th>
+      <th style="width:130px;text-align:right;">Debit (Rp)</th>
+      <th style="width:130px;text-align:right;">Kredit (Rp)</th>
+      <th style="width:60px;">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${data.list.length ? rowsHtml : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#8A8278;">Tidak ada transaksi pada periode ini</td></tr>'}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">Total (${data.list.length} transaksi)</td>
+      <td>${fmt(data.totalDebit)}</td>
+      <td>${fmt(data.totalKredit)}</td>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="footer">
+  <span>Jurnal Tani dari Nol — Sistem Keuangan Pertanian</span>
+  <span>Dicetak pada ${printed}</span>
+</div>
+</body>
+</html>`;
+}
+
+/** Cetak: buka jendela baru dengan HTML terfilter lalu print */
+function cetakRiwayat() {
+  const data = getFilteredRiwayatData();
+  const html = buildRiwayatPrintHTML(data);
+  const win  = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+/** Download PDF menggunakan jsPDF + autoTable */
+function downloadRiwayatPDF() {
+  const data = getFilteredRiwayatData();
+  const now  = new Date();
+  const printed = now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) +
+                  ' ' + now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  // Check jsPDF available
+  if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+    // Fallback: download as HTML if jsPDF not loaded
+    const html  = buildRiwayatPrintHTML(data);
+    const blob  = new Blob([html], { type: 'text/html' });
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(blob);
+    a.download  = 'riwayat-transaksi-' + today() + '.html';
+    a.click();
+    return;
+  }
+
+  const { jsPDF } = window.jspdf || { jsPDF: window.jsPDF };
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // ── Header ──
+  doc.setFillColor(28, 26, 22);
+  doc.rect(0, 0, 210, 22, 'F');
+  doc.setTextColor(253, 250, 245);
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Jurnal Tani dari Nol', 14, 9);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Sistem Keuangan Pertanian — Ardhi\'s Farm', 14, 15);
+  doc.setTextColor(180, 180, 160);
+  doc.text('Riwayat Transaksi', 196, 9, { align: 'right' });
+  doc.text('Dicetak: ' + printed, 196, 15, { align: 'right' });
+
+  // ── Meta boxes ──
+  doc.setTextColor(28, 26, 22);
+  const metaY = 28;
+  const metas = [
+    { label: 'PERIODE',          value: data.periodeLabel },
+    { label: 'JUMLAH TRANSAKSI', value: data.list.length + ' jurnal' },
+    { label: 'TOTAL NILAI',      value: fmt(data.totalDebit) },
+  ];
+  metas.forEach((m, i) => {
+    const x = 14 + i * 62;
+    doc.setFillColor(245, 242, 236);
+    doc.roundedRect(x, metaY, 58, 14, 2, 2, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(138, 130, 120);
+    doc.text(m.label, x + 4, metaY + 4.5);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(i === 2 ? 61 : 28, i === 2 ? 107 : 26, i === 2 ? 71 : 22);
+    doc.text(String(m.value), x + 4, metaY + 10.5);
+  });
+
+  // ── Table ──
+  const tableBody = [];
+  data.list.forEach(j => {
+    const totalD = j.lines.filter(l=>l.tipe==='Debit').reduce((s,l)=>s+l.nominal,0);
+    const totalK = j.lines.filter(l=>l.tipe==='Kredit').reduce((s,l)=>s+l.nominal,0);
+    const status = j.isClosing ? 'CLOSING' : j.locked ? 'TERKUNCI' : '';
+    // Summary row per journal entry
+    tableBody.push([
+      fmtDate(j.tanggal),
+      (j.deskripsi + (j.referensi ? ' [' + j.referensi + ']' : '')).substring(0, 60),
+      fmt(totalD),
+      fmt(totalK),
+      status,
+    ]);
+    // Detail lines (indented)
+    j.lines.forEach(l => {
+      const akun   = COA.find(a => a.kode === l.akun);
+      const nm     = akun ? akun.nama : l.akun;
+      const isK    = l.tipe === 'Kredit';
+      const prefix = isK ? '     K · ' : '  D · ';
+      tableBody.push([
+        '',
+        prefix + l.akun + ' ' + nm,
+        !isK ? fmt(l.nominal) : '',
+        isK  ? fmt(l.nominal) : '',
+        '',
+      ]);
+    });
+  });
+
+  doc.autoTable({
+    startY: metaY + 20,
+    head: [['Tanggal', 'Keterangan', 'Debit (Rp)', 'Kredit (Rp)', 'Status']],
+    body: tableBody,
+    foot: [['Total', data.list.length + ' transaksi', fmt(data.totalDebit), fmt(data.totalKredit), '']],
+    styles:       { fontSize: 8, cellPadding: 2.5, lineColor: [228, 223, 213], lineWidth: 0.2, textColor: [28, 26, 22] },
+    headStyles:   { fillColor: [28, 26, 22], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+    footStyles:   { fillColor: [232, 240, 234], textColor: [46, 82, 56], fontStyle: 'bold', fontSize: 8 },
+    columnStyles: {
+      0: { cellWidth: 22, valign: 'top' },
+      1: { cellWidth: 'auto', valign: 'top' },
+      2: { cellWidth: 30, halign: 'right', valign: 'top' },
+      3: { cellWidth: 30, halign: 'right', valign: 'top' },
+      4: { cellWidth: 18, halign: 'center', valign: 'top', fontSize: 7 },
+    },
+    didParseCell: (hookData) => {
+      if (hookData.section === 'body') {
+        const raw0 = hookData.row.cells[0]?.raw;
+        const isDetailRow = (raw0 === '' || raw0 === undefined);
+        if (isDetailRow) {
+          // Detail / sub rows — lighter background, muted text
+          hookData.cell.styles.fillColor  = [250, 249, 246];
+          hookData.cell.styles.textColor  = [90, 84, 73];
+          hookData.cell.styles.fontSize   = 7;
+        } else {
+          // Summary row — white background, dark text
+          hookData.cell.styles.fillColor  = [255, 255, 255];
+          hookData.cell.styles.textColor  = [28, 26, 22];
+          hookData.cell.styles.fontStyle  = 'bold';
+        }
+      }
+    },
+    margin: { left: 14, right: 14 },
+    showFoot: 'lastPage',
+  });
+
+  // ── Footer ──
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    const pageH = doc.internal.pageSize.getHeight();
+    doc.setFontSize(7);
+    doc.setTextColor(138, 130, 120);
+    doc.text('Jurnal Tani dari Nol — Sistem Keuangan Pertanian', 14, pageH - 6);
+    doc.text('Halaman ' + i + ' dari ' + pageCount + '  ·  Dicetak: ' + printed, 196, pageH - 6, { align: 'right' });
+    doc.setDrawColor(216, 210, 197);
+    doc.line(14, pageH - 9, 196, pageH - 9);
+  }
+
+  const safePeriode = data.periodeLabel.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 40);
+  doc.save('riwayat-transaksi-' + safePeriode + '-' + today() + '.pdf');
+}
+
 init();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>
