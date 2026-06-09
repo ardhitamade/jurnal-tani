@@ -621,6 +621,31 @@ tfoot td {
 }
 .jurnal-edit-banner strong { font-weight: 600; }
 
+/* ── SALDO HISTORY MODAL ── */
+.saldo-hist-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; padding: 20px;
+}
+.saldo-hist-inner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); width: 100%; max-width: 760px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.saldo-hist-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0;
+}
+.saldo-hist-body {
+  padding: 16px 20px; overflow-y: auto; flex: 1;
+}
+.saldo-hist-akun-card {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.saldo-hist-meta { font-size: 11px; color: var(--text3); padding: 5px 10px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border); }
+.saldo-hist-meta strong { display: block; font-size: 13px; font-weight: 600; color: var(--text); }
+
 /* ── CUSTOM TEMPLATES ── */
 .template-btn-custom {
   display: flex; align-items: center; justify-content: space-between;
@@ -917,6 +942,23 @@ tfoot td {
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-primary" id="import-csv-confirm-btn" onclick="konfirmasiImportCSV()" style="display:none;">✅ Konfirmasi Import</button>
             <button class="btn" onclick="tutupImportModal()">Batal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════ SALDO HISTORY MODAL ═══════════════════════════════════ -->
+      <div class="saldo-hist-modal" id="saldo-hist-modal" style="display:none;" onclick="if(event.target===this)tutupHistoriSaldo()">
+        <div class="saldo-hist-inner">
+          <div class="saldo-hist-header">
+            <div>
+              <div style="font-family:'Lora',serif;font-size:15px;font-weight:600;" id="saldo-hist-title">Riwayat Saldo</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:2px;" id="saldo-hist-subtitle"></div>
+            </div>
+            <button class="btn btn-sm" onclick="tutupHistoriSaldo()">✕ Tutup</button>
+          </div>
+          <div class="saldo-hist-body">
+            <div id="saldo-hist-akun-info" class="saldo-hist-akun-card"></div>
+            <div id="saldo-hist-content"></div>
           </div>
         </div>
       </div>
@@ -2286,6 +2328,138 @@ function setNeracaPeriod(type) {
 // ══════════════════════════════════════════════════
 //  COA — RENDER TABLE
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  COA — RIWAYAT SALDO (HISTORI)
+// ══════════════════════════════════════════════════
+
+function tutupHistoriSaldo() {
+  document.getElementById('saldo-hist-modal').style.display = 'none';
+}
+
+function bukaHistoriSaldo(kode) {
+  const akun = COA.find(a => a.kode === kode);
+  if (!akun) return;
+
+  // Guard: akun induk tidak punya riwayat transaksi langsung
+  if (hasChildren(kode)) {
+    alert('Akun induk tidak memiliki riwayat transaksi langsung.\nLihat riwayat dari masing-masing sub-akun di bawahnya.');
+    return;
+  }
+
+  // Kumpulkan semua transaksi yang melibatkan akun ini
+  const entries = [];
+  JURNAL.forEach(j => {
+    j.lines.forEach(l => {
+      if (l.akun === kode) {
+        entries.push({
+          tanggal:   j.tanggal,
+          deskripsi: j.deskripsi,
+          referensi: j.referensi || '',
+          tipe:      l.tipe,
+          nominal:   l.nominal,
+          locked:    !!j.locked,
+          isClosing: !!j.isClosing,
+          editedAt:  j.editedAt || null,
+          jurnalId:  j.id,
+        });
+      }
+    });
+  });
+  entries.sort((a, b) => a.tanggal.localeCompare(b.tanggal) || a.jurnalId - b.jurnalId);
+
+  const saldoAll  = calcSaldo();
+  const saldoAkhir = saldoAll[kode]?.saldo || 0;
+  const totalD    = entries.filter(e => e.tipe === 'Debit').reduce((s,e) => s+e.nominal, 0);
+  const totalK    = entries.filter(e => e.tipe === 'Kredit').reduce((s,e) => s+e.nominal, 0);
+
+  // Update modal header
+  document.getElementById('saldo-hist-title').textContent = akun.kode + ' — ' + akun.nama;
+  document.getElementById('saldo-hist-subtitle').textContent =
+    entries.length + ' transaksi · Normal Saldo: ' + akun.normal;
+
+  // Akun info cards
+  const badgeMap = {Aset:'badge-aset',Liabilitas:'badge-liab',Modal:'badge-modal',Pendapatan:'badge-pend',Beban:'badge-beban'};
+  const saldoClass = saldoAkhir > 0 ? 'saldo-positive' : saldoAkhir < 0 ? 'saldo-negative' : 'saldo-zero';
+  document.getElementById('saldo-hist-akun-info').innerHTML = `
+    <div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Kategori</span><strong>${akun.kategori}</strong></div>
+    <div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Tipe</span><strong>${akun.tipe||'—'}</strong></div>
+    <div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Total Debit</span><strong style="color:var(--blue);">${fmt(totalD)}</strong></div>
+    <div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Total Kredit</span><strong style="color:var(--accent);">${fmt(totalK)}</strong></div>
+    <div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Saldo Akhir</span><strong class="${saldoClass}">${fmt(saldoAkhir)}</strong></div>
+    ${akun.induk ? `<div class="saldo-hist-meta"><span style="color:var(--text3);font-size:10px;">Sub-akun dari</span><strong>${akun.induk}</strong></div>` : ''}
+  `;
+
+  // Build ledger rows with running balance
+  const contentEl = document.getElementById('saldo-hist-content');
+  if (!entries.length) {
+    contentEl.innerHTML = `<div class="empty-state" style="padding:24px 0;">
+      <div class="es-icon">📜</div>
+      <h3>Belum ada transaksi</h3>
+      <p>Akun ini belum pernah digunakan dalam jurnal.</p>
+    </div>`;
+    document.getElementById('saldo-hist-modal').style.display = 'flex';
+    return;
+  }
+
+  let running = 0;
+  const rows = entries.map((e, idx) => {
+    const delta    = (e.tipe === 'Debit' ? 1 : -1) * (akun.normal === 'Debit' ? 1 : -1) * e.nominal;
+    running       += delta;
+    const runClass = running > 0 ? 'saldo-positive' : running < 0 ? 'saldo-negative' : 'saldo-zero';
+    const rowBg    = e.isClosing ? 'background:var(--gold-light);' : idx % 2 === 0 ? 'background:var(--surface2);' : '';
+    const closingBadge = e.isClosing
+      ? `<span style="font-size:10px;background:var(--gold-light);color:var(--gold);border:1px solid #D4B06A;border-radius:4px;padding:1px 6px;margin-left:5px;">CLOSING</span>`
+      : '';
+    const lockBadge = e.locked && !e.isClosing
+      ? `<span style="font-size:10px;color:var(--text3);margin-left:5px;">🔒</span>`
+      : '';
+    const editBadge = e.editedAt
+      ? `<span style="font-size:10px;color:var(--text3);margin-left:5px;">✏️ ${fmtDate(e.editedAt)}</span>`
+      : '';
+    const refSpan = e.referensi
+      ? `<span style="font-size:10px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin-left:5px;">${e.referensi}</span>`
+      : '';
+    return `<tr style="${rowBg}">
+      <td style="white-space:nowrap;font-size:12px;padding:8px 10px;">${fmtDate(e.tanggal)}</td>
+      <td style="font-size:12px;padding:8px 10px;">
+        ${e.deskripsi}${refSpan}${closingBadge}${lockBadge}${editBadge}
+      </td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px;color:var(--blue);font-weight:${e.tipe==='Debit'?500:400};">
+        ${e.tipe === 'Debit' ? fmt(e.nominal) : '<span style="color:var(--text3);">—</span>'}
+      </td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px;color:var(--accent);font-weight:${e.tipe==='Kredit'?500:400};">
+        ${e.tipe === 'Kredit' ? fmt(e.nominal) : '<span style="color:var(--text3);">—</span>'}
+      </td>
+      <td style="text-align:right;padding:8px 10px;font-size:12px;font-weight:600;" class="${runClass}">
+        ${fmt(running)}
+      </td>
+    </tr>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:130px;">Tanggal</th>
+        <th>Keterangan</th>
+        <th style="text-align:right;width:125px;">Debit (Rp)</th>
+        <th style="text-align:right;width:125px;">Kredit (Rp)</th>
+        <th style="text-align:right;width:130px;">Saldo Berjalan</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr>
+        <td colspan="2" style="font-family:'Lora',serif;font-size:13px;">Saldo Akhir (${akun.normal})</td>
+        <td style="text-align:right;">${fmt(totalD)}</td>
+        <td style="text-align:right;">${fmt(totalK)}</td>
+        <td style="text-align:right;" class="${saldoClass}">${fmt(saldoAkhir)}</td>
+      </tr></tfoot>
+    </table>
+    </div>
+  `;
+
+  document.getElementById('saldo-hist-modal').style.display = 'flex';
+}
+
 function renderCOA() {
   const tb = document.getElementById('coa-tbody');
   if (!tb) return;
@@ -2353,6 +2527,7 @@ function renderCOA() {
 
     let actionHtml = `<div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-sm btn-icon" onclick="editCOA('${a.kode}')" title="Edit" style="padding:4px 7px;">✏️</button>
+      ${!isParent ? `<button class="btn btn-sm btn-icon" onclick="bukaHistoriSaldo('${a.kode}')" title="Riwayat saldo" style="padding:4px 7px;background:var(--blue-light);color:var(--blue);border-color:#B5C8DF;">📜</button>` : ''}
       <button class="btn btn-sm btn-icon" onclick="${canAddChild ? `addSubAkun('${a.kode}')` : `showAlert('coa-alert','⛔ Akun ini sudah memiliki transaksi. Hapus semua transaksinya dahulu sebelum menambah sub-akun.','error')`}" title="${addBtnTitle}" style="${addBtnStyle}">＋</button>
       <button class="btn btn-danger btn-icon btn-sm" onclick="hapusCOA('${a.kode}')" title="Hapus" style="padding:4px 7px;">✕</button>
     </div>`;
@@ -4963,7 +5138,7 @@ function downloadRiwayatPDF() {
       const akun   = COA.find(a => a.kode === l.akun);
       const nm     = akun ? akun.nama : l.akun;
       const isK    = l.tipe === 'Kredit';
-      const prefix = isK ? '     K · ' : '  D · ';
+      const prefix = isK ? '    ↳ K · ' : '  D · ';
       tableBody.push([
         '',
         prefix + l.akun + ' ' + nm,
