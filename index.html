@@ -294,10 +294,11 @@ tfoot td {
 .je-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .je-ref { font-size: 11px; color: var(--text3); background: var(--bg2); padding: 2px 7px; border-radius: 4px; display: inline-block; margin-left: 6px; }
 .je-lines { border-top: 1px solid var(--border); padding-top: 8px; }
-.je-line { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 12px; }
-.je-acct { color: var(--text2); }
+.je-line { display: flex; justify-content: space-between; align-items: flex-start; padding: 4px 0; font-size: 12px; gap: 8px; }
+.je-acct { color: var(--text2); flex: 1; min-width: 0; }
 .je-acct.indent { padding-left: 18px; color: var(--text3); }
-.je-amt { font-weight: 500; }
+.je-line-desc { font-size: 11px; color: var(--text3); margin-top: 1px; font-style: italic; }
+.je-amt { font-weight: 500; flex-shrink: 0; }
 .je-amt.d { color: var(--blue); }
 .je-amt.k { color: var(--accent); }
 
@@ -1570,9 +1571,11 @@ function editJurnal(id) {
     const selAkun  = rows[i].querySelector('.j-akun');
     const selTipe  = rows[i].querySelector('.j-tipe');
     const inpNom   = rows[i].querySelector('.j-nominal');
+    const inpDesc  = rows[i].querySelector('.j-line-desc');
     if (selAkun)  selAkun.value  = l.akun;
     if (selTipe)  selTipe.value  = l.tipe;
     if (inpNom)   inpNom.value   = l.nominal;
+    if (inpDesc)  inpDesc.value  = l.desc || '';
   });
   checkBalance();
 
@@ -1618,22 +1621,28 @@ function addLineEl(container, defaultTipe) {
   div.className = 'line-row';
   div.id = 'lr-' + idx;
   div.innerHTML = `
-    <div class="form-group" style="flex:1; min-width:180px;">
-      <label>Akun</label>
-      <select class="j-akun" onchange="checkBalance()"></select>
+    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;width:100%;">
+      <div class="form-group" style="flex:1; min-width:180px;">
+        <label>Akun</label>
+        <select class="j-akun" onchange="checkBalance()"></select>
+      </div>
+      <div class="form-group" style="width:110px;">
+        <label>Debit / Kredit</label>
+        <select class="j-tipe" onchange="checkBalance()">
+          <option ${defaultTipe==='Debit'?'selected':''}>Debit</option>
+          <option ${defaultTipe==='Kredit'?'selected':''}>Kredit</option>
+        </select>
+      </div>
+      <div class="form-group" style="width:160px;">
+        <label>Nominal (Rp)</label>
+        <input type="number" class="j-nominal" placeholder="0" min="0" oninput="checkBalance()" />
+      </div>
+      <div class="form-group" style="flex:1; min-width:160px;">
+        <label>Deskripsi Baris <span style="font-weight:400;color:var(--text3);font-size:11px;">(opsional)</span></label>
+        <input type="text" class="j-line-desc" placeholder="cth: 50 bibit kelapa genjah" maxlength="120" />
+      </div>
+      <button class="btn btn-danger btn-icon" style="margin-top:22px;flex-shrink:0;" onclick="document.getElementById('lr-${idx}').remove(); checkBalance();" title="Hapus baris">✕</button>
     </div>
-    <div class="form-group" style="width:110px;">
-      <label>Debit / Kredit</label>
-      <select class="j-tipe" onchange="checkBalance()">
-        <option ${defaultTipe==='Debit'?'selected':''}>Debit</option>
-        <option ${defaultTipe==='Kredit'?'selected':''}>Kredit</option>
-      </select>
-    </div>
-    <div class="form-group" style="width:160px;">
-      <label>Nominal (Rp)</label>
-      <input type="number" class="j-nominal" placeholder="0" min="0" oninput="checkBalance()" />
-    </div>
-    <button class="btn btn-danger btn-icon" style="margin-bottom:1px;" onclick="document.getElementById('lr-${idx}').remove(); checkBalance();" title="Hapus baris">✕</button>
   `;
   container.appendChild(div);
 }
@@ -1683,12 +1692,15 @@ function simpanJurnal() {
     const akun = row.querySelector('.j-akun').value;
     const tipe = row.querySelector('.j-tipe').value;
     const nom  = parseFloat(row.querySelector('.j-nominal').value) || 0;
+    const lineDesc = (row.querySelector('.j-line-desc')?.value || '').trim();
     if (!akun || nom <= 0) { valid = false; return; }
     if (hasChildren(akun)) {
       showAlert('jurnal-alert', '❌ Akun "' + akun + '" adalah akun induk dan tidak bisa digunakan di jurnal. Gunakan sub-akunnya.', 'error');
       valid = false; return;
     }
-    lines.push({ akun, tipe, nominal: nom });
+    const lineObj = { akun, tipe, nominal: nom };
+    if (lineDesc) lineObj.desc = lineDesc;
+    lines.push(lineObj);
     if (tipe === 'Debit') d += nom; else k += nom;
   });
   if (!valid || lines.length < 2) { showAlert('jurnal-alert','⚠️ Minimal 2 baris entri. Semua akun dan nominal wajib diisi.','error'); return; }
@@ -1759,12 +1771,14 @@ function _applyTemplateData(t) {
   const rows = container.querySelectorAll('.line-row');
   (t.lines || []).forEach((l, i) => {
     if (!rows[i]) return;
-    const selAkun = rows[i].querySelector('.j-akun');
-    const selTipe = rows[i].querySelector('.j-tipe');
-    const inpNom  = rows[i].querySelector('.j-nominal');
-    if (selAkun) selAkun.value = l.akun || '';
+    const selAkun  = rows[i].querySelector('.j-akun');
+    const selTipe  = rows[i].querySelector('.j-tipe');
+    const inpNom   = rows[i].querySelector('.j-nominal');
+    const inpDesc  = rows[i].querySelector('.j-line-desc');
+    if (selAkun) selAkun.value = l.akun  || '';
     if (selTipe) selTipe.value = l.tipe  || 'Debit';
     if (inpNom && l.nominal) inpNom.value = l.nominal;
+    if (inpDesc && l.desc)   inpDesc.value = l.desc;
   });
   checkBalance();
   document.getElementById('jurnal-form-card')
@@ -1870,14 +1884,20 @@ function editTemplate(id) {
   }, 200);
 }
 
-/** Read current form lines (akun + tipe + nominal) */
+/** Read current form lines (akun + tipe + nominal + desc) */
 function _readCurrentLines() {
   const lines = [];
   document.querySelectorAll('.line-row').forEach(row => {
-    const akun = row.querySelector('.j-akun')?.value   || '';
-    const tipe = row.querySelector('.j-tipe')?.value   || 'Debit';
-    const nom  = parseFloat(row.querySelector('.j-nominal')?.value) || 0;
-    if (akun || nom) lines.push({ akun, tipe, nominal: nom || undefined });
+    const akun     = row.querySelector('.j-akun')?.value    || '';
+    const tipe     = row.querySelector('.j-tipe')?.value    || 'Debit';
+    const nom      = parseFloat(row.querySelector('.j-nominal')?.value) || 0;
+    const lineDesc = (row.querySelector('.j-line-desc')?.value || '').trim();
+    if (akun || nom) {
+      const obj = { akun, tipe };
+      if (nom)      obj.nominal = nom;
+      if (lineDesc) obj.desc    = lineDesc;
+      lines.push(obj);
+    }
   });
   return lines;
 }
@@ -2354,6 +2374,7 @@ function bukaHistoriSaldo(kode) {
         entries.push({
           tanggal:   j.tanggal,
           deskripsi: j.deskripsi,
+          lineDesc:  l.desc || '',
           referensi: j.referensi || '',
           tipe:      l.tipe,
           nominal:   l.nominal,
@@ -2423,6 +2444,7 @@ function bukaHistoriSaldo(kode) {
       <td style="white-space:nowrap;font-size:12px;padding:8px 10px;">${fmtDate(e.tanggal)}</td>
       <td style="font-size:12px;padding:8px 10px;">
         ${e.deskripsi}${refSpan}${closingBadge}${lockBadge}${editBadge}
+        ${e.lineDesc ? `<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:2px;">${e.lineDesc}</div>` : ''}
       </td>
       <td style="text-align:right;padding:8px 10px;font-size:12px;color:var(--blue);font-weight:${e.tipe==='Debit'?500:400};">
         ${e.tipe === 'Debit' ? fmt(e.nominal) : '<span style="color:var(--text3);">—</span>'}
@@ -2892,7 +2914,8 @@ function renderRiwayat() {
       return `<div class="je-line">
         <span class="je-acct ${isK ? 'indent' : ''}">
           <span class="badge ${isK ? 'badge-kredit' : 'badge-debit'}" style="font-size:10px;padding:1px 6px;margin-right:5px;">${l.tipe[0]}</span>
-          ${l.akun} ${nm}
+          <span>${l.akun} ${nm}</span>
+          ${l.desc ? `<div class="je-line-desc">${l.desc}</div>` : ''}
         </span>
         <span class="je-amt ${isK ? 'k' : 'd'}">${fmt(l.nominal)}</span>
       </div>`;
@@ -2958,7 +2981,7 @@ function cetakBukuBesar() {
     JURNAL.forEach(j => {
       j.lines.forEach(l => {
         if (l.akun === leafAkun.kode) {
-          entries.push({ tanggal: j.tanggal, desc: j.deskripsi, ref: j.referensi||'', tipe: l.tipe, nominal: l.nominal, locked: !!j.locked, closing: !!j.isClosing });
+          entries.push({ tanggal: j.tanggal, desc: j.deskripsi, lineDesc: l.desc||'', ref: j.referensi||'', tipe: l.tipe, nominal: l.nominal, locked: !!j.locked, closing: !!j.isClosing });
         }
       });
     });
@@ -2977,7 +3000,9 @@ function cetakBukuBesar() {
                         : e.locked  ? '<span style="font-size:9px;color:#aaa;margin-left:4px;">[L]</span>' : '';
       return '<tr style="background:' + rowBg + ';border-top:1px solid #E8E4DC;">'
         + '<td style="padding:7px 10px;white-space:nowrap;font-size:11px;color:#5A5449;">' + fmtDate(e.tanggal) + '</td>'
-        + '<td style="padding:7px 10px;font-size:12px;font-family:Arial,sans-serif;">' + e.desc + statusBadge
+        + '<td style="padding:7px 10px;font-size:12px;font-family:Arial,sans-serif;">' + e.desc
+          + (e.lineDesc ? '<div style="font-size:10px;color:#8A8278;margin-top:1px;font-style:italic;">' + e.lineDesc + '</div>' : '')
+          + statusBadge
           + (e.ref ? '<span style="font-size:10px;background:#EEE;border-radius:3px;padding:0 5px;margin-left:4px;">' + e.ref + '</span>' : '') + '</td>'
         + '<td style="text-align:right;padding:7px 10px;font-size:12px;color:' + (e.tipe==='Debit'?'#2B4E7A':'#aaa') + ';font-family:Arial,sans-serif;">' + (e.tipe==='Debit' ? fmt(e.nominal) : '-') + '</td>'
         + '<td style="text-align:right;padding:7px 10px;font-size:12px;color:' + (e.tipe==='Kredit'?'#3D6B47':'#aaa') + ';font-family:Arial,sans-serif;">' + (e.tipe==='Kredit' ? fmt(e.nominal) : '-') + '</td>'
@@ -3198,7 +3223,7 @@ function renderBukuBesar() {
       const entries = [];
       JURNAL.forEach(j => {
         j.lines.forEach(l => {
-          if (l.akun === child.kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, tipe: l.tipe, nominal: l.nominal });
+          if (l.akun === child.kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, lineDesc: l.desc||'', tipe: l.tipe, nominal: l.nominal });
         });
       });
       entries.sort((a,b) => a.tanggal.localeCompare(b.tanggal));
@@ -3207,7 +3232,8 @@ function renderBukuBesar() {
         const delta = (e.tipe === 'Debit' ? 1 : -1) * (child.normal === 'Debit' ? 1 : -1) * e.nominal;
         childSaldo += delta;
         return `<tr>
-          <td style="white-space:nowrap;">${fmtDate(e.tanggal)}</td><td>${e.desc}</td>
+          <td style="white-space:nowrap;">${fmtDate(e.tanggal)}</td>
+          <td>${e.desc}${e.lineDesc ? `<div style="font-size:11px;color:var(--text3);font-style:italic;">${e.lineDesc}</div>` : ''}</td>
           <td style="text-align:right;color:var(--blue);">${e.tipe==='Debit'?fmt(e.nominal):''}</td>
           <td style="text-align:right;color:var(--accent);">${e.tipe==='Kredit'?fmt(e.nominal):''}</td>
           <td style="text-align:right;font-weight:500;">${fmt(childSaldo)}</td>
@@ -3239,7 +3265,7 @@ function renderBukuBesar() {
   const entries = [];
   JURNAL.forEach(j => {
     j.lines.forEach(l => {
-      if (l.akun === kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, tipe: l.tipe, nominal: l.nominal });
+      if (l.akun === kode) entries.push({ tanggal: j.tanggal, desc: j.deskripsi, lineDesc: l.desc||'', tipe: l.tipe, nominal: l.nominal });
     });
   });
   entries.sort((a,b) => a.tanggal.localeCompare(b.tanggal));
@@ -3250,6 +3276,7 @@ function renderBukuBesar() {
     saldo += delta;
     return `<tr>
       <td style="white-space:nowrap;">${fmtDate(e.tanggal)}</td>
+      <td>${e.desc}${e.lineDesc ? `<div style="font-size:11px;color:var(--text3);font-style:italic;">${e.lineDesc}</div>` : ''}</td>
       <td>${e.desc}</td>
       <td style="text-align:right; color:var(--blue);">${e.tipe==='Debit' ? fmt(e.nominal) : ''}</td>
       <td style="text-align:right; color:var(--accent);">${e.tipe==='Kredit' ? fmt(e.nominal) : ''}</td>
@@ -4520,11 +4547,11 @@ function buildFullCSV() {
 
   // ── JURNAL (one row per line, grouped by journal id)
   hr('##JURNAL');
-  rows.push(['id','tanggal','deskripsi','referensi','akun','tipe','nominal','locked','isClosing'].map(csvCell).join(','));
+  rows.push(['id','tanggal','deskripsi','referensi','akun','tipe','nominal','desc_baris','locked','isClosing'].map(csvCell).join(','));
   JURNAL.forEach(j => {
     j.lines.forEach(l => rows.push([
       j.id, j.tanggal, j.deskripsi, j.referensi||'',
-      l.akun, l.tipe, l.nominal,
+      l.akun, l.tipe, l.nominal, l.desc||'',
       j.locked ? '1' : '0',
       j.isClosing ? '1' : '0',
     ].map(csvCell).join(',')));
@@ -4614,13 +4641,13 @@ function downloadTemplate() {
   rows.push('##JURNAL');
   rows.push('# id[WAJIB: angka unik] | tanggal[WAJIB: YYYY-MM-DD] | deskripsi[WAJIB]');
   rows.push('# referensi | akun[WAJIB: kode COA] | tipe[WAJIB: Debit/Kredit] | nominal[WAJIB]');
-  rows.push('# locked[0/1] | isClosing[0/1]');
+  rows.push('# desc_baris[opsional: deskripsi per baris akun] | locked[0/1] | isClosing[0/1]');
   rows.push('# Setiap jurnal minimal 2 baris (1 Debit + 1 Kredit), total Debit = total Kredit');
-  rows.push('id,tanggal,deskripsi,referensi,akun,tipe,nominal,locked,isClosing');
-  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,1-002.01,Debit,10000000,0,0');
-  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,3-001,Kredit,10000000,0,0');
-  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-102,Debit,750000,0,0');
-  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-002.01,Kredit,750000,0,0');
+  rows.push('id,tanggal,deskripsi,referensi,akun,tipe,nominal,desc_baris,locked,isClosing');
+  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,1-002.01,Debit,10000000,,0,0');
+  rows.push('1001,2025-01-01,Setor modal awal,MDL-001,3-001,Kredit,10000000,,0,0');
+  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-102,Debit,750000,50 bibit kelapa genjah entog,0,0');
+  rows.push('1002,2025-01-15,Pembelian bibit kelapa genjah,INV-001,1-002.01,Kredit,750000,,0,0');
   rows.push('');
 
   // TEMPLATES
@@ -4739,7 +4766,9 @@ function parseImportCSV(text) {
       }
       const nom = parseFloat(obj.nominal);
       if (obj.akun && obj.tipe && !isNaN(nom)) {
-        jurnalMap[obj.id].lines.push({ akun: obj.akun, tipe: obj.tipe, nominal: nom });
+        const lineObj = { akun: obj.akun, tipe: obj.tipe, nominal: nom };
+        if (obj.desc_baris) lineObj.desc = obj.desc_baris;
+        jurnalMap[obj.id].lines.push(lineObj);
       }
     });
   }
@@ -4940,6 +4969,7 @@ function buildRiwayatPrintHTML(data) {
         + '<td style="padding:3px 10px 3px ' + pl + ';font-size:11px;color:#444;font-family:Arial,sans-serif;letter-spacing:0;">'
         + '<b style="color:' + tagColor + ';margin-right:6px;font-family:Arial,sans-serif;">' + tag + '</b>'
         + l.akun + ' ' + nm
+        + (l.desc ? '<span style="font-size:10px;color:#8A8278;font-style:italic;margin-left:6px;">' + l.desc + '</span>' : '')
         + '</td>'
         + '<td style="text-align:right;padding:3px 10px;font-size:11px;color:#333;white-space:nowrap;font-family:Arial,sans-serif;">' + (!isK ? fmt(l.nominal) : '') + '</td>'
         + '<td style="text-align:right;padding:3px 10px;font-size:11px;color:#333;white-space:nowrap;font-family:Arial,sans-serif;">' + (isK ? fmt(l.nominal) : '') + '</td>'
@@ -5138,7 +5168,7 @@ function downloadRiwayatPDF() {
       const akun   = COA.find(a => a.kode === l.akun);
       const nm     = akun ? akun.nama : l.akun;
       const isK    = l.tipe === 'Kredit';
-      const prefix = isK ? '    ↳ K · ' : '  D · ';
+      const prefix = isK ? '     K · ' : '  D · ';
       tableBody.push([
         '',
         prefix + l.akun + ' ' + nm,
